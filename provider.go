@@ -15,8 +15,8 @@ type ProviderInstance struct {
 	name     string
 	provider *plugin.GRPCProvider
 
-	dataSources map[string]providers.Schema
-	nested      map[string]*configschema.NestedBlock
+	dataSources *MapSchemaIntance
+	resources   *MapSchemaIntance
 }
 
 func NewProviderInstance(pm *PluginManager, name string) (*ProviderInstance, error) {
@@ -32,7 +32,6 @@ func NewProviderInstance(pm *PluginManager, name string) (*ProviderInstance, err
 		return nil, err
 	}
 
-	// store the client so that the plugin can kill the child process
 	provider := raw.(*plugin.GRPCProvider)
 	response := provider.GetSchema()
 
@@ -40,8 +39,8 @@ func NewProviderInstance(pm *PluginManager, name string) (*ProviderInstance, err
 	return &ProviderInstance{
 		name:        name,
 		provider:    provider,
-		dataSources: response.DataSources,
-		nested:      computeNestedBlocks(response.DataSources),
+		dataSources: NewMapSchemaInstance(name, response.DataSources),
+		resources:   NewMapSchemaInstance(name, response.ResourceTypes),
 	}, nil
 }
 
@@ -54,7 +53,6 @@ func computeNestedBlocks(s map[string]providers.Schema) map[string]*configschema
 		}
 	}
 
-	fmt.Println(blks)
 	return blks
 }
 
@@ -80,26 +78,58 @@ func (t *ProviderInstance) Freeze()               {}
 func (t *ProviderInstance) Truth() starlark.Bool  { return true }
 func (t *ProviderInstance) Hash() (uint32, error) { return 1, nil }
 func (t *ProviderInstance) Name() string          { return t.name }
-func (t *ProviderInstance) Attr(name string) (starlark.Value, error) {
-	name = t.name + "_" + name
-
-	if schema, ok := t.dataSources[name]; ok {
-		return NewResourceInstanceConstructor(name, schema.Block), nil
+func (s *ProviderInstance) Attr(name string) (starlark.Value, error) {
+	switch name {
+	case "data":
+		return s.dataSources, nil
+	case "resource":
+		return s.resources, nil
 	}
 
 	return starlark.None, nil
 }
 
-func (t *ProviderInstance) AttrNames() []string {
-	names := make([]string, len(t.dataSources)+len(t.nested))
+func (s *ProviderInstance) AttrNames() []string {
+	return []string{"data", "resource"}
+}
+
+type MapSchemaIntance struct {
+	prefix  string
+	schemas map[string]providers.Schema
+}
+
+func NewMapSchemaInstance(prefix string, schemas map[string]providers.Schema) *MapSchemaIntance {
+	return &MapSchemaIntance{prefix: prefix, schemas: schemas}
+}
+
+func (t *MapSchemaIntance) String() string {
+	return fmt.Sprintf("schemas(%q)", t.prefix)
+}
+
+func (t *MapSchemaIntance) Type() string {
+	return "schemas"
+}
+
+func (t *MapSchemaIntance) Freeze()               {}
+func (t *MapSchemaIntance) Truth() starlark.Bool  { return true }
+func (t *MapSchemaIntance) Hash() (uint32, error) { return 1, nil }
+func (t *MapSchemaIntance) Name() string          { return t.prefix }
+
+func (s *MapSchemaIntance) Attr(name string) (starlark.Value, error) {
+	name = s.prefix + "_" + name
+
+	if schema, ok := s.schemas[name]; ok {
+		return NewResourceInstanceConstructor(name, schema.Block, nil), nil
+	}
+
+	return starlark.None, nil
+}
+
+func (s *MapSchemaIntance) AttrNames() []string {
+	names := make([]string, len(s.schemas))
 
 	var i int
-	for k := range t.dataSources {
-		parts := strings.SplitN(k, "_", 2)
-		names[i] = parts[1]
-		i++
-	}
-	for k := range t.nested {
+	for k := range s.schemas {
 		parts := strings.SplitN(k, "_", 2)
 		names[i] = parts[1]
 		i++
