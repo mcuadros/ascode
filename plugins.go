@@ -59,11 +59,11 @@ func (m *PluginManager) getRemote(provider, version string) (discovery.PluginMet
 
 func (m *PluginManager) getLocal(provider, version string) (discovery.PluginMeta, bool) {
 	set := discovery.FindPlugins("provider", []string{m.Path})
+	set = set.WithName(provider)
 	if len(set) == 0 {
 		return discovery.PluginMeta{}, false
 	}
 
-	set = set.WithName(provider)
 	if version != "" {
 		//		set = set.WithVersion(version)
 	}
