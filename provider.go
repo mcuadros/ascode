@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform/configs/configschema"
+	"github.com/hashicorp/terraform/plugin/discovery"
 
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/providers"
@@ -14,14 +14,14 @@ import (
 type ProviderInstance struct {
 	name     string
 	provider *plugin.GRPCProvider
+	meta     discovery.PluginMeta
 
 	dataSources *MapSchemaIntance
 	resources   *MapSchemaIntance
 }
 
-func NewProviderInstance(pm *PluginManager, name string) (*ProviderInstance, error) {
-	cli := pm.Get(name, "")
-
+func NewProviderInstance(pm *PluginManager, name, version string) (*ProviderInstance, error) {
+	cli, meta := pm.Get(name, version)
 	rpc, err := cli.Client()
 	if err != nil {
 		return nil, err
@@ -39,31 +39,10 @@ func NewProviderInstance(pm *PluginManager, name string) (*ProviderInstance, err
 	return &ProviderInstance{
 		name:        name,
 		provider:    provider,
+		meta:        meta,
 		dataSources: NewMapSchemaInstance(name, response.DataSources),
 		resources:   NewMapSchemaInstance(name, response.ResourceTypes),
 	}, nil
-}
-
-func computeNestedBlocks(s map[string]providers.Schema) map[string]*configschema.NestedBlock {
-	blks := make(map[string]*configschema.NestedBlock)
-	for k, block := range s {
-		for n, nested := range block.Block.BlockTypes {
-			key := k + "_" + n
-			doComputeNestedBlocks(key, nested, blks)
-		}
-	}
-
-	return blks
-}
-
-func doComputeNestedBlocks(name string, b *configschema.NestedBlock, list map[string]*configschema.NestedBlock) {
-	list[name] = b
-	for k, block := range b.BlockTypes {
-		key := name + "_" + k
-		list[key] = block
-
-		doComputeNestedBlocks(key, block, list)
-	}
 }
 
 func (t *ProviderInstance) String() string {
@@ -80,6 +59,8 @@ func (t *ProviderInstance) Hash() (uint32, error) { return 1, nil }
 func (t *ProviderInstance) Name() string          { return t.name }
 func (s *ProviderInstance) Attr(name string) (starlark.Value, error) {
 	switch name {
+	case "version":
+		return starlark.String(s.meta.Version), nil
 	case "data":
 		return s.dataSources, nil
 	case "resource":
