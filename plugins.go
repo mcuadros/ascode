@@ -15,13 +15,13 @@ type PluginManager struct {
 	Path string
 }
 
-func (m *PluginManager) Get(provider, version string) *plugin.Client {
+func (m *PluginManager) Get(provider, version string) (*plugin.Client, discovery.PluginMeta) {
 	meta, ok := m.getLocal(provider, version)
 	if !ok {
 		meta, ok = m.getRemote(provider, version)
 	}
 
-	return client(meta)
+	return client(meta), meta
 }
 
 func client(m discovery.PluginMeta) *plugin.Client {
@@ -42,14 +42,14 @@ func client(m discovery.PluginMeta) *plugin.Client {
 	})
 }
 
-func (m *PluginManager) getRemote(provider, version string) (discovery.PluginMeta, bool) {
+func (m *PluginManager) getRemote(provider, v string) (discovery.PluginMeta, bool) {
 	installer := &discovery.ProviderInstaller{
 		Dir:                   m.Path,
 		PluginProtocolVersion: discovery.PluginInstallProtocolVersion,
 		Ui:                    cli.NewMockUi(),
 	}
 
-	pm, _, err := installer.Get(provider, discovery.Constraints{})
+	pm, _, err := installer.Get(provider, discovery.ConstraintStr(v).MustParse())
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,11 @@ func (m *PluginManager) getLocal(provider, version string) (discovery.PluginMeta
 	}
 
 	if version != "" {
-		//		set = set.WithVersion(version)
+		set = set.WithVersion(discovery.VersionStr(version).MustParse())
+	}
+
+	if len(set) == 0 {
+		return discovery.PluginMeta{}, false
 	}
 
 	return set.Newest(), true
