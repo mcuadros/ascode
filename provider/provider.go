@@ -12,16 +12,16 @@ import (
 	"go.starlark.net/starlark"
 )
 
-type ProviderInstance struct {
+type Provider struct {
 	name     string
 	provider *plugin.GRPCProvider
 	meta     discovery.PluginMeta
 
-	dataSources *MapSchemaIntance
-	resources   *MapSchemaIntance
+	dataSources *MapSchema
+	resources   *MapSchema
 }
 
-func NewProviderInstance(pm *PluginManager, name, version string) (*ProviderInstance, error) {
+func MakeProvider(pm *PluginManager, name, version string) (*Provider, error) {
 	cli, meta := pm.Get(name, version)
 	rpc, err := cli.Client()
 	if err != nil {
@@ -37,93 +37,93 @@ func NewProviderInstance(pm *PluginManager, name, version string) (*ProviderInst
 	response := provider.GetSchema()
 
 	defer cli.Kill()
-	return &ProviderInstance{
+	return &Provider{
 		name:        name,
 		provider:    provider,
 		meta:        meta,
-		dataSources: NewMapSchemaInstance(name, response.DataSources),
-		resources:   NewMapSchemaInstance(name, response.ResourceTypes),
+		dataSources: NewMapSchema(name, response.DataSources),
+		resources:   NewMapSchema(name, response.ResourceTypes),
 	}, nil
 }
 
-func (t *ProviderInstance) String() string {
-	return fmt.Sprintf("provider(%q)", t.name)
+func (p *Provider) String() string {
+	return fmt.Sprintf("provider(%q)", p.name)
 }
 
-func (t *ProviderInstance) Type() string {
+func (p *Provider) Type() string {
 	return "provider-instance"
 }
 
-func (t *ProviderInstance) Freeze()               {}
-func (t *ProviderInstance) Truth() starlark.Bool  { return true }
-func (t *ProviderInstance) Hash() (uint32, error) { return 1, nil }
-func (t *ProviderInstance) Name() string          { return t.name }
-func (s *ProviderInstance) Attr(name string) (starlark.Value, error) {
+func (p *Provider) Freeze()               {}
+func (p *Provider) Truth() starlark.Bool  { return true }
+func (p *Provider) Hash() (uint32, error) { return 1, nil }
+func (p *Provider) Name() string          { return p.name }
+func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "version":
-		return starlark.String(s.meta.Version), nil
+		return starlark.String(p.meta.Version), nil
 	case "data":
-		return s.dataSources, nil
+		return p.dataSources, nil
 	case "resource":
-		return s.resources, nil
+		return p.resources, nil
 	case "to_hcl":
-		return BuiltinToHCL(s, hclwrite.NewEmptyFile()), nil
+		return BuiltinToHCL(p, hclwrite.NewEmptyFile()), nil
 	}
 
 	return starlark.None, nil
 }
 
-func (s *ProviderInstance) AttrNames() []string {
+func (p *Provider) AttrNames() []string {
 	return []string{"data", "resource"}
 }
 
-type MapSchemaIntance struct {
+type MapSchema struct {
 	prefix      string
 	schemas     map[string]providers.Schema
 	collections map[string]*ResourceCollection
 }
 
-func NewMapSchemaInstance(prefix string, schemas map[string]providers.Schema) *MapSchemaIntance {
-	return &MapSchemaIntance{
+func NewMapSchema(prefix string, schemas map[string]providers.Schema) *MapSchema {
+	return &MapSchema{
 		prefix:      prefix,
 		schemas:     schemas,
 		collections: make(map[string]*ResourceCollection),
 	}
 }
 
-func (t *MapSchemaIntance) String() string {
-	return fmt.Sprintf("schemas(%q)", t.prefix)
+func (m *MapSchema) String() string {
+	return fmt.Sprintf("schemas(%q)", m.prefix)
 }
 
-func (t *MapSchemaIntance) Type() string {
+func (m *MapSchema) Type() string {
 	return "schemas"
 }
 
-func (t *MapSchemaIntance) Freeze()               {}
-func (t *MapSchemaIntance) Truth() starlark.Bool  { return true }
-func (t *MapSchemaIntance) Hash() (uint32, error) { return 1, nil }
-func (t *MapSchemaIntance) Name() string          { return t.prefix }
+func (m *MapSchema) Freeze()               {}
+func (m *MapSchema) Truth() starlark.Bool  { return true }
+func (m *MapSchema) Hash() (uint32, error) { return 1, nil }
+func (m *MapSchema) Name() string          { return m.prefix }
 
-func (s *MapSchemaIntance) Attr(name string) (starlark.Value, error) {
+func (m *MapSchema) Attr(name string) (starlark.Value, error) {
 	if name == "to_hcl" {
-		return BuiltinToHCL(s, hclwrite.NewEmptyFile()), nil
+		return BuiltinToHCL(m, hclwrite.NewEmptyFile()), nil
 	}
 
-	name = s.prefix + "_" + name
+	name = m.prefix + "_" + name
 
-	if c, ok := s.collections[name]; ok {
+	if c, ok := m.collections[name]; ok {
 		return c, nil
 	}
 
-	if schema, ok := s.schemas[name]; ok {
-		s.collections[name] = NewResourceCollection(name, false, schema.Block)
-		return s.collections[name], nil
+	if schema, ok := m.schemas[name]; ok {
+		m.collections[name] = NewResourceCollection(name, false, schema.Block)
+		return m.collections[name], nil
 	}
 
 	return starlark.None, nil
 }
 
-func (s *MapSchemaIntance) AttrNames() []string {
+func (s *MapSchema) AttrNames() []string {
 	names := make([]string, len(s.schemas))
 
 	var i int

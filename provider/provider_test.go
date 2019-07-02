@@ -31,8 +31,8 @@ func TestResource(t *testing.T) {
 	test(t, "testdata/resource.star")
 }
 
-func TestResourceJSON(t *testing.T) {
-	test(t, "testdata/json.star")
+func TestResourceHCL(t *testing.T) {
+	test(t, "testdata/hcl.star")
 }
 
 func test(t *testing.T, filename string) {
@@ -43,7 +43,7 @@ func test(t *testing.T, filename string) {
 	provider := starlark.NewBuiltin("provider", func(thread *starlark.Thread, fn *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		name := args.Index(0).(starlark.String)
 		version := args.Index(1).(starlark.String)
-		return NewProviderInstance(&PluginManager{".providers"}, string(name), string(version))
+		return MakeProvider(&PluginManager{".providers"}, string(name), string(version))
 	})
 
 	predeclared := starlark.StringDict{

@@ -19,12 +19,12 @@ func BuiltinToHCL(hcl HCLCompatible, f *hclwrite.File) starlark.Value {
 	})
 }
 
-func (s *ProviderInstance) ToHCL(b *hclwrite.Body) {
+func (s *Provider) ToHCL(b *hclwrite.Body) {
 	s.dataSources.ToHCL(b)
 	s.resources.ToHCL(b)
 }
 
-func (t *MapSchemaIntance) ToHCL(b *hclwrite.Body) {
+func (t *MapSchema) ToHCL(b *hclwrite.Body) {
 	for _, c := range t.collections {
 		c.ToHCL(b)
 	}
