@@ -1,4 +1,4 @@
-package main
+package provider
 
 import (
 	"fmt"
@@ -75,12 +75,17 @@ func (s *ProviderInstance) AttrNames() []string {
 }
 
 type MapSchemaIntance struct {
-	prefix  string
-	schemas map[string]providers.Schema
+	prefix      string
+	schemas     map[string]providers.Schema
+	collections map[string]*ResourceCollection
 }
 
 func NewMapSchemaInstance(prefix string, schemas map[string]providers.Schema) *MapSchemaIntance {
-	return &MapSchemaIntance{prefix: prefix, schemas: schemas}
+	return &MapSchemaIntance{
+		prefix:      prefix,
+		schemas:     schemas,
+		collections: make(map[string]*ResourceCollection),
+	}
 }
 
 func (t *MapSchemaIntance) String() string {
@@ -99,8 +104,13 @@ func (t *MapSchemaIntance) Name() string          { return t.prefix }
 func (s *MapSchemaIntance) Attr(name string) (starlark.Value, error) {
 	name = s.prefix + "_" + name
 
+	if c, ok := s.collections[name]; ok {
+		return c, nil
+	}
+
 	if schema, ok := s.schemas[name]; ok {
-		return NewResourceInstanceConstructor(name, schema.Block, nil), nil
+		s.collections[name] = NewResourceCollection(name, false, schema.Block)
+		return s.collections[name], nil
 	}
 
 	return starlark.None, nil

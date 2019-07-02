@@ -1,6 +1,7 @@
-package main
+package provider
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform/configs/configschema"
@@ -10,37 +11,15 @@ import (
 
 type fnSignature func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error)
 
-type ResourceInstance struct {
+type Resource struct {
 	name   string
 	typ    string
 	block  *configschema.Block
 	values map[string]starlark.Value
 }
 
-func NewResourceInstanceConstructor(typ string, b *configschema.Block, ptrs *PointerList) starlark.Value {
-	return starlark.NewBuiltin(
-		fmt.Sprintf("_%s", typ),
-		func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-			name := args.Index(0).(starlark.String)
-
-			resource, err := MakeResourceInstance(string(name), typ, b, kwargs)
-			if err != nil {
-				return nil, err
-			}
-
-			if ptrs != nil {
-				if err := ptrs.Append(resource); err != nil {
-					return nil, err
-				}
-			}
-
-			return resource, nil
-		},
-	)
-}
-
-func MakeResourceInstance(name, typ string, b *configschema.Block, kwargs []starlark.Tuple) (*ResourceInstance, error) {
-	r := &ResourceInstance{
+func MakeResource(name, typ string, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
+	r := &Resource{
 		name:   name,
 		typ:    typ,
 		block:  b,
@@ -50,7 +29,7 @@ func MakeResourceInstance(name, typ string, b *configschema.Block, kwargs []star
 	return r, r.loadKeywordArgs(kwargs)
 }
 
-func (r *ResourceInstance) loadDict(d *starlark.Dict) error {
+func (r *Resource) loadDict(d *starlark.Dict) error {
 	for _, k := range d.Keys() {
 		name := k.(starlark.String)
 		value, _, _ := d.Get(k)
@@ -62,7 +41,7 @@ func (r *ResourceInstance) loadDict(d *starlark.Dict) error {
 	return nil
 }
 
-func (r *ResourceInstance) loadKeywordArgs(kwargs []starlark.Tuple) error {
+func (r *Resource) loadKeywordArgs(kwargs []starlark.Tuple) error {
 	for _, kwarg := range kwargs {
 		name := kwarg.Index(0).(starlark.String)
 		if err := r.SetField(string(name), kwarg.Index(1)); err != nil {
@@ -74,45 +53,60 @@ func (r *ResourceInstance) loadKeywordArgs(kwargs []starlark.Tuple) error {
 }
 
 // String honors the starlark.Value interface.
-func (r *ResourceInstance) String() string {
+func (r *Resource) String() string {
 	return fmt.Sprintf("%s(%q)", r.typ, r.name)
 }
 
 // Type honors the starlark.Value interface.
-func (r *ResourceInstance) Type() string {
+func (r *Resource) Type() string {
 	return r.typ
 }
 
 // Truth honors the starlark.Value interface.
-func (r *ResourceInstance) Truth() starlark.Bool {
+func (r *Resource) Truth() starlark.Bool {
 	return true // even when empty
 }
 
 // Freeze honors the starlark.Value interface.
-func (r *ResourceInstance) Freeze() {}
+func (r *Resource) Freeze() {}
 
 // Hash honors the starlark.Value interface.
-func (r *ResourceInstance) Hash() (uint32, error) {
-	return 42, nil
+func (r *Resource) Hash() (uint32, error) {
+	// Same algorithm as Tuple.hash, but with different primes.
+	var x, m uint32 = 8731, 9839
+	for name, value := range r.values {
+		namehash, _ := starlark.String(name).Hash()
+		x = x ^ 3*namehash
+		y, err := value.Hash()
+		if err != nil {
+			return 0, err
+		}
+		x = x ^ y*m
+		m += 7349
+	}
+	fmt.Println(x)
+	return x, nil
 }
 
 // Attr honors the starlark.HasAttrs interface.
-func (r *ResourceInstance) Attr(name string) (starlark.Value, error) {
+func (r *Resource) Attr(name string) (starlark.Value, error) {
 	if name == "__dict__" {
 		return r.toDict(), nil
+	}
+
+	if name == "__json__" {
+		return r.toJSON(), nil
 	}
 
 	if b, ok := r.block.BlockTypes[name]; ok {
 		if b.MaxItems != 1 {
 			if _, ok := r.values[name]; !ok {
-				r.values[name] = NewPointerList()
+				r.values[name] = NewResourceCollection(name, false, &b.Block)
 			}
-
-			return NewResourceInstanceConstructor(name, &b.Block, r.values[name].(*PointerList)), nil
 		}
 
 		if _, ok := r.values[name]; !ok {
-			r.values[name], _ = MakeResourceInstance("", name, &b.Block, nil)
+			r.values[name], _ = MakeResource("", name, &b.Block, nil)
 		}
 	}
 
@@ -123,18 +117,18 @@ func (r *ResourceInstance) Attr(name string) (starlark.Value, error) {
 	return nil, nil
 }
 
-func (r *ResourceInstance) getNestedBlockAttr(name string, b *configschema.NestedBlock) (starlark.Value, error) {
+func (r *Resource) getNestedBlockAttr(name string, b *configschema.NestedBlock) (starlark.Value, error) {
 	if v, ok := r.values[name]; ok {
 		return v, nil
 	}
 
 	var err error
-	r.values[name], err = MakeResourceInstance("", name, &b.Block, nil)
+	r.values[name], err = MakeResource("", name, &b.Block, nil)
 	return r.values[name], err
 }
 
 // AttrNames honors the starlark.HasAttrs interface.
-func (r *ResourceInstance) AttrNames() []string {
+func (r *Resource) AttrNames() []string {
 	names := make([]string, len(r.block.Attributes)+len(r.block.BlockTypes))
 
 	var i int
@@ -152,7 +146,7 @@ func (r *ResourceInstance) AttrNames() []string {
 }
 
 // SetField honors the starlark.HasSetField interface.
-func (r *ResourceInstance) SetField(name string, v starlark.Value) error {
+func (r *Resource) SetField(name string, v starlark.Value) error {
 	if b, ok := r.block.BlockTypes[name]; ok {
 		return r.setFieldFromNestedBlock(name, b, v)
 	}
@@ -171,25 +165,25 @@ func (r *ResourceInstance) SetField(name string, v starlark.Value) error {
 	return nil
 }
 
-func (r *ResourceInstance) setFieldFromNestedBlock(name string, b *configschema.NestedBlock, v starlark.Value) error {
+func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBlock, v starlark.Value) error {
 	switch v.Type() {
 	case "dict":
 		resource, _ := r.Attr(name)
-		return resource.(*ResourceInstance).loadDict(v.(*starlark.Dict))
+		return resource.(*Resource).loadDict(v.(*starlark.Dict))
 	}
 
 	return fmt.Errorf("expected dict or list, got %s", v.Type())
 }
 
-func (r *ResourceInstance) toDict() *starlark.Dict {
+func (r *Resource) toDict() *starlark.Dict {
 	d := starlark.NewDict(len(r.values))
 	for k, v := range r.values {
-		if r, ok := v.(*ResourceInstance); ok {
+		if r, ok := v.(*Resource); ok {
 			d.SetKey(starlark.String(k), r.toDict())
 			continue
 		}
 
-		if r, ok := v.(*PointerList); ok {
+		if r, ok := v.(*ResourceCollection); ok {
 			d.SetKey(starlark.String(k), r.toDict())
 			continue
 		}
@@ -200,21 +194,37 @@ func (r *ResourceInstance) toDict() *starlark.Dict {
 	return d
 }
 
-type PointerList struct {
-	*starlark.List
-}
-
-func NewPointerList() *PointerList {
-	return &PointerList{List: starlark.NewList(nil)}
-}
-
-func (l *PointerList) toDict() *starlark.List {
-	values := make([]starlark.Value, l.Len())
-	for i := 0; i < l.Len(); i++ {
-		values[i] = l.Index(i).(*ResourceInstance).toDict()
+func (r *Resource) MarshalJSON() ([]byte, error) {
+	out := make(map[string]interface{}, len(r.values))
+	for k, v := range r.values {
+		out[k] = ValueToNative(v)
 	}
 
-	return starlark.NewList(values)
+	return json.Marshal(out)
+}
+
+func (r *Resource) toJSON() starlark.String {
+	json, _ := json.MarshalIndent(r, "  ", "  ")
+	return starlark.String(string(json))
+}
+
+func ValueToNative(v starlark.Value) interface{} {
+	switch cast := v.(type) {
+	case starlark.Int:
+		i, _ := cast.Int64()
+		return i
+	case *ResourceCollection:
+		return ValueToNative(cast.List)
+	case *starlark.List:
+		out := make([]interface{}, cast.Len())
+		for i := 0; i < cast.Len(); i++ {
+			out[i] = ValueToNative(cast.Index(i))
+		}
+
+		return out
+	default:
+		return v
+	}
 }
 
 /*

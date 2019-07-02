@@ -5,6 +5,9 @@ ami = aws.data.ami("ubuntu")
 ami.most_recent = True
 ami.filter("name", values=["ubuntu/images/hvm-ssd/ubuntu-trusty-14.04-amd64-server-*"])
 ami.filter("virtualization-type", values=["hvm"])
+print(ami.filter[0], ami.filter[1])
+ami.filter[0].values = []
+
 ami.owners = ["099720109477"]
 print(ami.__dict__)
 

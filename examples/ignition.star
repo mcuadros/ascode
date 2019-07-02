@@ -8,7 +8,6 @@ user.system = True
 
 print(user.__dict__)
 
-
 disk = ignition.data.disk("foo")
 disk.device = "/dev/sda"
 
@@ -20,4 +19,5 @@ home = disk.partition("home")
 home.start = root.size + root.start 
 home.size = 4 * 1024 * 1024 
 
+print("parition count: ", len(disk.partition))
 print(disk.__dict__)

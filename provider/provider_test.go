@@ -1,4 +1,4 @@
-package main
+package provider
 
 import (
 	"fmt"
@@ -25,6 +25,14 @@ func TestProvider(t *testing.T) {
 
 func TestNestedBlock(t *testing.T) {
 	test(t, "testdata/nested.star")
+}
+
+func TestResource(t *testing.T) {
+	test(t, "testdata/resource.star")
+}
+
+func TestResourceJSON(t *testing.T) {
+	test(t, "testdata/json.star")
 }
 
 func test(t *testing.T, filename string) {
