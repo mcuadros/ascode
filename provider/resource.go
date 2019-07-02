@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/hashicorp/terraform/configs/configschema"
 	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
@@ -14,14 +14,16 @@ type fnSignature func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tup
 type Resource struct {
 	name   string
 	typ    string
+	nested bool
 	block  *configschema.Block
 	values map[string]starlark.Value
 }
 
-func MakeResource(name, typ string, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
+func MakeResource(name, typ string, nested bool, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
 	r := &Resource{
 		name:   name,
 		typ:    typ,
+		nested: nested,
 		block:  b,
 		values: make(map[string]starlark.Value),
 	}
@@ -94,19 +96,19 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 		return r.toDict(), nil
 	}
 
-	if name == "__json__" {
-		return r.toJSON(), nil
+	if name == "to_hcl" {
+		return BuiltinToHCL(r, hclwrite.NewEmptyFile()), nil
 	}
 
 	if b, ok := r.block.BlockTypes[name]; ok {
 		if b.MaxItems != 1 {
 			if _, ok := r.values[name]; !ok {
-				r.values[name] = NewResourceCollection(name, false, &b.Block)
+				r.values[name] = NewResourceCollection(name, true, &b.Block)
 			}
 		}
 
 		if _, ok := r.values[name]; !ok {
-			r.values[name], _ = MakeResource("", name, &b.Block, nil)
+			r.values[name], _ = MakeResource("", name, true, &b.Block, nil)
 		}
 	}
 
@@ -123,7 +125,7 @@ func (r *Resource) getNestedBlockAttr(name string, b *configschema.NestedBlock) 
 	}
 
 	var err error
-	r.values[name], err = MakeResource("", name, &b.Block, nil)
+	r.values[name], err = MakeResource("", name, true, &b.Block, nil)
 	return r.values[name], err
 }
 
@@ -194,22 +196,12 @@ func (r *Resource) toDict() *starlark.Dict {
 	return d
 }
 
-func (r *Resource) MarshalJSON() ([]byte, error) {
-	out := make(map[string]interface{}, len(r.values))
-	for k, v := range r.values {
-		out[k] = ValueToNative(v)
-	}
-
-	return json.Marshal(out)
-}
-
-func (r *Resource) toJSON() starlark.String {
-	json, _ := json.MarshalIndent(r, "  ", "  ")
-	return starlark.String(string(json))
-}
-
 func ValueToNative(v starlark.Value) interface{} {
 	switch cast := v.(type) {
+	case starlark.Bool:
+		return bool(cast)
+	case starlark.String:
+		return string(cast)
 	case starlark.Int:
 		i, _ := cast.Int64()
 		return i

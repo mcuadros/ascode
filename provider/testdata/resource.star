@@ -8,6 +8,7 @@ user.uid = 42
 user.groups = ["foo", "bar"]
 user.system = True
 
+
 assert.eq(user.__dict__, {
     "name": "foo", 
     "uid": 42,

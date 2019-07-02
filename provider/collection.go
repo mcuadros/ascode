@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/hashicorp/terraform/configs/configschema"
 	"go.starlark.net/starlark"
 )
@@ -52,8 +52,8 @@ func (c *ResourceCollection) Name() string {
 
 // Attr honors the starlark.HasAttrs interface.
 func (c *ResourceCollection) Attr(name string) (starlark.Value, error) {
-	if name == "__json__" {
-		return c.toJSON(), nil
+	if name == "to_hcl" {
+		return BuiltinToHCL(c, hclwrite.NewEmptyFile()), nil
 	}
 
 	return c.List.Attr(name)
@@ -66,7 +66,7 @@ func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark
 		name = args.Index(0).(starlark.String)
 	}
 
-	resource, err := MakeResource(string(name), c.typ, c.block, kwargs)
+	resource, err := MakeResource(string(name), c.typ, c.nested, c.block, kwargs)
 	if err != nil {
 		return nil, err
 	}
@@ -76,26 +76,6 @@ func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark
 	}
 
 	return resource, nil
-}
-
-func (c *ResourceCollection) MarshalJSON() ([]byte, error) {
-	if c.nested {
-		out := ValueToNative(c.List)
-		return json.Marshal(out)
-	}
-
-	out := make(map[string]interface{}, c.List.Len())
-	for i := 0; i < c.List.Len(); i++ {
-		r := c.List.Index(i)
-		out["foo"] = r
-	}
-
-	return json.Marshal(out)
-}
-
-func (r *ResourceCollection) toJSON() starlark.String {
-	json, _ := json.MarshalIndent(r, "  ", "  ")
-	return starlark.String(string(json))
 }
 
 func (c *ResourceCollection) toDict() *starlark.List {
