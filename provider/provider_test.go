@@ -52,6 +52,7 @@ func test(t *testing.T, filename string) {
 
 	predeclared := starlark.StringDict{
 		"provider": provider,
+		"hcl":      BuiltinHCL(),
 	}
 
 	if _, err := starlark.ExecFile(thread, filename, nil, predeclared); err != nil {

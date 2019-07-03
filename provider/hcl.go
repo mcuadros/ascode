@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hclwrite"
 	"go.starlark.net/starlark"
@@ -10,8 +12,19 @@ type HCLCompatible interface {
 	ToHCL(b *hclwrite.Body)
 }
 
-func BuiltinToHCL(hcl HCLCompatible, f *hclwrite.File) starlark.Value {
-	return starlark.NewBuiltin("to_hcl", func(_ *starlark.Thread, _ *starlark.Builtin, _ starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
+func BuiltinHCL() starlark.Value {
+	return starlark.NewBuiltin("hcl", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
+		if args.Len() != 1 {
+			return nil, fmt.Errorf("exactly one argument is required")
+		}
+
+		value := args.Index(0)
+		hcl, ok := value.(HCLCompatible)
+		if !ok {
+			return nil, fmt.Errorf("value type %s doesn't support HCL conversion", value.Type())
+		}
+
+		f := hclwrite.NewEmptyFile()
 		hcl.ToHCL(f.Body())
 		return starlark.String(string(f.Bytes())), nil
 	})

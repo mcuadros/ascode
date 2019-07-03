@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/hashicorp/terraform/plugin/discovery"
 
 	"github.com/hashicorp/terraform/plugin"
@@ -51,7 +50,7 @@ func (p *Provider) String() string {
 }
 
 func (p *Provider) Type() string {
-	return "provider-instance"
+	return "provider"
 }
 
 func (p *Provider) Freeze()               {}
@@ -66,8 +65,6 @@ func (p *Provider) Attr(name string) (starlark.Value, error) {
 		return p.dataSources, nil
 	case "resource":
 		return p.resources, nil
-	case "to_hcl":
-		return BuiltinToHCL(p, hclwrite.NewEmptyFile()), nil
 	}
 
 	return starlark.None, nil
@@ -107,10 +104,6 @@ func (m *MapSchema) Hash() (uint32, error) { return 1, nil }
 func (m *MapSchema) Name() string          { return m.prefix }
 
 func (m *MapSchema) Attr(name string) (starlark.Value, error) {
-	if name == "to_hcl" {
-		return BuiltinToHCL(m, hclwrite.NewEmptyFile()), nil
-	}
-
 	name = m.prefix + "_" + name
 
 	if c, ok := m.collections[name]; ok {

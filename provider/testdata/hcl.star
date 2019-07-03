@@ -34,4 +34,4 @@ group.mixed_instances_policy = {
 ami2 = aws.data.ami("foo")
 ami2.most_recent = True
 
-print(aws.to_hcl())
+print(hcl(aws))

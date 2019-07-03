@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 
-	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/hashicorp/terraform/configs/configschema"
 	"go.starlark.net/starlark"
 )
@@ -102,8 +101,6 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "__dict__":
 		return r.toDict(), nil
-	case "to_hcl":
-		return BuiltinToHCL(r, hclwrite.NewEmptyFile()), nil
 	}
 
 	if a, ok := r.block.Attributes[name]; (ok && a.Computed) || name == "id" {

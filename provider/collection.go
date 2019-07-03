@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 
-	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/hashicorp/terraform/configs/configschema"
 	"go.starlark.net/starlark"
 )
@@ -49,15 +48,6 @@ func (c *ResourceCollection) Hash() (uint32, error) { return 42, nil }
 // Name honors the starlark.Callable interface.
 func (c *ResourceCollection) Name() string {
 	return c.typ
-}
-
-// Attr honors the starlark.HasAttrs interface.
-func (c *ResourceCollection) Attr(name string) (starlark.Value, error) {
-	if name == "to_hcl" {
-		return BuiltinToHCL(c, hclwrite.NewEmptyFile()), nil
-	}
-
-	return c.List.Attr(name)
 }
 
 // CallInternal honos the starlark.Callable interface.
