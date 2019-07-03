@@ -32,7 +32,7 @@ func (c *ResourceCollection) String() string {
 
 // Type honors the starlark.Value interface.
 func (c *ResourceCollection) Type() string {
-	return fmt.Sprintf("%s_collection", c.typ)
+	return "collection"
 }
 
 // Truth honors the starlark.Value interface.

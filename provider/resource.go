@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/hashicorp/terraform/configs/configschema"
-	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
 )
 
@@ -24,7 +23,7 @@ type Resource struct {
 	typ    string
 	kind   ResourceKind
 	block  *configschema.Block
-	values map[string]starlark.Value
+	values map[string]*Value
 }
 
 func MakeResource(name, typ string, k ResourceKind, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
@@ -33,7 +32,7 @@ func MakeResource(name, typ string, k ResourceKind, b *configschema.Block, kwarg
 		typ:    typ,
 		kind:   k,
 		block:  b,
-		values: make(map[string]starlark.Value),
+		values: make(map[string]*Value),
 	}
 
 	return r, r.loadKeywordArgs(kwargs)
@@ -69,7 +68,7 @@ func (r *Resource) String() string {
 
 // Type honors the starlark.Value interface.
 func (r *Resource) Type() string {
-	return r.typ
+	return "resource"
 }
 
 // Truth honors the starlark.Value interface.
@@ -87,7 +86,7 @@ func (r *Resource) Hash() (uint32, error) {
 	for name, value := range r.values {
 		namehash, _ := starlark.String(name).Hash()
 		x = x ^ 3*namehash
-		y, err := value.Hash()
+		y, err := value.Value().Hash()
 		if err != nil {
 			return 0, err
 		}
@@ -116,7 +115,7 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 	}
 
 	if v, ok := r.values[name]; ok {
-		return v, nil
+		return v.Value(), nil
 	}
 
 	return nil, nil
@@ -128,15 +127,16 @@ func (r *Resource) attrComputed(name string, attr *configschema.Attribute) (star
 func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark.Value, error) {
 	if b.MaxItems != 1 {
 		if _, ok := r.values[name]; !ok {
-			r.values[name] = NewResourceCollection(name, NestedK, &b.Block)
+			r.values[name] = MustValue(NewResourceCollection(name, NestedK, &b.Block))
 		}
 	}
 
 	if _, ok := r.values[name]; !ok {
-		r.values[name], _ = MakeResource("", name, NestedK, &b.Block, nil)
+		resource, _ := MakeResource("", name, NestedK, &b.Block, nil)
+		r.values[name] = MustValue(resource)
 	}
 
-	return r.values[name], nil
+	return r.values[name].Value(), nil
 }
 
 // AttrNames honors the starlark.HasAttrs interface.
@@ -169,11 +169,11 @@ func (r *Resource) SetField(name string, v starlark.Value) error {
 		return starlark.NoSuchAttrError(errmsg)
 	}
 
-	if err := ValidateType(v, attr.Type); err != nil {
+	if err := MustTypeFromCty(attr.Type).Validate(v); err != nil {
 		return err
 	}
 
-	r.values[name] = v
+	r.values[name] = MustValue(v)
 	return nil
 }
 
@@ -190,127 +190,18 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 func (r *Resource) toDict() *starlark.Dict {
 	d := starlark.NewDict(len(r.values))
 	for k, v := range r.values {
-		if r, ok := v.(*Resource); ok {
+		if r, ok := v.Value().(*Resource); ok {
 			d.SetKey(starlark.String(k), r.toDict())
 			continue
 		}
 
-		if r, ok := v.(*ResourceCollection); ok {
+		if r, ok := v.Value().(*ResourceCollection); ok {
 			d.SetKey(starlark.String(k), r.toDict())
 			continue
 		}
 
-		d.SetKey(starlark.String(k), v)
+		d.SetKey(starlark.String(k), v.Value())
 	}
 
 	return d
-}
-
-func ValueToNative(v starlark.Value) interface{} {
-	switch cast := v.(type) {
-	case starlark.Bool:
-		return bool(cast)
-	case starlark.String:
-		return string(cast)
-	case starlark.Int:
-		i, _ := cast.Int64()
-		return i
-	case *ResourceCollection:
-		return ValueToNative(cast.List)
-	case *starlark.List:
-		out := make([]interface{}, cast.Len())
-		for i := 0; i < cast.Len(); i++ {
-			out[i] = ValueToNative(cast.Index(i))
-		}
-
-		return out
-	default:
-		return v
-	}
-}
-
-/*
-NoneType                     # the type of None
-bool                         # True or False
-int                          # a signed integer of arbitrary magnitude
-float                        # an IEEE 754 double-precision floating point number
-string                       # a byte string
-list                         # a modifiable sequence of values
-tuple                        # an unmodifiable sequence of values
-dict                         # a mapping from values to values
-set                          # a set of values
-function                     # a function implemented in Starlark
-builtin_function_or_method
-*/
-
-func FromStarlarkType(typ string) cty.Type {
-	switch typ {
-	case "bool":
-		return cty.Bool
-	case "int":
-	case "float":
-		return cty.Number
-	case "string":
-		return cty.String
-	}
-
-	return cty.NilType
-}
-
-func ValidateListType(l *starlark.List, expected cty.Type) error {
-	for i := 0; i < l.Len(); i++ {
-		if err := ValidateType(l.Index(i), expected); err != nil {
-			return fmt.Errorf("index %d: %s", i, err)
-		}
-	}
-
-	return nil
-}
-
-func ValidateType(v starlark.Value, expected cty.Type) error {
-	switch v.(type) {
-	case starlark.String:
-		if expected == cty.String {
-			return nil
-		}
-	case starlark.Int:
-		if expected == cty.Number {
-			return nil
-		}
-	case starlark.Bool:
-		if expected == cty.Bool {
-			return nil
-		}
-	case *Computed:
-		if expected == v.(*Computed).a.Type {
-			return nil
-		}
-	case *starlark.List:
-		if expected.IsListType() || expected.IsSetType() {
-			return ValidateListType(v.(*starlark.List), expected.ElementType())
-		}
-	}
-
-	return fmt.Errorf("expected %s, got %s", ToStarlarkType(expected), v.Type())
-}
-
-func ToStarlarkType(t cty.Type) string {
-	switch t {
-	case cty.String:
-		return "string"
-	case cty.Number:
-		return "int"
-	case cty.Bool:
-		return "bool"
-	}
-
-	if t.IsListType() {
-		return "list"
-	}
-
-	if t.IsSetType() {
-		return "set"
-	}
-
-	return "(unknown)"
 }

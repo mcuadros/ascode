@@ -8,7 +8,7 @@ assert.eq(len(dir(p.resource)), 506)
 
 resources = dir(p.resource)
 assert.contains(resources, "instance")
-assert.eq(type(p.resource.instance), "aws_instance_collection")
+assert.eq(type(p.resource.instance), "collection")
 
 p.resource.instance("foo")
 p.resource.instance("bar")

@@ -1,11 +1,8 @@
 package provider
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hclwrite"
-	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
 )
 
@@ -51,14 +48,14 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 	}
 
 	body := block.Body()
-	for k, attr := range r.block.Attributes {
+	for k := range r.block.Attributes {
 		v, ok := r.values[k]
 		if !ok {
 			continue
 		}
 
 		// TODO(mcuadros): I don't know how to do this properly, meanwhile, this works.
-		if c, ok := v.(*Computed); ok {
+		if c, ok := v.v.(*Computed); ok {
 			body.SetAttributeTraversal(k, hcl.Traversal{hcl.TraverseRoot{
 				Name: c.String(),
 			}})
@@ -66,7 +63,7 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 			continue
 		}
 
-		body.SetAttributeValue(k, EncodeToCty(attr.Type, ValueToNative(v)))
+		body.SetAttributeValue(k, v.Cty())
 	}
 
 	for k := range r.block.BlockTypes {
@@ -75,32 +72,8 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 			continue
 		}
 
-		if collection, ok := v.(HCLCompatible); ok {
+		if collection, ok := v.Value().(HCLCompatible); ok {
 			collection.ToHCL(block.Body())
 		}
-	}
-}
-
-func EncodeToCty(t cty.Type, v interface{}) cty.Value {
-	switch value := v.(type) {
-	case string:
-		return cty.StringVal(value)
-	case int64:
-		return cty.NumberIntVal(value)
-	case bool:
-		return cty.BoolVal(value)
-	case []interface{}:
-		if len(value) == 0 {
-			return cty.ListValEmpty(t)
-		}
-
-		values := make([]cty.Value, len(value))
-		for i, v := range value {
-			values[i] = EncodeToCty(t, v)
-		}
-
-		return cty.ListVal(values)
-	default:
-		return cty.StringVal(fmt.Sprintf("unhandled: %T", v))
 	}
 }

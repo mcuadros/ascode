@@ -3,11 +3,11 @@ load("assert.star", "assert")
 p = provider("aws", "2.13.0")
 d = p.data.ami("foo")
 
-assert.eq(type(d.filter), "filter_collection")
+assert.eq(type(d.filter), "collection")
 
 bar = d.filter(name="bar", values=["qux"])
 
-assert.eq(type(bar), "filter")
+assert.eq(type(bar), "resource")
 assert.eq(bar.name, "bar")
 assert.eq(bar.values, ["qux"])
 
