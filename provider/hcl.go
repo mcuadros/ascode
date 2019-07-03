@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 
+	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
@@ -43,8 +44,8 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 	}
 
 	var block *hclwrite.Block
-	if !r.nested {
-		block = b.AppendNewBlock("resource", []string{r.typ, r.name})
+	if r.kind != NestedK {
+		block = b.AppendNewBlock(string(r.kind), []string{r.typ, r.name})
 	} else {
 		block = b.AppendNewBlock(r.typ, nil)
 	}
@@ -53,6 +54,15 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 	for k, attr := range r.block.Attributes {
 		v, ok := r.values[k]
 		if !ok {
+			continue
+		}
+
+		// TODO(mcuadros): I don't know how to do this properly, meanwhile, this works.
+		if c, ok := v.(*Computed); ok {
+			body.SetAttributeTraversal(k, hcl.Traversal{hcl.TraverseRoot{
+				Name: c.String(),
+			}})
+
 			continue
 		}
 

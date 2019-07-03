@@ -41,8 +41,8 @@ func MakeProvider(pm *PluginManager, name, version string) (*Provider, error) {
 		name:        name,
 		provider:    provider,
 		meta:        meta,
-		dataSources: NewMapSchema(name, response.DataSources),
-		resources:   NewMapSchema(name, response.ResourceTypes),
+		dataSources: NewMapSchema(name, DataResourceK, response.DataSources),
+		resources:   NewMapSchema(name, ResourceK, response.ResourceTypes),
 	}, nil
 }
 
@@ -79,13 +79,15 @@ func (p *Provider) AttrNames() []string {
 
 type MapSchema struct {
 	prefix      string
+	kind        ResourceKind
 	schemas     map[string]providers.Schema
 	collections map[string]*ResourceCollection
 }
 
-func NewMapSchema(prefix string, schemas map[string]providers.Schema) *MapSchema {
+func NewMapSchema(prefix string, k ResourceKind, schemas map[string]providers.Schema) *MapSchema {
 	return &MapSchema{
 		prefix:      prefix,
+		kind:        k,
 		schemas:     schemas,
 		collections: make(map[string]*ResourceCollection),
 	}
@@ -116,7 +118,7 @@ func (m *MapSchema) Attr(name string) (starlark.Value, error) {
 	}
 
 	if schema, ok := m.schemas[name]; ok {
-		m.collections[name] = NewResourceCollection(name, false, schema.Block)
+		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block)
 		return m.collections[name], nil
 	}
 

@@ -11,19 +11,27 @@ import (
 
 type fnSignature func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error)
 
+type ResourceKind string
+
+const (
+	ResourceK     ResourceKind = "resource"
+	DataResourceK ResourceKind = "data"
+	NestedK       ResourceKind = "nested"
+)
+
 type Resource struct {
 	name   string
 	typ    string
-	nested bool
+	kind   ResourceKind
 	block  *configschema.Block
 	values map[string]starlark.Value
 }
 
-func MakeResource(name, typ string, nested bool, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
+func MakeResource(name, typ string, k ResourceKind, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
 	r := &Resource{
 		name:   name,
 		typ:    typ,
-		nested: nested,
+		kind:   k,
 		block:  b,
 		values: make(map[string]starlark.Value),
 	}
@@ -86,30 +94,25 @@ func (r *Resource) Hash() (uint32, error) {
 		x = x ^ y*m
 		m += 7349
 	}
-	fmt.Println(x)
+
 	return x, nil
 }
 
 // Attr honors the starlark.HasAttrs interface.
 func (r *Resource) Attr(name string) (starlark.Value, error) {
-	if name == "__dict__" {
+	switch name {
+	case "__dict__":
 		return r.toDict(), nil
-	}
-
-	if name == "to_hcl" {
+	case "to_hcl":
 		return BuiltinToHCL(r, hclwrite.NewEmptyFile()), nil
 	}
 
-	if b, ok := r.block.BlockTypes[name]; ok {
-		if b.MaxItems != 1 {
-			if _, ok := r.values[name]; !ok {
-				r.values[name] = NewResourceCollection(name, true, &b.Block)
-			}
-		}
+	if a, ok := r.block.Attributes[name]; (ok && a.Computed) || name == "id" {
+		return r.attrComputed(name, a)
+	}
 
-		if _, ok := r.values[name]; !ok {
-			r.values[name], _ = MakeResource("", name, true, &b.Block, nil)
-		}
+	if b, ok := r.block.BlockTypes[name]; ok {
+		return r.attrBlock(name, b)
 	}
 
 	if v, ok := r.values[name]; ok {
@@ -118,15 +121,22 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 
 	return nil, nil
 }
+func (r *Resource) attrComputed(name string, attr *configschema.Attribute) (starlark.Value, error) {
+	return NewComputed(r, attr, name), nil
+}
 
-func (r *Resource) getNestedBlockAttr(name string, b *configschema.NestedBlock) (starlark.Value, error) {
-	if v, ok := r.values[name]; ok {
-		return v, nil
+func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark.Value, error) {
+	if b.MaxItems != 1 {
+		if _, ok := r.values[name]; !ok {
+			r.values[name] = NewResourceCollection(name, NestedK, &b.Block)
+		}
 	}
 
-	var err error
-	r.values[name], err = MakeResource("", name, true, &b.Block, nil)
-	return r.values[name], err
+	if _, ok := r.values[name]; !ok {
+		r.values[name], _ = MakeResource("", name, NestedK, &b.Block, nil)
+	}
+
+	return r.values[name], nil
 }
 
 // AttrNames honors the starlark.HasAttrs interface.
@@ -269,6 +279,10 @@ func ValidateType(v starlark.Value, expected cty.Type) error {
 		}
 	case starlark.Bool:
 		if expected == cty.Bool {
+			return nil
+		}
+	case *Computed:
+		if expected == v.(*Computed).a.Type {
 			return nil
 		}
 	case *starlark.List:

@@ -10,17 +10,18 @@ import (
 
 type ResourceCollection struct {
 	typ    string
+	kind   ResourceKind
 	nested bool
 	block  *configschema.Block
 	*starlark.List
 }
 
-func NewResourceCollection(typ string, nested bool, block *configschema.Block) *ResourceCollection {
+func NewResourceCollection(typ string, k ResourceKind, block *configschema.Block) *ResourceCollection {
 	return &ResourceCollection{
-		typ:    typ,
-		nested: nested,
-		block:  block,
-		List:   starlark.NewList(nil),
+		typ:   typ,
+		kind:  k,
+		block: block,
+		List:  starlark.NewList(nil),
 	}
 }
 
@@ -66,7 +67,7 @@ func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark
 		name = args.Index(0).(starlark.String)
 	}
 
-	resource, err := MakeResource(string(name), c.typ, c.nested, c.block, kwargs)
+	resource, err := MakeResource(string(name), c.typ, c.kind, c.block, kwargs)
 	if err != nil {
 		return nil, err
 	}
