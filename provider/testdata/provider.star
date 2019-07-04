@@ -10,6 +10,6 @@ resources = dir(p.resource)
 assert.contains(resources, "instance")
 assert.eq(type(p.resource.instance), "collection")
 
-p.resource.instance("foo")
-p.resource.instance("bar")
+p.resource.instance()
+p.resource.instance()
 assert.eq(len(p.resource.instance), 2)

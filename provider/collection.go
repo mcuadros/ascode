@@ -8,10 +8,9 @@ import (
 )
 
 type ResourceCollection struct {
-	typ    string
-	kind   ResourceKind
-	nested bool
-	block  *configschema.Block
+	typ   string
+	kind  ResourceKind
+	block *configschema.Block
 	*starlark.List
 }
 
@@ -52,14 +51,33 @@ func (c *ResourceCollection) Name() string {
 
 // CallInternal honos the starlark.Callable interface.
 func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-	var name starlark.String
-	if len(args) != 0 {
-		name = args.Index(0).(starlark.String)
+	var dict *starlark.Dict
+
+	switch len(args) {
+	case 0:
+	case 1:
+		var ok bool
+		dict, ok = args.Index(0).(*starlark.Dict)
+		if !ok {
+			return nil, fmt.Errorf("resource: expected dict, go %s", args.Index(0).Type())
+		}
+	default:
+		if c.kind != NestedK {
+			return nil, fmt.Errorf("resource: unexpected positional arguments count")
+		}
 	}
 
-	resource, err := MakeResource(string(name), c.typ, c.kind, c.block, kwargs)
-	if err != nil {
-		return nil, err
+	resource := MakeResource(c.typ, c.kind, c.block)
+	if len(kwargs) != 0 {
+		if err := resource.loadKeywordArgs(kwargs); err != nil {
+			return nil, err
+		}
+	}
+
+	if dict != nil && dict.Len() != 0 {
+		if err := resource.loadDict(dict); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := c.List.Append(resource); err != nil {

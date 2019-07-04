@@ -17,11 +17,12 @@ type Computed struct {
 }
 
 func NewComputed(r *Resource, a *configschema.Attribute, name string) *Computed {
+	hash, _ := r.Hash()
 	return &Computed{
 		r:       r,
 		a:       a,
 		name:    name,
-		sString: starlark.String(fmt.Sprintf("${%s.%s.%s.%s}", r.kind, r.typ, r.name, name)),
+		sString: starlark.String(fmt.Sprintf("${%s.%s.%d.%s}", r.kind, r.typ, hash, name)),
 	}
 }
 

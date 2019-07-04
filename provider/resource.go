@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform/configs/configschema"
 	"go.starlark.net/starlark"
+	"go.starlark.net/syntax"
 )
 
 type fnSignature func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error)
@@ -18,23 +19,19 @@ const (
 )
 
 type Resource struct {
-	name   string
 	typ    string
 	kind   ResourceKind
 	block  *configschema.Block
 	values map[string]*Value
 }
 
-func MakeResource(name, typ string, k ResourceKind, b *configschema.Block, kwargs []starlark.Tuple) (*Resource, error) {
-	r := &Resource{
-		name:   name,
+func MakeResource(typ string, k ResourceKind, b *configschema.Block) *Resource {
+	return &Resource{
 		typ:    typ,
 		kind:   k,
 		block:  b,
 		values: make(map[string]*Value),
 	}
-
-	return r, r.loadKeywordArgs(kwargs)
 }
 
 func (r *Resource) loadDict(d *starlark.Dict) error {
@@ -62,12 +59,12 @@ func (r *Resource) loadKeywordArgs(kwargs []starlark.Tuple) error {
 
 // String honors the starlark.Value interface.
 func (r *Resource) String() string {
-	return fmt.Sprintf("%s(%q)", r.typ, r.name)
+	return fmt.Sprintf("%s(%q)", r.kind, r.typ)
 }
 
 // Type honors the starlark.Value interface.
 func (r *Resource) Type() string {
-	return "resource"
+	return string(r.kind)
 }
 
 // Truth honors the starlark.Value interface.
@@ -85,7 +82,7 @@ func (r *Resource) Hash() (uint32, error) {
 	for name, value := range r.values {
 		namehash, _ := starlark.String(name).Hash()
 		x = x ^ 3*namehash
-		y, err := value.Value().Hash()
+		y, err := value.Hash()
 		if err != nil {
 			return 0, err
 		}
@@ -117,6 +114,7 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 
 	return nil, nil
 }
+
 func (r *Resource) attrComputed(name string, attr *configschema.Attribute) (starlark.Value, error) {
 	return NewComputed(r, attr, name), nil
 }
@@ -129,8 +127,7 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 	}
 
 	if _, ok := r.values[name]; !ok {
-		resource, _ := MakeResource("", name, NestedK, &b.Block, nil)
-		r.values[name] = MustValue(resource)
+		r.values[name] = MustValue(MakeResource(name, NestedK, &b.Block))
 	}
 
 	return r.values[name].Value(), nil
@@ -184,6 +181,10 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 	return fmt.Errorf("expected dict or list, got %s", v.Type())
 }
 
+func (r *Resource) localName() string {
+	return fmt.Sprintf("")
+}
+
 func (r *Resource) toDict() *starlark.Dict {
 	d := starlark.NewDict(len(r.values))
 	for k, v := range r.values {
@@ -201,4 +202,60 @@ func (r *Resource) toDict() *starlark.Dict {
 	}
 
 	return d
+}
+
+// CompareSameType honors starlark.Comprable interface.
+func (x *Resource) CompareSameType(op syntax.Token, y_ starlark.Value, depth int) (bool, error) {
+	y := y_.(*Resource)
+	switch op {
+	case syntax.EQL:
+		ok, err := x.doCompareSameType(y, depth)
+		return ok, err
+	case syntax.NEQ:
+		ok, err := x.doCompareSameType(y, depth)
+		return !ok, err
+	default:
+		return false, fmt.Errorf("%s %s %s not implemented", x.Type(), op, y.Type())
+	}
+}
+
+func (x *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
+	if x.typ != y.typ {
+		return false, nil
+	}
+
+	if len(x.values) != len(y.values) {
+		return false, nil
+	}
+
+	for key, xval := range x.values {
+		fmt.Printf("%s = %T, %T\n", key, xval.Value(), y.values[key].Value())
+		yval, found := y.values[key]
+		if !found {
+			return false, nil
+		}
+
+		var eq bool
+		var err error
+		if xcol, ok := xval.Value().(*ResourceCollection); ok {
+			ycol, ok := yval.Value().(*ResourceCollection)
+			if !ok {
+				return false, nil
+			}
+
+			eq, err = starlark.EqualDepth(xcol.List, ycol.List, depth-1)
+		} else {
+			eq, err = starlark.EqualDepth(xval.Value(), yval.Value(), depth-1)
+		}
+
+		if err != nil {
+			return false, err
+		}
+
+		if !eq {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

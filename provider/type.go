@@ -98,6 +98,25 @@ func (v *Value) Interface() interface{} {
 	}
 }
 
+func (v *Value) Hash() (uint32, error) {
+	switch value := v.v.(type) {
+	case *starlark.List:
+		// Use same algorithm as Python.
+		var x, mult uint32 = 0x345678, 1000003
+		for i := 0; i < value.Len(); i++ {
+			y, err := value.Index(i).Hash()
+			if err != nil {
+				return 0, err
+			}
+			x = x ^ y*mult
+			mult += 82520 + uint32(value.Len()+value.Len())
+		}
+		return x, nil
+	default:
+		return value.Hash()
+	}
+}
+
 // Type is a helper to manipulate and transform starlark.Type and cty.Type
 type Type struct {
 	typ string
@@ -129,7 +148,7 @@ func NewTypeFromStarlark(typ string) (*Type, error) {
 		t.cty = cty.String
 	case "collection":
 		t.cty = cty.List(cty.NilType)
-	case "resource":
+	case "nested", "data", "resource":
 		t.cty = cty.Map(cty.NilType)
 	case "list":
 		t.cty = cty.List(cty.NilType)

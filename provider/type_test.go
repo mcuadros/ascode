@@ -33,6 +33,12 @@ func TestNewTypeFromStarlark_NonScalar(t *testing.T) {
 	typ = MustTypeFromStarlark("collection")
 	assert.True(t, typ.Cty().IsListType())
 
+	typ = MustTypeFromStarlark("data")
+	assert.True(t, typ.Cty().IsMapType())
+
+	typ = MustTypeFromStarlark("nested")
+	assert.True(t, typ.Cty().IsMapType())
+
 	typ = MustTypeFromStarlark("resource")
 	assert.True(t, typ.Cty().IsMapType())
 }
