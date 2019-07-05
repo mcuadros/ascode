@@ -51,7 +51,8 @@ func test(t *testing.T, filename string) {
 		"hcl":      BuiltinHCL(),
 	}
 
-	if _, err := starlark.ExecFile(thread, filename, nil, predeclared); err != nil {
+	_, err := starlark.ExecFile(thread, filename, nil, predeclared)
+	if err != nil {
 		if err, ok := err.(*starlark.EvalError); ok {
 			t.Fatal(err.Backtrace())
 		}

@@ -75,6 +75,20 @@ func (r *Resource) Truth() starlark.Bool {
 // Freeze honors the starlark.Value interface.
 func (r *Resource) Freeze() {}
 
+// Name returns the resource name based on the hash.
+func (r *Resource) Name() (string, error) {
+	if r.kind == NestedK {
+		return "", fmt.Errorf("name is not supported on nested resources")
+	}
+
+	hash, err := r.Hash()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("id_%d", hash), nil
+}
+
 // Hash honors the starlark.Value interface.
 func (r *Resource) Hash() (uint32, error) {
 	// Same algorithm as Tuple.hash, but with different primes.

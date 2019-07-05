@@ -55,12 +55,12 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 
 	var block *hclwrite.Block
 	if r.kind != NestedK {
-		hash, err := r.Hash()
+		name, err := r.Name()
 		if err != nil {
-			//panic(err)
+			panic(err)
 		}
 
-		block = b.AppendNewBlock(string(r.kind), []string{r.typ, fmt.Sprintf("%d", hash)})
+		block = b.AppendNewBlock(string(r.kind), []string{r.typ, name})
 	} else {
 		block = b.AppendNewBlock(r.typ, nil)
 	}

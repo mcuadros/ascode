@@ -26,8 +26,12 @@ func NewComputed(r *Resource, t cty.Type, name string) *Computed {
 	child := r
 	for {
 		if child.parent == nil {
-			hash, _ := r.Hash()
-			path = fmt.Sprintf("%s.%s.%d", child.kind, child.typ, hash)
+			name, err := child.Name()
+			if err != nil {
+				panic(err)
+			}
+
+			path = fmt.Sprintf("%s.%s.%s", child.kind, child.typ, name)
 			break
 		}
 
