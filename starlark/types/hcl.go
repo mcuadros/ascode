@@ -1,10 +1,11 @@
-package provider
+package types
 
 import (
 	"fmt"
 
 	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hclwrite"
+	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
 )
 
@@ -31,6 +32,9 @@ func BuiltinHCL() starlark.Value {
 }
 
 func (s *Provider) ToHCL(b *hclwrite.Body) {
+	block := b.AppendNewBlock("provider", []string{s.name})
+	block.Body().SetAttributeValue("version", cty.StringVal(string(s.meta.Version)))
+
 	s.dataSources.ToHCL(b)
 	s.resources.ToHCL(b)
 }

@@ -1,12 +1,13 @@
-package provider
+package types
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform/plugin/discovery"
+	"github.com/ascode-dev/ascode/terraform"
 
 	"github.com/hashicorp/terraform/plugin"
+	"github.com/hashicorp/terraform/plugin/discovery"
 	"github.com/hashicorp/terraform/providers"
 	"go.starlark.net/starlark"
 )
@@ -18,9 +19,11 @@ type Provider struct {
 
 	dataSources *MapSchema
 	resources   *MapSchema
+
+	r *Resource
 }
 
-func MakeProvider(pm *PluginManager, name, version string) (*Provider, error) {
+func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider, error) {
 	cli, meta := pm.Get(name, version)
 	rpc, err := cli.Client()
 	if err != nil {
@@ -40,6 +43,7 @@ func MakeProvider(pm *PluginManager, name, version string) (*Provider, error) {
 		name:        name,
 		provider:    provider,
 		meta:        meta,
+		r:           MakeResource("", ResourceK, response.Provider.Block, nil),
 		dataSources: NewMapSchema(name, DataResourceK, response.DataSources),
 		resources:   NewMapSchema(name, ResourceK, response.ResourceTypes),
 	}, nil
@@ -56,7 +60,6 @@ func (p *Provider) Type() string {
 func (p *Provider) Freeze()               {}
 func (p *Provider) Truth() starlark.Bool  { return true }
 func (p *Provider) Hash() (uint32, error) { return 1, nil }
-func (p *Provider) Name() string          { return p.name }
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "version":

@@ -1,10 +1,9 @@
-package provider
+package types
 
 import (
 	"fmt"
 
 	"github.com/zclconf/go-cty/cty"
-
 	"go.starlark.net/starlark"
 )
 
