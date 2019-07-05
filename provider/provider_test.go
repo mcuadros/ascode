@@ -31,10 +31,6 @@ func TestResource(t *testing.T) {
 	test(t, "testdata/resource.star")
 }
 
-func TestResourceOutput(t *testing.T) {
-	test(t, "testdata/resource-output.star")
-}
-
 func TestHCL(t *testing.T) {
 	test(t, "testdata/hcl.star")
 }

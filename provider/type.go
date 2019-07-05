@@ -226,9 +226,12 @@ func (t *Type) Validate(v starlark.Value) error {
 			return nil
 		}
 	case *Computed:
-		if t.cty == v.(*Computed).a.Type {
+		if t.cty == v.(*Computed).t {
 			return nil
 		}
+
+		vt := v.(*Computed).InnerType().Starlark()
+		return fmt.Errorf("expected %s, got %s", t.typ, vt)
 	case *starlark.List:
 		if t.cty.IsListType() || t.cty.IsSetType() {
 			return t.validateListType(v.(*starlark.List), t.cty.ElementType())

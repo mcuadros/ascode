@@ -111,7 +111,7 @@ func (m *MapSchema) Attr(name string) (starlark.Value, error) {
 	}
 
 	if schema, ok := m.schemas[name]; ok {
-		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block)
+		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, nil)
 		return m.collections[name], nil
 	}
 

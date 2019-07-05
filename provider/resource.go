@@ -8,8 +8,6 @@ import (
 	"go.starlark.net/syntax"
 )
 
-type fnSignature func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error)
-
 type ResourceKind string
 
 const (
@@ -22,14 +20,16 @@ type Resource struct {
 	typ    string
 	kind   ResourceKind
 	block  *configschema.Block
+	parent *Resource
 	values map[string]*Value
 }
 
-func MakeResource(typ string, k ResourceKind, b *configschema.Block) *Resource {
+func MakeResource(typ string, k ResourceKind, b *configschema.Block, parent *Resource) *Resource {
 	return &Resource{
 		typ:    typ,
 		kind:   k,
 		block:  b,
+		parent: parent,
 		values: make(map[string]*Value),
 	}
 }
@@ -100,37 +100,41 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 		return r.toDict(), nil
 	}
 
-	if a, ok := r.block.Attributes[name]; (ok && a.Computed) || name == "id" {
-		return r.attrComputed(name, a)
+	if a, ok := r.block.Attributes[name]; ok {
+		return r.attrValue(name, a)
 	}
 
 	if b, ok := r.block.BlockTypes[name]; ok {
 		return r.attrBlock(name, b)
 	}
 
-	if v, ok := r.values[name]; ok {
-		return v.Value(), nil
-	}
-
 	return nil, nil
-}
-
-func (r *Resource) attrComputed(name string, attr *configschema.Attribute) (starlark.Value, error) {
-	return NewComputed(r, attr, name), nil
 }
 
 func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark.Value, error) {
 	if b.MaxItems != 1 {
 		if _, ok := r.values[name]; !ok {
-			r.values[name] = MustValue(NewResourceCollection(name, NestedK, &b.Block))
+			r.values[name] = MustValue(NewResourceCollection(name, NestedK, &b.Block, r))
+		}
+	} else {
+		if _, ok := r.values[name]; !ok {
+			r.values[name] = MustValue(MakeResource(name, NestedK, &b.Block, r))
 		}
 	}
 
-	if _, ok := r.values[name]; !ok {
-		r.values[name] = MustValue(MakeResource(name, NestedK, &b.Block))
+	return r.values[name].Value(), nil
+}
+
+func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
+	if attr.Computed {
+		return NewComputed(r, attr.Type, name), nil
 	}
 
-	return r.values[name].Value(), nil
+	if v, ok := r.values[name]; ok {
+		return v.Value(), nil
+	}
+
+	return starlark.None, nil
 }
 
 // AttrNames honors the starlark.HasAttrs interface.
@@ -163,6 +167,10 @@ func (r *Resource) SetField(name string, v starlark.Value) error {
 		return starlark.NoSuchAttrError(errmsg)
 	}
 
+	if attr.Computed && !attr.Optional {
+		return fmt.Errorf("%s: can't set computed %s attribute", r.typ, name)
+	}
+
 	if err := MustTypeFromCty(attr.Type).Validate(v); err != nil {
 		return err
 	}
@@ -179,10 +187,6 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 	}
 
 	return fmt.Errorf("expected dict or list, got %s", v.Type())
-}
-
-func (r *Resource) localName() string {
-	return fmt.Sprintf("")
 }
 
 func (r *Resource) toDict() *starlark.Dict {
@@ -229,7 +233,6 @@ func (x *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
 	}
 
 	for key, xval := range x.values {
-		fmt.Printf("%s = %T, %T\n", key, xval.Value(), y.values[key].Value())
 		yval, found := y.values[key]
 		if !found {
 			return false, nil

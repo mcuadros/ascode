@@ -2,6 +2,32 @@ load("assert.star", "assert")
 
 p = provider("ignition", "1.1.0")
 
+# attr
+qux = p.data.user()
+qux.uid = 42
+assert.eq(qux.uid, 42)
+
+# attr not-set
+assert.eq(qux.name, None)
+
+# attr not-exists
+assert.fails(lambda: qux.foo, "data has no .foo field or method")
+
+# attr id
+assert.eq(type(qux.id), "computed")
+assert.eq(str(qux.id), '"${data.ignition_user.3399129522.id}"')
+
+# attr output assignation
+aws = provider("aws", "2.13.0")
+def invalidOutput(): aws.data.instance().public_dns = "foo"
+assert.fails(invalidOutput, "aws_instance: can't set computed public_dns attribute") 
+
+# attr output in asignation
+web = aws.resource.instance()
+web.ami = web.id
+def invalidType(): web.get_password_data = web.id
+assert.fails(invalidType, "expected bool, got string") 
+
 # comparasion simple values
 assert.eq(p.data.disk(), p.data.disk())
 assert.ne(p.data.disk(device="foo"), p.data.disk())
@@ -59,8 +85,6 @@ home = disk.partition()
 home.label = "home"
 home.start = root.size + root.start 
 home.size = 4 * 1024 * 1024 
-
-print(dict({"foo": disk}))
 
 assert.eq(disk.__dict__, {
     "partition": [{
