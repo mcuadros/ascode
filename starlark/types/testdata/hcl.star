@@ -1,6 +1,7 @@
 load("assert.star", "assert")
 
 aws = provider("aws", "2.13.0")
+aws.region = "us-west-2"
 
 ubuntu = aws.data.ami()
 ubuntu.most_recent = True

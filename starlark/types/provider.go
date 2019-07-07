@@ -20,7 +20,7 @@ type Provider struct {
 	dataSources *MapSchema
 	resources   *MapSchema
 
-	r *Resource
+	*Resource
 }
 
 func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider, error) {
@@ -39,14 +39,18 @@ func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider,
 	response := provider.GetSchema()
 
 	defer cli.Kill()
-	return &Provider{
-		name:        name,
-		provider:    provider,
-		meta:        meta,
-		r:           MakeResource("", ResourceK, response.Provider.Block, nil),
-		dataSources: NewMapSchema(name, DataResourceK, response.DataSources),
-		resources:   NewMapSchema(name, ResourceK, response.ResourceTypes),
-	}, nil
+	p := &Provider{
+		name:     name,
+		provider: provider,
+		meta:     meta,
+
+		Resource: MakeResource(name, ProviderKind, response.Provider.Block, nil),
+	}
+
+	p.dataSources = NewMapSchema(p, name, DataSourceKind, response.DataSources)
+	p.resources = NewMapSchema(p, name, ResourceKind, response.ResourceTypes)
+
+	return p, nil
 }
 
 func (p *Provider) String() string {
@@ -57,9 +61,6 @@ func (p *Provider) Type() string {
 	return "provider"
 }
 
-func (p *Provider) Freeze()               {}
-func (p *Provider) Truth() starlark.Bool  { return true }
-func (p *Provider) Hash() (uint32, error) { return 1, nil }
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "version":
@@ -70,22 +71,25 @@ func (p *Provider) Attr(name string) (starlark.Value, error) {
 		return p.resources, nil
 	}
 
-	return starlark.None, nil
+	return p.Resource.Attr(name)
 }
 
 func (p *Provider) AttrNames() []string {
-	return []string{"data", "resource"}
+	return append(p.Resource.AttrNames(), "data", "resource", "version")
 }
 
 type MapSchema struct {
+	p *Provider
+
 	prefix      string
-	kind        ResourceKind
+	kind        Kind
 	schemas     map[string]providers.Schema
 	collections map[string]*ResourceCollection
 }
 
-func NewMapSchema(prefix string, k ResourceKind, schemas map[string]providers.Schema) *MapSchema {
+func NewMapSchema(p *Provider, prefix string, k Kind, schemas map[string]providers.Schema) *MapSchema {
 	return &MapSchema{
+		p:           p,
 		prefix:      prefix,
 		kind:        k,
 		schemas:     schemas,
@@ -114,7 +118,7 @@ func (m *MapSchema) Attr(name string) (starlark.Value, error) {
 	}
 
 	if schema, ok := m.schemas[name]; ok {
-		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, nil)
+		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, m.p.Resource)
 		return m.collections[name], nil
 	}
 

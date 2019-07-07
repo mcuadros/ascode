@@ -9,13 +9,13 @@ import (
 
 type ResourceCollection struct {
 	typ    string
-	kind   ResourceKind
+	kind   Kind
 	block  *configschema.Block
 	parent *Resource
 	*starlark.List
 }
 
-func NewResourceCollection(typ string, k ResourceKind, block *configschema.Block, parent *Resource) *ResourceCollection {
+func NewResourceCollection(typ string, k Kind, block *configschema.Block, parent *Resource) *ResourceCollection {
 	return &ResourceCollection{
 		typ:    typ,
 		kind:   k,
@@ -64,7 +64,7 @@ func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark
 			return nil, fmt.Errorf("resource: expected dict, go %s", args.Index(0).Type())
 		}
 	default:
-		if c.kind != NestedK {
+		if c.kind != NestedKind {
 			return nil, fmt.Errorf("resource: unexpected positional arguments count")
 		}
 	}

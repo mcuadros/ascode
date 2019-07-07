@@ -16,3 +16,6 @@ root.size = 4 * 1024 * 1024
 home = disk.partition()
 home.start = root.size + root.start 
 home.size = 4 * 1024 * 1024 
+
+
+config = ignition.data.config(disks=[disk.id], users=[user.id])

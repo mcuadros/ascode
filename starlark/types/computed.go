@@ -24,13 +24,8 @@ func NewComputed(r *Resource, t cty.Type, name string) *Computed {
 
 	child := r
 	for {
-		if child.parent == nil {
-			name, err := child.Name()
-			if err != nil {
-				panic(err)
-			}
-
-			path = fmt.Sprintf("%s.%s.%s", child.kind, child.typ, name)
+		if child.parent.kind == ProviderKind {
+			path = fmt.Sprintf("%s.%s.%s", child.kind, child.typ, child.Name())
 			break
 		}
 
@@ -51,7 +46,7 @@ func NewComputedWithPath(r *Resource, t cty.Type, name, path string) *Computed {
 		t:       t,
 		name:    name,
 		path:    path,
-		sString: starlark.String(fmt.Sprintf("${%s}", path)),
+		sString: starlark.String(fmt.Sprintf("$${%s}", path)),
 	}
 }
 

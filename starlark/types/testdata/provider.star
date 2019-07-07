@@ -13,3 +13,6 @@ assert.eq(type(p.resource.instance), "collection")
 p.resource.instance()
 p.resource.instance()
 assert.eq(len(p.resource.instance), 2)
+
+p.region = "us-west-2"
+assert.eq(p.region, "us-west-2")

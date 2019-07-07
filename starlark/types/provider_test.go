@@ -13,6 +13,12 @@ import (
 )
 
 func init() {
+	var id int
+	NameGenerator = func() string {
+		id++
+		return fmt.Sprintf("id_%d", id)
+	}
+
 	// The tests make extensive use of these not-yet-standard features.
 	resolve.AllowLambda = true
 	resolve.AllowNestedDef = true

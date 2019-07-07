@@ -15,7 +15,7 @@ assert.fails(lambda: qux.foo, "data has no .foo field or method")
 
 # attr id
 assert.eq(type(qux.id), "computed")
-assert.eq(str(qux.id), '"${data.ignition_user.id_3399129522.id}"')
+assert.eq(str(qux.id), '"$${data.ignition_user.id_5.id}"')
 
 # attr output assignation
 aws = provider("aws", "2.13.0")

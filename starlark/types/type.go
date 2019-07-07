@@ -67,6 +67,8 @@ func (v *Value) Cty() cty.Value {
 		}
 
 		return cty.ListVal(values)
+	case "computed":
+		return cty.StringVal(v.v.(*Computed).GoString())
 	default:
 		return cty.StringVal(fmt.Sprintf("unhandled: %s", v.t.typ))
 	}

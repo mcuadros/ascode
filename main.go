@@ -35,6 +35,7 @@ func main() {
 
 	out, err := starlark.ExecFile(thread, os.Args[1], nil, predeclared)
 	if err != nil {
+		fmt.Println(err)
 		if err, ok := err.(*starlark.EvalError); ok {
 			log.Fatal(err.Backtrace())
 		}

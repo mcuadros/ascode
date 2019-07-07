@@ -33,7 +33,9 @@ func BuiltinHCL() starlark.Value {
 
 func (s *Provider) ToHCL(b *hclwrite.Body) {
 	block := b.AppendNewBlock("provider", []string{s.name})
+	block.Body().SetAttributeValue("alias", cty.StringVal(s.Name()))
 	block.Body().SetAttributeValue("version", cty.StringVal(string(s.meta.Version)))
+	s.Resource.doToHCLAttributes(block.Body())
 
 	s.dataSources.ToHCL(b)
 	s.resources.ToHCL(b)
@@ -58,18 +60,24 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 	}
 
 	var block *hclwrite.Block
-	if r.kind != NestedK {
-		name, err := r.Name()
-		if err != nil {
-			panic(err)
-		}
-
-		block = b.AppendNewBlock(string(r.kind), []string{r.typ, name})
+	if r.kind != NestedKind {
+		block = b.AppendNewBlock(string(r.kind), []string{r.typ, r.Name()})
 	} else {
 		block = b.AppendNewBlock(r.typ, nil)
 	}
 
 	body := block.Body()
+
+	if r.parent.kind == ProviderKind {
+		body.SetAttributeTraversal("provider", hcl.Traversal{hcl.TraverseRoot{
+			Name: fmt.Sprintf("%s.%s", r.parent.typ, r.parent.Name()),
+		}})
+	}
+
+	r.doToHCLAttributes(body)
+}
+
+func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 	for k := range r.block.Attributes {
 		v, ok := r.values[k]
 		if !ok {
@@ -95,7 +103,7 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 		}
 
 		if collection, ok := v.Value().(HCLCompatible); ok {
-			collection.ToHCL(block.Body())
+			collection.ToHCL(body)
 		}
 	}
 }

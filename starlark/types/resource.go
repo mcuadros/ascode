@@ -2,29 +2,48 @@ package types
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/hashicorp/terraform/configs/configschema"
+	"github.com/oklog/ulid"
 	"go.starlark.net/starlark"
 	"go.starlark.net/syntax"
 )
 
-type ResourceKind string
+// NameGenerator function used to generate Resource names, by default is based
+// on a ULID generator.
+var NameGenerator = func() string {
+	t := time.Now()
+	entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
+
+	return fmt.Sprintf("id_%s", ulid.MustNew(ulid.Timestamp(t), entropy))
+}
+
+// Kind describes what kind of resource is represented by a Resource isntance.
+type Kind string
 
 const (
-	ResourceK     ResourceKind = "resource"
-	DataResourceK ResourceKind = "data"
-	NestedK       ResourceKind = "nested"
+	ProviderKind   Kind = "provider"
+	ResourceKind   Kind = "resource"
+	DataSourceKind Kind = "data"
+	NestedKind     Kind = "nested"
 )
 
+// Resource represents a resource as a starlark.Value, it can be of four kinds,
+// provider, resource, data source or a nested resource.
 type Resource struct {
+	name   string
 	typ    string
-	kind   ResourceKind
+	kind   Kind
 	block  *configschema.Block
 	parent *Resource
 	values map[string]*Value
 }
 
-func MakeResource(typ string, k ResourceKind, b *configschema.Block, parent *Resource) *Resource {
+// MakeResource returns a new resource of the given kind, type based on the
+// given configschema.Block.
+func MakeResource(typ string, k Kind, b *configschema.Block, parent *Resource) *Resource {
 	return &Resource{
 		typ:    typ,
 		kind:   k,
@@ -76,17 +95,12 @@ func (r *Resource) Truth() starlark.Bool {
 func (r *Resource) Freeze() {}
 
 // Name returns the resource name based on the hash.
-func (r *Resource) Name() (string, error) {
-	if r.kind == NestedK {
-		return "", fmt.Errorf("name is not supported on nested resources")
+func (r *Resource) Name() string {
+	if r.name == "" {
+		r.name = NameGenerator()
 	}
 
-	hash, err := r.Hash()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("id_%d", hash), nil
+	return r.name
 }
 
 // Hash honors the starlark.Value interface.
@@ -128,11 +142,11 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark.Value, error) {
 	if b.MaxItems != 1 {
 		if _, ok := r.values[name]; !ok {
-			r.values[name] = MustValue(NewResourceCollection(name, NestedK, &b.Block, r))
+			r.values[name] = MustValue(NewResourceCollection(name, NestedKind, &b.Block, r))
 		}
 	} else {
 		if _, ok := r.values[name]; !ok {
-			r.values[name] = MustValue(MakeResource(name, NestedK, &b.Block, r))
+			r.values[name] = MustValue(MakeResource(name, NestedKind, &b.Block, r))
 		}
 	}
 
