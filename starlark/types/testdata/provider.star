@@ -16,3 +16,5 @@ assert.eq(len(p.resource.instance), 2)
 
 p.region = "us-west-2"
 assert.eq(p.region, "us-west-2")
+
+ignition = provider("ignition")

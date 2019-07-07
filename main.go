@@ -21,22 +21,16 @@ func main() {
 	pm := &terraform.PluginManager{".providers"}
 	resolve.AllowFloat = true
 
-	provider := starlark.NewBuiltin("provider", func(thread *starlark.Thread, fn *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-		name := args.Index(0).(starlark.String)
-		version := args.Index(1).(starlark.String)
-
-		return types.MakeProvider(pm, string(name), string(version))
-	})
-
 	thread := &starlark.Thread{Name: "thread", Load: repl.MakeLoad()}
 	predeclared := starlark.StringDict{
-		"provider": provider,
+		"provider": types.BuiltinProvider(pm),
 	}
 
 	out, err := starlark.ExecFile(thread, os.Args[1], nil, predeclared)
 	if err != nil {
 		fmt.Println(err)
 		if err, ok := err.(*starlark.EvalError); ok {
+			fmt.Println(err.Backtrace())
 			log.Fatal(err.Backtrace())
 		}
 		log.Fatal(err)

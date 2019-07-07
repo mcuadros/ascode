@@ -12,6 +12,31 @@ import (
 	"go.starlark.net/starlark"
 )
 
+func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
+	return starlark.NewBuiltin("provider", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
+		var name, version starlark.String
+		switch len(args) {
+		case 2:
+			var ok bool
+			version, ok = args.Index(1).(starlark.String)
+			if !ok {
+				return nil, fmt.Errorf("resource: expected string, go %s", args.Index(1).Type())
+			}
+			fallthrough
+		case 1:
+			var ok bool
+			name, ok = args.Index(0).(starlark.String)
+			if !ok {
+				return nil, fmt.Errorf("provider: expected string, got %s", args.Index(0).Type())
+			}
+		default:
+			return nil, fmt.Errorf("resource: unexpected positional arguments count")
+		}
+
+		return MakeProvider(pm, name.GoString(), version.GoString())
+	})
+}
+
 type Provider struct {
 	name     string
 	provider *plugin.GRPCProvider
@@ -57,10 +82,12 @@ func (p *Provider) String() string {
 	return fmt.Sprintf("provider(%q)", p.name)
 }
 
+// Type honors the starlark.Value interface. It shadows p.Resource.Type.
 func (p *Provider) Type() string {
 	return "provider"
 }
 
+// Attr honors the starlark.HasAttrs interface.
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "version":
@@ -74,6 +101,7 @@ func (p *Provider) Attr(name string) (starlark.Value, error) {
 	return p.Resource.Attr(name)
 }
 
+// AttrNames honors the starlark.HasAttrs interface.
 func (p *Provider) AttrNames() []string {
 	return append(p.Resource.AttrNames(), "data", "resource", "version")
 }
