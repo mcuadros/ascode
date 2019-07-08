@@ -6,12 +6,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/ascode-dev/ascode/starlark/runtime"
 	"github.com/ascode-dev/ascode/starlark/types"
 	"github.com/ascode-dev/ascode/terraform"
 
 	"github.com/hashicorp/hcl2/hclwrite"
-	"go.starlark.net/repl"
-	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
 )
 
@@ -19,14 +18,9 @@ func main() {
 	log.SetOutput(ioutil.Discard)
 
 	pm := &terraform.PluginManager{".providers"}
-	resolve.AllowFloat = true
+	runtime := runtime.NewRuntime(pm)
 
-	thread := &starlark.Thread{Name: "thread", Load: repl.MakeLoad()}
-	predeclared := starlark.StringDict{
-		"provider": types.BuiltinProvider(pm),
-	}
-
-	out, err := starlark.ExecFile(thread, os.Args[1], nil, predeclared)
+	out, err := runtime.ExecFile(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		if err, ok := err.(*starlark.EvalError); ok {
