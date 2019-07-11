@@ -1,6 +1,8 @@
 package runtime
 
 import (
+	"fmt"
+
 	"github.com/ascode-dev/ascode/starlark/module/filepath"
 	"github.com/ascode-dev/ascode/starlark/module/os"
 	"github.com/ascode-dev/ascode/starlark/types"
@@ -23,14 +25,14 @@ func init() {
 type LoadModuleFunc func() (starlark.StringDict, error)
 
 type Runtime struct {
-	predeclared  starlark.StringDict
-	modules      map[string]LoadModuleFunc
-	fallbackLoad func(t *starlark.Thread, module string) (starlark.StringDict, error)
+	predeclared starlark.StringDict
+	modules     map[string]LoadModuleFunc
+	moduleCache map[string]*moduleCache
 }
 
 func NewRuntime(pm *terraform.PluginManager) *Runtime {
 	return &Runtime{
-		fallbackLoad: repl.MakeLoad(),
+		moduleCache: make(map[string]*moduleCache),
 		modules: map[string]LoadModuleFunc{
 			filepath.ModuleName: filepath.LoadModule,
 			os.ModuleName:       os.LoadModule,
@@ -54,10 +56,41 @@ func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
 	return starlark.ExecFile(thread, filename, nil, r.predeclared)
 }
 
+func (r *Runtime) REPL() {
+	thread := &starlark.Thread{Name: "thread", Load: r.load}
+	repl.REPL(thread, r.predeclared)
+}
+
 func (r *Runtime) load(t *starlark.Thread, module string) (starlark.StringDict, error) {
 	if m, ok := r.modules[module]; ok {
 		return m()
 	}
 
-	return nil, nil
+	return r.loadFile(t, module)
+}
+
+type moduleCache struct {
+	globals starlark.StringDict
+	err     error
+}
+
+func (r *Runtime) loadFile(thread *starlark.Thread, module string) (starlark.StringDict, error) {
+	e, ok := r.moduleCache[module]
+	if e == nil {
+		if ok {
+			// request for package whose loading is in progress
+			return nil, fmt.Errorf("cycle in load graph")
+		}
+
+		// Add a placeholder to indicate "load in progress".
+		r.moduleCache[module] = nil
+
+		thread := &starlark.Thread{Name: "exec " + module, Load: thread.Load}
+		globals, err := starlark.ExecFile(thread, module, nil, r.predeclared)
+
+		e = &moduleCache{globals, err}
+		r.moduleCache[module] = e
+	}
+
+	return e.globals, e.err
 }

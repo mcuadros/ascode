@@ -2,43 +2,27 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 
-	"github.com/ascode-dev/ascode/starlark/runtime"
-	"github.com/ascode-dev/ascode/starlark/types"
-	"github.com/ascode-dev/ascode/terraform"
-
-	"github.com/hashicorp/hcl2/hclwrite"
-	"go.starlark.net/starlark"
+	"github.com/ascode-dev/ascode/cmd"
+	"github.com/jessevdk/go-flags"
 )
 
+var version string
+var build string
+
 func main() {
-	log.SetOutput(ioutil.Discard)
+	parser := flags.NewNamedParser("ascode", flags.Default)
+	parser.LongDescription = "AsCode - The real infrastructure as code."
+	parser.AddCommand("run", cmd.RunCmdShortDescription, cmd.RunCmdLongDescription, &cmd.RunCmd{})
+	parser.AddCommand("repl", cmd.REPLCmdShortDescription, cmd.REPLCmdLongDescription, &cmd.REPLCmd{})
 
-	pm := &terraform.PluginManager{".providers"}
-	runtime := runtime.NewRuntime(pm)
-
-	out, err := runtime.ExecFile(os.Args[1])
-	if err != nil {
-		fmt.Println(err)
-		if err, ok := err.(*starlark.EvalError); ok {
-			fmt.Println(err.Backtrace())
-			log.Fatal(err.Backtrace())
-		}
-		log.Fatal(err)
-	}
-
-	for _, v := range out {
-		p, ok := v.(*types.Provider)
-		if !ok {
-			continue
+	if _, err := parser.Parse(); err != nil {
+		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
+			fmt.Printf("Build information\n  commit: %s\n  date:%s\n", version, build)
+			os.Exit(0)
 		}
 
-		f := hclwrite.NewEmptyFile()
-		p.ToHCL(f.Body())
-
-		fmt.Println(string(f.Bytes()))
+		os.Exit(1)
 	}
 }

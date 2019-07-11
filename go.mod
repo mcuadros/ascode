@@ -9,6 +9,7 @@ require (
 	github.com/hashicorp/go-plugin v1.0.1
 	github.com/hashicorp/hcl2 v0.0.0-20190702185634-5b39d9ff3a9a
 	github.com/hashicorp/terraform v0.12.3
+	github.com/jessevdk/go-flags v1.4.0
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mitchellh/cli v1.0.0
@@ -18,7 +19,7 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.0.0
-	go.starlark.net v0.0.0-20190711142432-2aa3d956942f
+	go.starlark.net v0.0.0-20190711213017-77c1099ca038
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/sys v0.0.0-20190710143415-6ec70d6a5542 // indirect
