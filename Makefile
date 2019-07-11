@@ -18,7 +18,7 @@ RUNTIME_MODULES = \
 documentation: $(RUNTIME_MODULES)
 
 $(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH)
-	@$(OUTLINE_CMD) package $@ > $(DOCUMENTATION_RUNTIME_PATH)/`basename $@`.md
+	@$(OUTLINE_CMD) package -t _scripts/template.md $@ > $(DOCUMENTATION_RUNTIME_PATH)/`basename $@`.md
 
 $(DOCUMENTATION_RUNTIME_PATH):
 	mkdir -p $@
