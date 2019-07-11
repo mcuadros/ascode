@@ -42,7 +42,13 @@ func client(m discovery.PluginMeta) *plugin.Client {
 	})
 }
 
+const defaultVersionContraint = "> 0"
+
 func (m *PluginManager) getRemote(provider, v string) (discovery.PluginMeta, bool) {
+	if v == "" {
+		v = defaultVersionContraint
+	}
+
 	installer := &discovery.ProviderInstaller{
 		Dir:                   m.Path,
 		PluginProtocolVersion: discovery.PluginInstallProtocolVersion,
