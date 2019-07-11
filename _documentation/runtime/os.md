@@ -5,6 +5,7 @@ title: 'os'
 os provides a platform-independent interface to operating system functionality.
 ## Functions
 
+
 #### def <b>chdir</b>
 ```go
 chdir(dir)
@@ -16,6 +17,7 @@ changes the current working directory to the named directory.
 | name | type | description |
 |------|------|-------------|
 | 'dir' | 'string' | target dir |
+
 
 
 #### def <b>getenv</b>
@@ -31,11 +33,13 @@ retrieves the value of the environment variable named by the key.
 | 'key' | 'string' | name of the environment variable |
 
 
+
 #### def <b>getwd</b>
 ```go
 getwd() dir
 ```
 returns a rooted path name corresponding to the current directory.
+
 
 #### def <b>mkdir</b>
 ```go
@@ -51,6 +55,7 @@ creates a new directory with the specified name and permission bits (before umas
 | 'perms' | 'int' | optional, permission of the folder |
 
 
+
 #### def <b>mkdir_all</b>
 ```go
 mkdir_all(name, perms=0o777)
@@ -63,6 +68,7 @@ creates a new directory with the specified name and permission bits (before umas
 |------|------|-------------|
 | 'name' | 'string' | name of the folder to be created |
 | 'perms' | 'int' | optional, permission of the folder |
+
 
 
 #### def <b>read_file</b>
@@ -80,6 +86,7 @@ reads the file named by filename and returns the contents.
 | 'perms' | 'int' | optional, permission of the file |
 
 
+
 #### def <b>remove</b>
 ```go
 remove(name)
@@ -93,6 +100,7 @@ removes the named file or (empty) directory.
 | 'name' | 'string' | name of the file or directory to be deleted |
 
 
+
 #### def <b>remove_all</b>
 ```go
 remove_all(path)
@@ -104,6 +112,7 @@ removes path and any children it contains. It removes everything it can but retu
 | name | type | description |
 |------|------|-------------|
 | 'name' | 'string' | path to be deleted |
+
 
 
 #### def <b>rename</b>
@@ -120,6 +129,7 @@ renames (moves) oldpath to newpath. If newpath already exists and is not a direc
 | 'newpath' | 'string' | new path |
 
 
+
 #### def <b>setenv</b>
 ```go
 setenv(key, value) dir
@@ -132,6 +142,7 @@ sets the value of the environment variable named by the key.
 |------|------|-------------|
 | 'key' | 'string' | name of the environment variable |
 | 'value' | 'string' | value of the environment variable |
+
 
 
 #### def <b>write_file</b>

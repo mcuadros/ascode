@@ -1,9 +1,10 @@
 ---
-title: ''
+title: 're'
 ---
 
 re defines regular expression functions, it's intended to be a drop-in subset of python's re module for starlark: https://docs.python.org/3/library/re.html
 ## Functions
+
 
 #### def <b>findall</b>
 ```go
@@ -20,6 +21,7 @@ Returns all non-overlapping matches of pattern in string, as a list of strings. 
 | 'flags' | 'int' | integer flags to control regex behaviour. reserved for future use |
 
 
+
 #### def <b>split</b>
 ```go
 split(pattern, text, maxsplit=0, flags=0)
@@ -34,6 +36,7 @@ Split text by the occurrences of pattern. If capturing parentheses are used in p
 | 'text' | 'string' | input string to split |
 | 'maxsplit' | 'int' | maximum number of splits to make. default 0 splits all matches |
 | 'flags' | 'int' | integer flags to control regex behaviour. reserved for future use |
+
 
 
 #### def <b>sub</b>

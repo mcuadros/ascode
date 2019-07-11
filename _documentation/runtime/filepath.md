@@ -5,6 +5,7 @@ title: 'path/filepath'
 filepath implements utility routines for manipulating filename paths in a way compatible with the target operating system-defined file path
 ## Functions
 
+
 #### def <b>abs</b>
 ```go
 abs(path) string
@@ -16,6 +17,7 @@ returns an absolute representation of path. If the path is not absolute it will 
 | name | type | description |
 |------|------|-------------|
 | 'path' | 'string' | relative or absolute path |
+
 
 
 #### def <b>base</b>
@@ -31,6 +33,7 @@ returns the last element of path. Trailing path separators are removed before ex
 | 'path' | 'string' | input path |
 
 
+
 #### def <b>clean</b>
 ```go
 clean(path) string
@@ -42,6 +45,7 @@ returns the shortest path name equivalent to path by purely lexical processing.
 | name | type | description |
 |------|------|-------------|
 | 'path' | 'string' | input path |
+
 
 
 #### def <b>dir</b>
@@ -57,6 +61,7 @@ returns all but the last element of path, typically the path's directory. After 
 | 'path' | 'string' | input path |
 
 
+
 #### def <b>ext</b>
 ```go
 ext(path) string
@@ -68,6 +73,7 @@ returns the file name extension used by path. The extension is the suffix beginn
 | name | type | description |
 |------|------|-------------|
 | 'path' | 'string' | input path |
+
 
 
 #### def <b>glob</b>
@@ -83,6 +89,7 @@ returns the names of all files matching pattern or None if there is no matching 
 | 'pattern' | 'string' | pattern ([syntax](https://golang.org/pkg/path/filepath/#Match)) |
 
 
+
 #### def <b>is_abs</b>
 ```go
 is_abs(path) bool
@@ -96,6 +103,7 @@ reports whether the path is absolute.
 | 'path' | 'string' | input path |
 
 
+
 #### def <b>join</b>
 ```go
 join(elements) string
@@ -107,6 +115,7 @@ joins any number of path elements into a single path, adding a `filepath.separat
 | name | type | description |
 |------|------|-------------|
 | 'elements' | 'lists' | list of path elements to be joined |
+
 
 
 #### def <b>rel</b>

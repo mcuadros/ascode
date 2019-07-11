@@ -8,6 +8,7 @@ import (
 	"github.com/qri-io/starlib/encoding/base64"
 	"github.com/qri-io/starlib/encoding/csv"
 	"github.com/qri-io/starlib/encoding/json"
+	"github.com/qri-io/starlib/encoding/yaml"
 	"github.com/qri-io/starlib/http"
 	"github.com/qri-io/starlib/re"
 	"go.starlark.net/repl"
@@ -37,6 +38,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"encoding/json":   json.LoadModule,
 			"encoding/base64": base64.LoadModule,
 			"encoding/csv":    csv.LoadModule,
+			"encoding/yaml":   yaml.LoadModule,
 			"re":              re.LoadModule,
 			"http":            http.LoadModule,
 		},

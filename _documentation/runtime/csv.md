@@ -5,6 +5,7 @@ title: 'encoding/csv'
 csv reads comma-separated values files
 ## Functions
 
+
 #### def <b>read_all</b>
 ```go
 read_all(source, comma=",", comment="", lazy_quotes=False, trim_leading_space=False, fields_per_record=0, skip=0) [][]string
@@ -22,6 +23,7 @@ read all rows from a source string, returning a list of string lists
 | 'trim_leading_space' | 'bool' | If trim_leading_space is True, leading white space in a field is ignored. This is done even if the field delimiter, comma, is white space. |
 | 'fields_per_record' | 'int' | fields_per_record is the number of expected fields per record. If fields_per_record is positive, read_all requires each record to have the given number of fields. If fields_per_record is 0, read_all sets it to the number of fields in the first record, so that future records must have the same field count. If fields_per_record is negative, no check is made and records may have a variable number of fields. |
 | 'skip' | 'int' | number of rows to skip, omitting from returned rows |
+
 
 
 #### def <b>write_all</b>

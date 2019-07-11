@@ -8,6 +8,7 @@ RUNTIME_MODULES = \
 	github.com/qri-io/starlib/encoding/base64 \
 	github.com/qri-io/starlib/encoding/csv \
 	github.com/qri-io/starlib/encoding/json \
+	github.com/qri-io/starlib/encoding/yaml \
 	github.com/qri-io/starlib/re \
 	github.com/qri-io/starlib/http
 

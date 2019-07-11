@@ -1,9 +1,10 @@
 ---
-title: ''
+title: 'http'
 ---
 
 http defines an HTTP client implementation
 ## Functions
+
 
 #### def <b>delete</b>
 ```go
@@ -23,6 +24,7 @@ perform an HTTP DELETE request, returning a response
 | 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
 
 
+
 #### def <b>get</b>
 ```go
 get(url,params={},headers={},auth=()) response
@@ -36,6 +38,7 @@ perform an HTTP GET request, returning a response
 | 'url' | 'string' | url to request |
 | 'headers' | 'dict' | optional. dictionary of headers to add to request |
 | 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+
 
 
 #### def <b>options</b>
@@ -56,6 +59,7 @@ perform an HTTP OPTIONS request, returning a response
 | 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
 
 
+
 #### def <b>patch</b>
 ```go
 patch(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
@@ -74,6 +78,7 @@ perform an HTTP PATCH request, returning a response
 | 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
 
 
+
 #### def <b>post</b>
 ```go
 post(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
@@ -90,6 +95,7 @@ perform an HTTP POST request, returning a response
 | 'form_body' | 'dict' | optional. dict of values that will be encoded as form data |
 | 'json_body' | 'any' | optional. json data to supply as a request. handy for working with JSON-API's |
 | 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+
 
 
 #### def <b>put</b>
@@ -127,11 +133,13 @@ the result of performing a http request
 
 
 **Methods**
+
 #### def <b>body</b>
 ```go
 body() string
 ```
 output response body as a string
+
 
 #### def <b>json</b>
 ```go

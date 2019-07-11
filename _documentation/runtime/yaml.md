@@ -1,8 +1,8 @@
 ---
-title: 'encoding/json'
+title: 'encoding/yaml'
 ---
 
-json provides functions for working with json data
+yaml provides functions for working with yaml data
 ## Functions
 
 
@@ -10,7 +10,7 @@ json provides functions for working with json data
 ```go
 dumps(obj) string
 ```
-serialize obj to a JSON string
+serialize obj to a yaml string
 
 **parameters:**
 
@@ -24,13 +24,13 @@ serialize obj to a JSON string
 ```go
 loads(source) object
 ```
-read a source JSON string to a starlark object
+read a source yaml string to a starlark object
 
 **parameters:**
 
 | name | type | description |
 |------|------|-------------|
-| 'source' | 'string' | input string of json data |
+| 'source' | 'string' | input string of yaml data |
 
 
 
