@@ -43,8 +43,9 @@ type Resource struct {
 
 // MakeResource returns a new resource of the given kind, type based on the
 // given configschema.Block.
-func MakeResource(typ string, k Kind, b *configschema.Block, parent *Resource) *Resource {
+func MakeResource(name, typ string, k Kind, b *configschema.Block, parent *Resource) *Resource {
 	return &Resource{
+		name:   name,
 		typ:    typ,
 		kind:   k,
 		block:  b,
@@ -96,10 +97,6 @@ func (r *Resource) Freeze() {}
 
 // Name returns the resource name based on the hash.
 func (r *Resource) Name() string {
-	if r.name == "" {
-		r.name = NameGenerator()
-	}
-
 	return r.name
 }
 
@@ -146,7 +143,7 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 		}
 	} else {
 		if _, ok := r.values[name]; !ok {
-			r.values[name] = MustValue(MakeResource(name, NestedKind, &b.Block, r))
+			r.values[name] = MustValue(MakeResource("", name, NestedKind, &b.Block, r))
 		}
 	}
 

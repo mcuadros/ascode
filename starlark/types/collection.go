@@ -53,29 +53,16 @@ func (c *ResourceCollection) Name() string {
 
 // CallInternal honos the starlark.Callable interface.
 func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-	var dict *starlark.Dict
-
-	switch len(args) {
-	case 0:
-	case 1:
-		var ok bool
-		dict, ok = args.Index(0).(*starlark.Dict)
-		if !ok {
-			return nil, fmt.Errorf("resource: expected dict, go %s", args.Index(0).Type())
-		}
-	default:
-		if c.kind != NestedKind {
-			return nil, fmt.Errorf("resource: unexpected positional arguments count")
-		}
+	name, dict, err := c.unpackArgs(args, kwargs)
+	if err != nil {
+		return nil, err
 	}
 
-	resource := MakeResource(c.typ, c.kind, c.block, c.parent)
-	if len(kwargs) != 0 {
-		if err := resource.loadKeywordArgs(kwargs); err != nil {
-			return nil, err
-		}
+	if (c.kind == ResourceKind || c.kind == DataSourceKind) && name == "" {
+		name = NameGenerator()
 	}
 
+	resource := MakeResource(name, c.typ, c.kind, c.block, c.parent)
 	if dict != nil && dict.Len() != 0 {
 		if err := resource.loadDict(dict); err != nil {
 			return nil, err
@@ -87,6 +74,72 @@ func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark
 	}
 
 	return resource, nil
+}
+
+func (c *ResourceCollection) unpackArgsWithKwargs(args starlark.Tuple, kwargs []starlark.Tuple) (string, *starlark.Dict, error) {
+	dict := starlark.NewDict(len(kwargs))
+	var name starlark.String
+
+	for _, kwarg := range kwargs {
+		dict.SetKey(kwarg.Index(0), kwarg.Index(1))
+	}
+
+	if len(args) == 1 {
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return "", nil, fmt.Errorf("resource: expected string, got %s", args.Index(0).Type())
+		}
+	}
+
+	if len(args) > 1 {
+		return "", nil, fmt.Errorf("resource: unexpected positional args mixed with kwargs")
+	}
+
+	return string(name), dict, nil
+}
+
+func (c *ResourceCollection) unpackArgs(args starlark.Tuple, kwargs []starlark.Tuple) (string, *starlark.Dict, error) {
+	var dict *starlark.Dict
+	var name starlark.String
+
+	if len(args) == 0 && len(kwargs) == 0 {
+		return "", nil, nil
+	}
+
+	if len(kwargs) != 0 {
+		return c.unpackArgsWithKwargs(args, kwargs)
+	}
+
+	switch len(args) {
+	case 0:
+	case 1:
+		switch v := args.Index(0).(type) {
+		case starlark.String:
+			return string(v), nil, nil
+		case *starlark.Dict:
+			return "", v, nil
+		default:
+			return "", nil, fmt.Errorf("resource: expected string or dict, got %s", args.Index(0).Type())
+		}
+	case 2:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return "", nil, fmt.Errorf("resource: expected string, got %s", args.Index(0).Type())
+		}
+
+		dict, ok = args.Index(1).(*starlark.Dict)
+		if !ok {
+			return "", nil, fmt.Errorf("resource: expected dict, got %s", args.Index(1).Type())
+		}
+	default:
+		if c.kind != NestedKind {
+			return "", nil, fmt.Errorf("resource: unexpected positional arguments count")
+		}
+	}
+
+	return string(name), dict, nil
 }
 
 func (c *ResourceCollection) toDict() *starlark.List {

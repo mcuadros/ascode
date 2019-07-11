@@ -69,7 +69,7 @@ func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider,
 		provider: provider,
 		meta:     meta,
 
-		Resource: MakeResource(name, ProviderKind, response.Provider.Block, nil),
+		Resource: MakeResource(NameGenerator(), name, ProviderKind, response.Provider.Block, nil),
 	}
 
 	p.dataSources = NewMapSchema(p, name, DataSourceKind, response.DataSources)
