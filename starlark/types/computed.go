@@ -46,7 +46,7 @@ func NewComputedWithPath(r *Resource, t cty.Type, name, path string) *Computed {
 		t:       t,
 		name:    name,
 		path:    path,
-		sString: starlark.String(fmt.Sprintf("$${%s}", path)),
+		sString: starlark.String(fmt.Sprintf("${%s}", path)),
 	}
 }
 

@@ -229,6 +229,7 @@ github.com/hashicorp/hcl v0.0.0-20170504190234-a4b07c25de5f/go.mod h1:oZtUIOe8dh
 github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce h1:xdsDDbiBDQTKASoGEZ+pEmF1OnWuu8AQ9I8iNbHNeno=
 github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce/go.mod h1:oZtUIOe8dh44I2q6ScRibXws4Ajl+d+nod3AaR9vL5w=
 github.com/hashicorp/hcl2 v0.0.0-20181208003705-670926858200/go.mod h1:ShfpTh661oAaxo7VcNxg0zcZW6jvMa7Moy2oFx7e5dE=
+github.com/hashicorp/hcl2 v0.0.0-20190618163856-0b64543c968c h1:P96avlEdjyi6kpx6kTbTbuQb5GuZvVTrLK9FWKwTy6A=
 github.com/hashicorp/hcl2 v0.0.0-20190618163856-0b64543c968c/go.mod h1:FSQTwDi9qesxGBsII2VqhIzKQ4r0bHvBkOczWfD7llg=
 github.com/hashicorp/hcl2 v0.0.0-20190702185634-5b39d9ff3a9a/go.mod h1:FSQTwDi9qesxGBsII2VqhIzKQ4r0bHvBkOczWfD7llg=
 github.com/hashicorp/hil v0.0.0-20190212112733-ab17b08d6590/go.mod h1:n2TSygSNwsLJ76m8qFXTSc7beTb+auJxYdqrnoqwZWE=
@@ -483,6 +484,8 @@ github.com/mattn/goveralls v0.0.2/go.mod h1:8d1ZMHsd7fW6IRPKQh46F2WRpyib5/X4FOpe
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
 github.com/mcuadros/hcl2 v0.0.0-20190711172820-dd3dbf62a554 h1:XOp7Z8WiWrNayvvEo9Clc7fh63xRr9KYYW9V2yVeQAQ=
 github.com/mcuadros/hcl2 v0.0.0-20190711172820-dd3dbf62a554/go.mod h1:FSQTwDi9qesxGBsII2VqhIzKQ4r0bHvBkOczWfD7llg=
+github.com/mcuadros/hcl2 v0.0.0-20190712010647-ace444864d00 h1:qnjhW43Q1lVIuWtLzDONwc1iujUDLIsS066UyHGBFAY=
+github.com/mcuadros/hcl2 v0.0.0-20190712010647-ace444864d00/go.mod h1:kQuWn12iFepCKkwkei+aHXznYdyBUJ5un1ZnD5vpHqI=
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b/go.mod h1:01TrycV0kFyexm33Z7vhZRXopbI8J3TDReVlkTgMUxE=
 github.com/microcosm-cc/bluemonday v1.0.1/go.mod h1:hsXNsILzKxV+sX77C5b8FSuKF00vh2OMYv+xgHpAMF4=
 github.com/miekg/dns v1.0.8/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
