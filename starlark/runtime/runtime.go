@@ -19,7 +19,9 @@ import (
 )
 
 func init() {
+	resolve.AllowRecursion = true
 	resolve.AllowFloat = true
+	resolve.AllowGlobalReassign = true
 }
 
 type LoadModuleFunc func() (starlark.StringDict, error)

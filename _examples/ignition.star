@@ -11,10 +11,12 @@ disk.device = "/dev/sda"
 
 root = disk.partition()
 root.start = 2048
-root.size = 4 * 1024 * 1024 
+root.size = 4 * 1024 * 1024
 
 home = disk.partition()
-home.start = root.size + root.start 
-home.size = 4 * 1024 * 1024 
+home.start = root.size + root.start
+home.size = 4 * 1024 * 1024
 
-config = ignition.data.config(disks=[disk.id], users=[user.id])
+ignition.data.config(disks=[disk.id], users=[user.id])
+
+
