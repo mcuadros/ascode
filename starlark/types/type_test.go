@@ -30,16 +30,10 @@ func TestNewTypeFromStarlark_NonScalar(t *testing.T) {
 	typ := MustTypeFromStarlark("list")
 	assert.True(t, typ.Cty().IsListType())
 
-	typ = MustTypeFromStarlark("collection")
+	typ = MustTypeFromStarlark("ResourceCollection<bar>")
 	assert.True(t, typ.Cty().IsListType())
 
-	typ = MustTypeFromStarlark("data")
-	assert.True(t, typ.Cty().IsMapType())
-
-	typ = MustTypeFromStarlark("nested")
-	assert.True(t, typ.Cty().IsMapType())
-
-	typ = MustTypeFromStarlark("resource")
+	typ = MustTypeFromStarlark("Resource<foo>")
 	assert.True(t, typ.Cty().IsMapType())
 }
 
@@ -77,13 +71,13 @@ func TestTypeValidate(t *testing.T) {
 		{"int", starlark.Float(42.), false},
 	}
 
-	for _, tc := range testCases {
+	for i, tc := range testCases {
 		typ := MustTypeFromStarlark(tc.t)
 		err := typ.Validate(tc.v)
 		if tc.err {
-			assert.Error(t, err)
+			assert.Error(t, err, i)
 		} else {
-			assert.NoError(t, err)
+			assert.NoError(t, err, i)
 		}
 	}
 }

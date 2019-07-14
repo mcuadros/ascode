@@ -8,9 +8,9 @@ assert.eq(len(dir(p.resource)), 506)
 
 resources = dir(p.resource)
 assert.contains(resources, "instance")
-assert.eq(type(p.resource.instance), "collection")
+assert.eq(type(p.resource.instance), "ResourceCollection<resource.aws_instance>")
+assert.eq(type(p.resource.instance()), "Resource<resource.aws_instance>")
 
-p.resource.instance()
 p.resource.instance()
 assert.eq(len(p.resource.instance), 2)
 

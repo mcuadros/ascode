@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
@@ -67,7 +68,7 @@ func (v *Value) Cty() cty.Value {
 		}
 
 		return cty.ListVal(values)
-	case "computed":
+	case "Computed":
 		return cty.StringVal(v.v.(*Computed).GoString())
 	default:
 		return cty.StringVal(fmt.Sprintf("unhandled: %s", v.t.typ))
@@ -141,6 +142,11 @@ func NewTypeFromStarlark(typ string) (*Type, error) {
 	t := &Type{}
 	t.typ = typ
 
+	complex := strings.SplitN(typ, "<", 2)
+	if len(complex) == 2 {
+		typ = complex[0]
+	}
+
 	switch typ {
 	case "bool":
 		t.cty = cty.Bool
@@ -148,13 +154,11 @@ func NewTypeFromStarlark(typ string) (*Type, error) {
 		t.cty = cty.Number
 	case "string":
 		t.cty = cty.String
-	case "collection":
+	case "list", "ResourceCollection":
 		t.cty = cty.List(cty.NilType)
-	case "nested", "data", "resource":
+	case "Resource":
 		t.cty = cty.Map(cty.NilType)
-	case "list":
-		t.cty = cty.List(cty.NilType)
-	case "computed":
+	case "Computed":
 		t.cty = cty.String
 	default:
 		return nil, fmt.Errorf("unexpected %q type", typ)

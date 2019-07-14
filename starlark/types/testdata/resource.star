@@ -11,11 +11,11 @@ assert.eq(qux.uid, 42)
 assert.eq(qux.name, None)
 
 # attr not-exists
-assert.fails(lambda: qux.foo, "data has no .foo field or method")
+assert.fails(lambda: qux.foo, "Resource<data.ignition_user> has no .foo field or method")
 
 # attr id
-assert.eq(type(qux.id), "computed")
-assert.eq(str(qux.id), '"$${data.ignition_user.id_14.id}"')
+assert.eq(type(qux.id), "Computed")
+assert.eq(str(qux.id), '"${data.ignition_user.id_14.id}"')
 
 # attr output assignation
 aws = provider("aws", "2.13.0")
@@ -48,7 +48,7 @@ assert.eq(p.data.user(groups=["foo"]), p.data.user(groups=["foo"]))
 
 # constructor with name
 quux = p.data.user("quux")
-assert.eq(str(quux.id), '"$${data.ignition_user.quux.id}"')
+assert.eq(str(quux.id), '"${data.ignition_user.quux.id}"')
 
 # constructor from kwargs
 bar = p.data.user(uid=42, system=True)
@@ -59,7 +59,7 @@ assert.eq(bar.system, True)
 fred = p.data.user("fred", uid=42, system=True)
 assert.eq(fred.uid, 42)
 assert.eq(fred.system, True)
-assert.eq(str(fred.id), '"$${data.ignition_user.fred.id}"')
+assert.eq(str(fred.id), '"${data.ignition_user.fred.id}"')
 
 # constructor from dict
 foo = p.data.user({"uid": 42, "system": True})
@@ -70,7 +70,7 @@ assert.eq(foo.system, True)
 baz = p.data.user("baz", {"uid": 42, "system": True})
 assert.eq(baz.uid, 42)
 assert.eq(baz.system, True)
-assert.eq(str(baz.id), '"$${data.ignition_user.baz.id}"')
+assert.eq(str(baz.id), '"${data.ignition_user.baz.id}"')
 
 assert.eq(bar, foo)
 assert.eq(foo, p.data.user(foo.__dict__))
@@ -95,7 +95,7 @@ user.uid = 42
 user.groups = ["foo", "bar"]
 user.system = True
 
-assert.eq(type(user), "data")
+assert.eq(type(user), "Resource<data.ignition_user>")
 assert.eq(user.__dict__, {
     "name": "foo",
     "uid": 42,

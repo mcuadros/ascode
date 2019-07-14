@@ -51,7 +51,7 @@ func NewComputedWithPath(r *Resource, t cty.Type, name, path string) *Computed {
 }
 
 func (*Computed) Type() string {
-	return "computed"
+	return "Computed"
 }
 
 func (c *Computed) InnerType() *Type {
