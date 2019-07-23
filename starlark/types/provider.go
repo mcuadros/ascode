@@ -84,7 +84,7 @@ func (p *Provider) String() string {
 
 // Type honors the starlark.Value interface. It shadows p.Resource.Type.
 func (p *Provider) Type() string {
-	return "provider"
+	return fmt.Sprintf("Provider<%s>", p.name)
 }
 
 // Attr honors the starlark.HasAttrs interface.
