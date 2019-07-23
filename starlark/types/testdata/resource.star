@@ -126,3 +126,18 @@ assert.eq(disk.__dict__, {
         "label": "home"
     }]
 })
+
+
+# depends_on
+userA = p.data.user()
+userB = p.data.user()
+userA.depends_on(userB)
+
+def dependsOnNonResource(): userA.depends_on(42)
+assert.fails(dependsOnNonResource, "expected Resource<\\[data|resource\\].\\*>, got int")
+
+def dependsOnNestedResource(): userA.depends_on(disk.partition())
+assert.fails(dependsOnNestedResource, "expected Resource<\\[data|resource\\].\\*>, got Resource<nested.partition>")
+
+def dependsOnItself(): userA.depends_on(userA)
+assert.fails(dependsOnItself, "can't depend on itself")

@@ -9,10 +9,12 @@ ubuntu.filter(name = "name", values = ["ubuntu/images/hvm-ssd/ubuntu-trusty-14.0
 ubuntu.filter(name = "virtualization-type", values = ["hvm"])
 ubuntu.owners = ["099720109477"]
 
+fedora = aws.data.ami("fedora")
 web = aws.resource.instance(instance_type = "t2.micro")
+web.depends_on(ubuntu, fedora)
 
-#web.instance_type = "t2.micro"
-#web.ami = ami.id
+web.instance_type = "t2.micro"
+web.ami = ubuntu.id
 
 template = aws.resource.launch_template()
 template.name_prefix = "example"

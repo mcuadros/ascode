@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl2/hcl"
+	"github.com/hashicorp/hcl2/hcl/hclsyntax"
 	"github.com/hashicorp/hcl2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
@@ -69,12 +70,14 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 	body := block.Body()
 
 	if r.parent.kind == ProviderKind {
-		body.SetAttributeTraversal("provider", hcl.Traversal{hcl.TraverseRoot{
-			Name: fmt.Sprintf("%s.%s", r.parent.typ, r.parent.Name()),
-		}})
+		body.SetAttributeTraversal("provider", hcl.Traversal{
+			hcl.TraverseRoot{Name: r.parent.typ},
+			hcl.TraverseAttr{Name: r.parent.Name()},
+		})
 	}
 
 	r.doToHCLAttributes(body)
+	r.doToHCLDependencies(body)
 }
 
 func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
@@ -84,11 +87,10 @@ func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 			continue
 		}
 
-		// TODO(mcuadros): I don't know how to do this properly, meanwhile, this works.
 		if c, ok := v.v.(*Computed); ok {
-			body.SetAttributeTraversal(k, hcl.Traversal{hcl.TraverseRoot{
-				Name: c.String(),
-			}})
+			body.SetAttributeTraversal(k, hcl.Traversal{
+				hcl.TraverseRoot{Name: c.String()},
+			})
 
 			continue
 		}
@@ -106,4 +108,45 @@ func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 			collection.ToHCL(body)
 		}
 	}
+}
+
+func (r *Resource) doToHCLDependencies(body *hclwrite.Body) {
+	if len(r.dependenies) == 0 {
+		return
+	}
+
+	toks := []*hclwrite.Token{}
+	toks = append(toks, &hclwrite.Token{
+		Type:  hclsyntax.TokenIdent,
+		Bytes: []byte("depends_on"),
+	})
+
+	toks = append(toks, &hclwrite.Token{
+		Type: hclsyntax.TokenEqual, Bytes: []byte{'='},
+	}, &hclwrite.Token{
+		Type: hclsyntax.TokenOBrack, Bytes: []byte{'['},
+	})
+
+	l := len(r.dependenies)
+	for i, dep := range r.dependenies {
+		name := fmt.Sprintf("%s.%s", dep.typ, dep.Name())
+		toks = append(toks, &hclwrite.Token{
+			Type: hclsyntax.TokenIdent, Bytes: []byte(name),
+		})
+
+		if i+1 == l {
+			break
+		}
+
+		toks = append(toks, &hclwrite.Token{
+			Type: hclsyntax.TokenComma, Bytes: []byte{','},
+		})
+	}
+
+	toks = append(toks, &hclwrite.Token{
+		Type: hclsyntax.TokenCBrack, Bytes: []byte{']'},
+	})
+
+	body.AppendUnstructuredTokens(toks)
+	body.AppendNewline()
 }

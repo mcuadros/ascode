@@ -37,8 +37,10 @@ type Resource struct {
 	typ    string
 	kind   Kind
 	block  *configschema.Block
-	parent *Resource
 	values map[string]*Value
+
+	parent      *Resource
+	dependenies []*Resource
 }
 
 // MakeResource returns a new resource of the given kind, type based on the
@@ -121,6 +123,8 @@ func (r *Resource) Hash() (uint32, error) {
 // Attr honors the starlark.HasAttrs interface.
 func (r *Resource) Attr(name string) (starlark.Value, error) {
 	switch name {
+	case "depends_on":
+		return starlark.NewBuiltin("depends_on", r.dependsOn), nil
 	case "__dict__":
 		return r.toDict(), nil
 	}
@@ -231,6 +235,25 @@ func (r *Resource) toDict() *starlark.Dict {
 	}
 
 	return d
+}
+
+func (r *Resource) dependsOn(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
+	resources := make([]*Resource, len(args))
+	for i, arg := range args {
+		resource, ok := arg.(*Resource)
+		if !ok || resource.kind != DataSourceKind && resource.kind != ResourceKind {
+			return nil, fmt.Errorf("expected Resource<[data|resource].*>, got %s", arg.Type())
+		}
+
+		if r == resource {
+			return nil, fmt.Errorf("can't depend on itself")
+		}
+
+		resources[i] = resource
+	}
+
+	r.dependenies = append(r.dependenies, resources...)
+	return starlark.None, nil
 }
 
 // CompareSameType honors starlark.Comprable interface.
