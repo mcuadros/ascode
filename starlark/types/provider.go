@@ -49,7 +49,11 @@ type Provider struct {
 }
 
 func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider, error) {
-	cli, meta := pm.Get(name, version)
+	cli, meta, err := pm.Provider(name, version, false)
+	if err != nil {
+		return nil, err
+	}
+
 	rpc, err := cli.Client()
 	if err != nil {
 		return nil, err
