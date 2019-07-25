@@ -30,6 +30,10 @@ func TestProvider(t *testing.T) {
 	test(t, "testdata/provider.star")
 }
 
+func TestProvisioner(t *testing.T) {
+	test(t, "testdata/provisioner.star")
+}
+
 func TestNestedBlock(t *testing.T) {
 	test(t, "testdata/nested.star")
 }
@@ -47,9 +51,12 @@ func test(t *testing.T, filename string) {
 	thread := &starlark.Thread{Load: load}
 	starlarktest.SetReporter(thread, t)
 
+	pm := &terraform.PluginManager{".providers"}
+
 	predeclared := starlark.StringDict{
-		"provider": BuiltinProvider(&terraform.PluginManager{".providers"}),
-		"hcl":      BuiltinHCL(),
+		"provider":    BuiltinProvider(pm),
+		"provisioner": BuiltinProvisioner(pm),
+		"hcl":         BuiltinHCL(),
 	}
 
 	_, err := starlark.ExecFile(thread, filename, nil, predeclared)

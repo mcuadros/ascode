@@ -42,6 +42,11 @@ func (s *Provider) ToHCL(b *hclwrite.Body) {
 	s.resources.ToHCL(b)
 }
 
+func (s *Provisioner) ToHCL(b *hclwrite.Body) {
+	block := b.AppendNewBlock("provisioner", []string{s.name})
+	s.Resource.doToHCLAttributes(block.Body())
+}
+
 func (t *MapSchema) ToHCL(b *hclwrite.Body) {
 	for _, c := range t.collections {
 		c.ToHCL(b)
@@ -69,7 +74,7 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 
 	body := block.Body()
 
-	if r.parent.kind == ProviderKind {
+	if r.parent != nil && r.parent.kind == ProviderKind {
 		body.SetAttributeTraversal("provider", hcl.Traversal{
 			hcl.TraverseRoot{Name: r.parent.typ},
 			hcl.TraverseAttr{Name: r.parent.Name()},
@@ -78,6 +83,7 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 
 	r.doToHCLAttributes(body)
 	r.doToHCLDependencies(body)
+	r.doToHCLProvisioner(body)
 }
 
 func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
@@ -149,4 +155,18 @@ func (r *Resource) doToHCLDependencies(body *hclwrite.Body) {
 
 	body.AppendUnstructuredTokens(toks)
 	body.AppendNewline()
+}
+
+func (r *Resource) doToHCLProvisioner(body *hclwrite.Body) {
+	if len(r.provisioners) == 0 {
+		return
+	}
+
+	for _, p := range r.provisioners {
+		if len(body.Blocks()) != 0 || len(body.Attributes()) != 0 {
+			body.AppendNewline()
+		}
+
+		p.ToHCL(body)
+	}
 }

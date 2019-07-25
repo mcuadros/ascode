@@ -47,8 +47,9 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"http":            http.LoadModule,
 		},
 		predeclared: starlark.StringDict{
-			"provider": types.BuiltinProvider(pm),
-			"hcl":      types.BuiltinHCL(),
+			"provider":    types.BuiltinProvider(pm),
+			"provisioner": types.BuiltinProvisioner(pm),
+			"hcl":         types.BuiltinHCL(),
 		},
 	}
 }

@@ -15,7 +15,7 @@ assert.fails(lambda: qux.foo, "Resource<data.ignition_user> has no .foo field or
 
 # attr id
 assert.eq(type(qux.id), "Computed")
-assert.eq(str(qux.id), '"${data.ignition_user.id_14.id}"')
+assert.eq(str(qux.id), '"${data.ignition_user.id_15.id}"')
 
 # attr output assignation
 aws = provider("aws", "2.13.0")

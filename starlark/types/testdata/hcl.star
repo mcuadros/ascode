@@ -15,6 +15,8 @@ web.depends_on(ubuntu, fedora)
 
 web.instance_type = "t2.micro"
 web.ami = ubuntu.id
+web.add_provisioner(provisioner("file", source="conf/myapp.conf", destination="/etc/myapp.conf"))
+
 
 template = aws.resource.launch_template()
 template.name_prefix = "example"
@@ -35,5 +37,8 @@ group.mixed_instances_policy = {
 
 ami2 = aws.data.ami()
 ami2.most_recent = True
+
+
+
 
 print(hcl(aws))

@@ -20,17 +20,17 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 			var ok bool
 			version, ok = args.Index(1).(starlark.String)
 			if !ok {
-				return nil, fmt.Errorf("resource: expected string, go %s", args.Index(1).Type())
+				return nil, fmt.Errorf("expected string, go %s", args.Index(1).Type())
 			}
 			fallthrough
 		case 1:
 			var ok bool
 			name, ok = args.Index(0).(starlark.String)
 			if !ok {
-				return nil, fmt.Errorf("provider: expected string, got %s", args.Index(0).Type())
+				return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
 			}
 		default:
-			return nil, fmt.Errorf("resource: unexpected positional arguments count")
+			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
 		return MakeProvider(pm, name.GoString(), version.GoString())

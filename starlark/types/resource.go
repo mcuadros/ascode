@@ -39,8 +39,9 @@ type Resource struct {
 	block  *configschema.Block
 	values map[string]*Value
 
-	parent      *Resource
-	dependenies []*Resource
+	parent       *Resource
+	dependenies  []*Resource
+	provisioners []*Provisioner
 }
 
 // MakeResource returns a new resource of the given kind, type based on the
@@ -125,6 +126,8 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "depends_on":
 		return starlark.NewBuiltin("depends_on", r.dependsOn), nil
+	case "add_provisioner":
+		return starlark.NewBuiltin("add_provisioner", r.addProvisioner), nil
 	case "__dict__":
 		return r.toDict(), nil
 	}
@@ -253,6 +256,21 @@ func (r *Resource) dependsOn(_ *starlark.Thread, _ *starlark.Builtin, args starl
 	}
 
 	r.dependenies = append(r.dependenies, resources...)
+	return starlark.None, nil
+}
+
+func (r *Resource) addProvisioner(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
+	provisioners := make([]*Provisioner, len(args))
+	for i, arg := range args {
+		provisioner, ok := arg.(*Provisioner)
+		if !ok {
+			return nil, fmt.Errorf("expected Provisioner<*>, got %s", arg.Type())
+		}
+
+		provisioners[i] = provisioner
+	}
+
+	r.provisioners = append(r.provisioners, provisioners...)
 	return starlark.None, nil
 }
 
