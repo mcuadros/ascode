@@ -88,8 +88,8 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 
 func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 	for k := range r.block.Attributes {
-		v, ok := r.values[k]
-		if !ok {
+		v := r.values.Get(k)
+		if v == nil {
 			continue
 		}
 
@@ -105,12 +105,12 @@ func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 	}
 
 	for k := range r.block.BlockTypes {
-		v, ok := r.values[k]
-		if !ok {
+		v := r.values.Get(k)
+		if v == nil {
 			continue
 		}
 
-		if collection, ok := v.Value().(HCLCompatible); ok {
+		if collection, ok := v.Starlark().(HCLCompatible); ok {
 			collection.ToHCL(body)
 		}
 	}

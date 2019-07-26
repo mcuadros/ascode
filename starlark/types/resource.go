@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"time"
 
 	"github.com/hashicorp/terraform/configs/configschema"
@@ -37,7 +38,7 @@ type Resource struct {
 	typ    string
 	kind   Kind
 	block  *configschema.Block
-	values map[string]*Value
+	values Values
 
 	parent       *Resource
 	dependenies  []*Resource
@@ -53,7 +54,6 @@ func MakeResource(name, typ string, k Kind, b *configschema.Block, parent *Resou
 		kind:   k,
 		block:  b,
 		parent: parent,
-		values: make(map[string]*Value),
 	}
 }
 
@@ -105,20 +105,7 @@ func (r *Resource) Name() string {
 
 // Hash honors the starlark.Value interface.
 func (r *Resource) Hash() (uint32, error) {
-	// Same algorithm as Tuple.hash, but with different primes.
-	var x, m uint32 = 8731, 9839
-	for name, value := range r.values {
-		namehash, _ := starlark.String(name).Hash()
-		x = x ^ 3*namehash
-		y, err := value.Hash()
-		if err != nil {
-			return 0, err
-		}
-		x = x ^ y*m
-		m += 7349
-	}
-
-	return x, nil
+	return r.values.Hash()
 }
 
 // Attr honors the starlark.HasAttrs interface.
@@ -144,17 +131,16 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 }
 
 func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark.Value, error) {
-	if b.MaxItems != 1 {
-		if _, ok := r.values[name]; !ok {
-			r.values[name] = MustValue(NewResourceCollection(name, NestedKind, &b.Block, r))
-		}
-	} else {
-		if _, ok := r.values[name]; !ok {
-			r.values[name] = MustValue(MakeResource("", name, NestedKind, &b.Block, r))
-		}
+	v := r.values.Get(name)
+	if v != nil {
+		return v.Starlark(), nil
 	}
 
-	return r.values[name].Value(), nil
+	if b.MaxItems != 1 {
+		return r.values.Set(name, MustValue(NewResourceCollection(name, NestedKind, &b.Block, r))).Starlark(), nil
+	}
+
+	return r.values.Set(name, MustValue(MakeResource("", name, NestedKind, &b.Block, r))).Starlark(), nil
 }
 
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
@@ -162,8 +148,8 @@ func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlar
 		return NewComputed(r, attr.Type, name), nil
 	}
 
-	if v, ok := r.values[name]; ok {
-		return v.Value(), nil
+	if e := r.values.Get(name); e != nil {
+		return e.Starlark(), nil
 	}
 
 	return starlark.None, nil
@@ -207,7 +193,7 @@ func (r *Resource) SetField(name string, v starlark.Value) error {
 		return err
 	}
 
-	r.values[name] = MustValue(v)
+	r.values.Set(name, MustValue(v))
 	return nil
 }
 
@@ -222,19 +208,21 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 }
 
 func (r *Resource) toDict() *starlark.Dict {
+	sort.Sort(r.values)
 	d := starlark.NewDict(len(r.values))
-	for k, v := range r.values {
-		if r, ok := v.Value().(*Resource); ok {
-			d.SetKey(starlark.String(k), r.toDict())
+
+	for _, e := range r.values {
+		if r, ok := e.Starlark().(*Resource); ok {
+			d.SetKey(starlark.String(e.Name), r.toDict())
 			continue
 		}
 
-		if r, ok := v.Value().(*ResourceCollection); ok {
-			d.SetKey(starlark.String(k), r.toDict())
+		if r, ok := e.Starlark().(*ResourceCollection); ok {
+			d.SetKey(starlark.String(e.Name), r.toDict())
 			continue
 		}
 
-		d.SetKey(starlark.String(k), v.Value())
+		d.SetKey(starlark.String(e.Name), e.Starlark())
 	}
 
 	return d
@@ -298,23 +286,23 @@ func (x *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
 		return false, nil
 	}
 
-	for key, xval := range x.values {
-		yval, found := y.values[key]
-		if !found {
+	for _, xval := range x.values {
+		yval := y.values.Get(xval.Name)
+		if yval == nil {
 			return false, nil
 		}
 
 		var eq bool
 		var err error
-		if xcol, ok := xval.Value().(*ResourceCollection); ok {
-			ycol, ok := yval.Value().(*ResourceCollection)
+		if xcol, ok := xval.Starlark().(*ResourceCollection); ok {
+			ycol, ok := yval.Starlark().(*ResourceCollection)
 			if !ok {
 				return false, nil
 			}
 
 			eq, err = starlark.EqualDepth(xcol.List, ycol.List, depth-1)
 		} else {
-			eq, err = starlark.EqualDepth(xval.Value(), yval.Value(), depth-1)
+			eq, err = starlark.EqualDepth(xval.Starlark(), yval.Starlark(), depth-1)
 		}
 
 		if err != nil {

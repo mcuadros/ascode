@@ -7,6 +7,9 @@ qux = p.data.user()
 qux.uid = 42
 assert.eq(qux.uid, 42)
 
+qux.uid *= 2
+assert.eq(qux.uid, 84)
+
 # attr not-set
 assert.eq(qux.name, None)
 
@@ -15,7 +18,7 @@ assert.fails(lambda: qux.foo, "Resource<data.ignition_user> has no .foo field or
 
 # attr id
 assert.eq(type(qux.id), "Computed")
-assert.eq(str(qux.id), '"${data.ignition_user.id_15.id}"')
+assert.eq(str(qux.id), '"${data.ignition_user.id_16.id}"')
 
 # attr output assignation
 aws = provider("aws", "2.13.0")
