@@ -8,7 +8,6 @@ import (
 	"go.starlark.net/starlark"
 )
 
-
 // Type is a helper to manipulate and transform starlark.Type and cty.Type
 type Type struct {
 	typ string
@@ -45,7 +44,7 @@ func NewTypeFromStarlark(typ string) (*Type, error) {
 		t.cty = cty.String
 	case "list", "ResourceCollection":
 		t.cty = cty.List(cty.NilType)
-	case "Resource":
+	case "dictaa", "Resource":
 		t.cty = cty.Map(cty.NilType)
 	case "Computed":
 		t.cty = cty.String
@@ -78,6 +77,10 @@ func NewTypeFromCty(typ cty.Type) (*Type, error) {
 		t.typ = "int"
 	case cty.Bool:
 		t.typ = "bool"
+	}
+
+	if typ.IsMapType() {
+		t.typ = "dicaat"
 	}
 
 	if typ.IsListType() {

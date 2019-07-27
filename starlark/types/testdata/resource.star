@@ -31,6 +31,55 @@ web.ami = web.id
 def invalidType(): web.get_password_data = web.id
 assert.fails(invalidType, "expected bool, got string")
 
+group = aws.resource.autoscaling_group()
+
+# attr optional computed
+assert.eq(str(group.name), '"${resource.aws_autoscaling_group.id_20.name}"')
+
+group.name = "foo"
+assert.eq(group.name, "foo")
+
+# attr resource
+group.mixed_instances_policy = {
+    "launch_template": {
+        "launch_template_specification": {
+            "launch_template_id": "bar",
+        },
+    },
+}
+
+assert.eq(group.mixed_instances_policy.launch_template.launch_template_specification.launch_template_id, "bar")
+
+# attr resource non dict
+def attrResourceNonDict(): group.mixed_instances_policy = []
+assert.fails(attrResourceNonDict, "expected dict, got list")
+
+# attr collections
+web.network_interface = [
+    {"network_interface_id": "foo"},
+    {"network_interface_id": "bar"},
+]
+
+assert.eq(len(web.network_interface), 2)
+assert.eq(web.network_interface[0].network_interface_id, "foo")
+assert.eq(web.network_interface[1].network_interface_id, "bar")
+
+# attr collections clears list
+web.network_interface = [
+    {"network_interface_id": "qux"},
+]
+
+assert.eq(len(web.network_interface), 1)
+assert.eq(web.network_interface[0].network_interface_id, "qux")
+
+# attr collection non list
+def attrCollectionNonList(): web.network_interface = {}
+assert.fails(attrCollectionNonList, "expected list, got dict")
+
+# attr collection non dict elements
+def attrCollectionNonDictElement(): web.network_interface = [{}, 42]
+assert.fails(attrCollectionNonDictElement, "1: expected dict, got int")
+
 # comparasion simple values
 assert.eq(p.data.disk(), p.data.disk())
 assert.ne(p.data.disk(device="foo"), p.data.disk())

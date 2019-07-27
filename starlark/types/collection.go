@@ -25,6 +25,24 @@ func NewResourceCollection(typ string, k Kind, block *configschema.Block, parent
 	}
 }
 
+// LoadList loads a list of dicts on the collection. It clears the collection.
+func (c *ResourceCollection) LoadList(l *starlark.List) error {
+	if err := c.List.Clear(); err != nil {
+		return err
+	}
+
+	for i := 0; i < l.Len(); i++ {
+		dict, ok := l.Index(i).(*starlark.Dict)
+		if !ok {
+			return fmt.Errorf("%d: expected dict, got %s", i, l.Index(i).Type())
+		}
+
+		c.MakeResource("", dict)
+	}
+
+	return nil
+}
+
 // String honors the starlark.Value interface.
 func (c *ResourceCollection) String() string {
 	return fmt.Sprintf("%s", c.typ)
@@ -51,20 +69,25 @@ func (c *ResourceCollection) Name() string {
 	return c.typ
 }
 
-// CallInternal honos the starlark.Callable interface.
+// CallInternal honors the starlark.Callable interface.
 func (c *ResourceCollection) CallInternal(thread *starlark.Thread, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	name, dict, err := c.unpackArgs(args, kwargs)
 	if err != nil {
 		return nil, err
 	}
 
+	return c.MakeResource(name, dict)
+}
+
+// MakeResource it makes a new resource and loads the dict on it.
+func (c *ResourceCollection) MakeResource(name string, dict *starlark.Dict) (*Resource, error) {
 	if (c.kind == ResourceKind || c.kind == DataSourceKind) && name == "" {
 		name = NameGenerator()
 	}
 
 	resource := MakeResource(name, c.typ, c.kind, c.block, c.parent)
 	if dict != nil && dict.Len() != 0 {
-		if err := resource.loadDict(dict); err != nil {
+		if err := resource.LoadDict(dict); err != nil {
 			return nil, err
 		}
 	}

@@ -57,7 +57,8 @@ func MakeResource(name, typ string, k Kind, b *configschema.Block, parent *Resou
 	}
 }
 
-func (r *Resource) loadDict(d *starlark.Dict) error {
+// LoadDict loads a dict in the resource.
+func (r *Resource) LoadDict(d *starlark.Dict) error {
 	for _, k := range d.Keys() {
 		name := k.(starlark.String)
 		value, _, _ := d.Get(k)
@@ -145,7 +146,9 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
 	if attr.Computed {
-		return NewComputed(r, attr.Type, name), nil
+		if !attr.Optional || !r.values.Has(name) {
+			return NewComputed(r, attr.Type, name), nil
+		}
 	}
 
 	if e := r.values.Get(name); e != nil {
@@ -198,13 +201,24 @@ func (r *Resource) SetField(name string, v starlark.Value) error {
 }
 
 func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBlock, v starlark.Value) error {
-	switch v.Type() {
-	case "dict":
-		resource, _ := r.Attr(name)
-		return resource.(*Resource).loadDict(v.(*starlark.Dict))
+	attr, _ := r.Attr(name)
+
+	switch resource := attr.(type) {
+	case *Resource:
+		if v.Type() != "dict" {
+			return fmt.Errorf("expected dict, got %s", v.Type())
+		}
+
+		return resource.LoadDict(v.(*starlark.Dict))
+	case *ResourceCollection:
+		if v.Type() != "list" {
+			return fmt.Errorf("expected list, got %s", v.Type())
+		}
+
+		return resource.LoadList(v.(*starlark.List))
 	}
 
-	return fmt.Errorf("expected dict or list, got %s", v.Type())
+	return fmt.Errorf("unexpected value %s", v.Type())
 }
 
 func (r *Resource) toDict() *starlark.Dict {

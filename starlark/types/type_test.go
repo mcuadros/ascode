@@ -82,6 +82,15 @@ func TestTypeValidate(t *testing.T) {
 	}
 }
 
+func TestTypeValidate_Dict(t *testing.T) {
+	typ := MustTypeFromCty(cty.Map(cty.String))
+	dict := starlark.NewDict(1)
+	dict.SetKey(starlark.String("foo"), starlark.MakeInt(42))
+
+	err := typ.Validate(dict)
+	assert.NoError(t, err)
+}
+
 func TestTypeValidate_List(t *testing.T) {
 	typ := MustTypeFromCty(cty.List(cty.String))
 	err := typ.Validate(starlark.NewList([]starlark.Value{
