@@ -119,6 +119,7 @@ func (v *Value) Interface() interface{} {
 	}
 }
 
+// Hash honors the starlark.Value interface.
 func (v *Value) Hash() (uint32, error) {
 	switch value := v.v.(type) {
 	case *starlark.List:
@@ -145,32 +146,39 @@ type NamedValue struct {
 }
 
 // Values is a list of NamedValues.
-type Values []*NamedValue
+type Values struct {
+	names  sort.StringSlice
+	values map[string]*NamedValue
+}
+
+// NewValues return a new instance of Values
+func NewValues() *Values {
+	return &Values{values: make(map[string]*NamedValue)}
+}
 
 // Set sets a name and a value and returns it as a NamedValue.
 func (a *Values) Set(name string, v *Value) *NamedValue {
-	e := a.Get(name)
-	if e != nil {
+	if e, ok := a.values[name]; ok {
 		e.Value = v
 		return e
 	}
 
-	e = &NamedValue{Name: name, Value: v}
-	*a = append(*a, e)
+	e := &NamedValue{Name: name, Value: v}
+	a.values[name] = e
+	a.names = append(a.names, name)
 	return e
 }
 
 // Has returns true if Values contains a NamedValue with this name.
 func (a Values) Has(name string) bool {
-	return a.Get(name) != nil
+	_, ok := a.values[name]
+	return ok
 }
 
 // Get returns the NamedValue with the given name, if any.
 func (a Values) Get(name string) *NamedValue {
-	for _, e := range a {
-		if e.Name == name {
-			return e
-		}
+	if e, ok := a.values[name]; ok {
+		return e
 	}
 
 	return nil
@@ -203,18 +211,19 @@ func (a Values) Hash() (uint32, error) {
 
 // ToStringDict adds a name/value entry to d for each field of the struct.
 func (a Values) ToStringDict(d starlark.StringDict) {
-	for _, e := range a {
-		d[e.Name] = e.Starlark()
+	sort.Sort(a.names) // we sort the list before hash it.
+	for _, name := range a.names {
+		d[name] = a.values[name].Starlark()
 	}
 }
 
 // ForEach call cb for each value on Values, it stop the iteration an error
 // is returned.
 func (a Values) ForEach(cb func(*NamedValue) error) error {
-	sort.Sort(a) // we sort the list before hash it.
+	sort.Sort(a.names) // we sort the list before hash it.
 
-	for _, v := range a {
-		if err := cb(v); err != nil {
+	for _, name := range a.names {
+		if err := cb(a.values[name]); err != nil {
 			return err
 		}
 	}
@@ -222,6 +231,19 @@ func (a Values) ForEach(cb func(*NamedValue) error) error {
 	return nil
 }
 
-func (a Values) Len() int           { return len(a) }
-func (a Values) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a Values) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+// List return a list of NamedValues sorted by name.
+func (a Values) List() []*NamedValue {
+	sort.Sort(a.names) // we sort the list before hash it.
+
+	list := make([]*NamedValue, len(a.names))
+	for i, name := range a.names {
+		list[i] = a.values[name]
+	}
+
+	return list
+}
+
+// Len return the length.
+func (a Values) Len() int {
+	return len(a.values)
+}

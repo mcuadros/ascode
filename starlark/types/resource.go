@@ -3,7 +3,6 @@ package types
 import (
 	"fmt"
 	"math/rand"
-	"sort"
 	"time"
 
 	"github.com/hashicorp/terraform/configs/configschema"
@@ -38,7 +37,7 @@ type Resource struct {
 	typ    string
 	kind   Kind
 	block  *configschema.Block
-	values Values
+	values *Values
 
 	parent       *Resource
 	dependenies  []*Resource
@@ -53,6 +52,7 @@ func MakeResource(name, typ string, k Kind, b *configschema.Block, parent *Resou
 		typ:    typ,
 		kind:   k,
 		block:  b,
+		values: NewValues(),
 		parent: parent,
 	}
 }
@@ -222,22 +222,22 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 }
 
 func (r *Resource) toDict() *starlark.Dict {
-	sort.Sort(r.values)
-	d := starlark.NewDict(len(r.values))
+	d := starlark.NewDict(r.values.Len())
 
-	for _, e := range r.values {
+	r.values.ForEach(func(e *NamedValue) error {
 		if r, ok := e.Starlark().(*Resource); ok {
 			d.SetKey(starlark.String(e.Name), r.toDict())
-			continue
+			return nil
 		}
 
 		if r, ok := e.Starlark().(*ResourceCollection); ok {
 			d.SetKey(starlark.String(e.Name), r.toDict())
-			continue
+			return nil
 		}
 
 		d.SetKey(starlark.String(e.Name), e.Starlark())
-	}
+		return nil
+	})
 
 	return d
 }
@@ -296,11 +296,11 @@ func (x *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
 		return false, nil
 	}
 
-	if len(x.values) != len(y.values) {
+	if x.values.Len() != y.values.Len() {
 		return false, nil
 	}
 
-	for _, xval := range x.values {
+	for _, xval := range x.values.List() {
 		yval := y.values.Get(xval.Name)
 		if yval == nil {
 			return false, nil

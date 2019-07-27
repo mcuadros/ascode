@@ -68,7 +68,7 @@ func TestMustValue(t *testing.T) {
 }
 
 func TestValuesSet(t *testing.T) {
-	var values Values
+	values := NewValues()
 	val := values.Set("foo", MustValue(starlark.MakeInt(42)))
 
 	assert.Equal(t, val.Name, "foo")
@@ -79,7 +79,7 @@ func TestValuesSet(t *testing.T) {
 }
 
 func TestValuesGet(t *testing.T) {
-	var values Values
+	values := NewValues()
 	values.Set("foo", MustValue(starlark.MakeInt(42)))
 	values.Set("foo", MustValue(starlark.MakeInt(42*2)))
 
@@ -94,7 +94,7 @@ func TestValuesGet(t *testing.T) {
 }
 
 func TestValuesHash(t *testing.T) {
-	var a Values
+	a := NewValues()
 	a.Set("foo", MustValue(starlark.MakeInt(42)))
 	a.Set("bar", MustValue(starlark.MakeInt(42*32)))
 
@@ -102,7 +102,7 @@ func TestValuesHash(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, hashA, uint32(0xfede4ab3))
 
-	var b Values
+	b := NewValues()
 	b.Set("bar", MustValue(starlark.MakeInt(42*32)))
 	b.Set("foo", MustValue(starlark.MakeInt(42)))
 
@@ -112,7 +112,7 @@ func TestValuesHash(t *testing.T) {
 }
 
 func TestValuesToStringDict(t *testing.T) {
-	var a Values
+	a := NewValues()
 	a.Set("foo", MustValue(starlark.MakeInt(42)))
 	a.Set("bar", MustValue(starlark.MakeInt(42*32)))
 
@@ -123,7 +123,7 @@ func TestValuesToStringDict(t *testing.T) {
 }
 
 func TestValuesForEach(t *testing.T) {
-	var a Values
+	a := NewValues()
 	a.Set("foo", MustValue(starlark.MakeInt(42)))
 	a.Set("bar", MustValue(starlark.MakeInt(42*32)))
 
