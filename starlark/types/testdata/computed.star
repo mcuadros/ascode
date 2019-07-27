@@ -22,4 +22,10 @@ assert.eq(str(instance.credit_specification[0].cpu_credits), '"${data.aws_instan
 
 # compute of map
 computed = str(aws.resource.instance().root_block_device.volume_size)
-assert.eq(computed, '"${resource.aws_instance.id_6.root_block_device.volume_size}"')
+assert.eq(computed, '"${aws_instance.id_6.root_block_device.volume_size}"')
+
+# compute on data source
+assert.eq(str(aws.resource.instance().id), '"${aws_instance.id_7.id}"')
+
+# compute on resource
+assert.eq(str(aws.data.ami().id), '"${data.aws_ami.id_8.id}"')

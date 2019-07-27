@@ -25,7 +25,12 @@ func NewComputed(r *Resource, t cty.Type, name string) *Computed {
 	child := r
 	for {
 		if child.parent.kind == ProviderKind {
-			path = fmt.Sprintf("%s.%s.%s", child.kind, child.typ, child.Name())
+			if child.kind == ResourceKind {
+				path = fmt.Sprintf("%s.%s", child.typ, child.Name())
+			} else {
+				path = fmt.Sprintf("%s.%s.%s", child.kind, child.typ, child.Name())
+			}
+
 			break
 		}
 

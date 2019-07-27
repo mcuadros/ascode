@@ -18,7 +18,7 @@ assert.fails(lambda: qux.foo, "Resource<data.ignition_user> has no .foo field or
 
 # attr id
 assert.eq(type(qux.id), "Computed")
-assert.eq(str(qux.id), '"${data.ignition_user.id_16.id}"')
+assert.eq(str(qux.id), '"${data.ignition_user.id_18.id}"')
 
 # attr output assignation
 aws = provider("aws", "2.13.0")
@@ -34,7 +34,7 @@ assert.fails(invalidType, "expected bool, got string")
 group = aws.resource.autoscaling_group()
 
 # attr optional computed
-assert.eq(str(group.name), '"${resource.aws_autoscaling_group.id_20.name}"')
+assert.eq(str(group.name), '"${aws_autoscaling_group.id_22.name}"')
 
 group.name = "foo"
 assert.eq(group.name, "foo")
