@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/hashicorp/hcl2/hcl"
 	"github.com/hashicorp/hcl2/hcl/hclsyntax"
@@ -48,15 +49,22 @@ func (s *Provisioner) ToHCL(b *hclwrite.Body) {
 }
 
 func (t *MapSchema) ToHCL(b *hclwrite.Body) {
-	for _, c := range t.collections {
-		c.ToHCL(b)
+	names := make(sort.StringSlice, len(t.collections))
+	var i int
+	for name := range t.collections {
+		names[i] = name
+		i++
+	}
+
+	sort.Sort(names)
+	for _, name := range names {
+		t.collections[name].ToHCL(b)
 	}
 }
 
-func (r *ResourceCollection) ToHCL(b *hclwrite.Body) {
-	for i := 0; i < r.Len(); i++ {
-		resource := r.Index(i).(*Resource)
-		resource.ToHCL(b)
+func (c *ResourceCollection) ToHCL(b *hclwrite.Body) {
+	for i := 0; i < c.Len(); i++ {
+		c.Index(i).(*Resource).ToHCL(b)
 	}
 }
 
@@ -87,33 +95,34 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 }
 
 func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
-	for k := range r.block.Attributes {
-		v := r.values.Get(k)
-		if v == nil {
-			continue
+	r.values.ForEach(func(v *NamedValue) error {
+		if _, ok := r.block.Attributes[v.Name]; !ok {
+			return nil
 		}
 
 		if c, ok := v.v.(*Computed); ok {
-			body.SetAttributeTraversal(k, hcl.Traversal{
+			body.SetAttributeTraversal(v.Name, hcl.Traversal{
 				hcl.TraverseRoot{Name: c.String()},
 			})
 
-			continue
+			return nil
 		}
 
-		body.SetAttributeValue(k, v.Cty())
-	}
+		body.SetAttributeValue(v.Name, v.Cty())
+		return nil
+	})
 
-	for k := range r.block.BlockTypes {
-		v := r.values.Get(k)
-		if v == nil {
-			continue
+	r.values.ForEach(func(v *NamedValue) error {
+		if _, ok := r.block.BlockTypes[v.Name]; !ok {
+			return nil
 		}
 
 		if collection, ok := v.Starlark().(HCLCompatible); ok {
 			collection.ToHCL(body)
 		}
-	}
+
+		return nil
+	})
 }
 
 func (r *Resource) doToHCLDependencies(body *hclwrite.Body) {

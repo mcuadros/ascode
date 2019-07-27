@@ -6,6 +6,7 @@ import (
 	"log"
 	"testing"
 
+	"github.com/ascode-dev/ascode/starlark/module/os"
 	"github.com/ascode-dev/ascode/terraform"
 	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
@@ -72,6 +73,10 @@ func test(t *testing.T, filename string) {
 func load(thread *starlark.Thread, module string) (starlark.StringDict, error) {
 	if module == "assert.star" {
 		return starlarktest.LoadAssertModule()
+	}
+
+	if module == os.ModuleName {
+		return os.LoadModule()
 	}
 
 	return nil, fmt.Errorf("load not implemented")
