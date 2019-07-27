@@ -68,6 +68,15 @@ func (v *Value) Cty() cty.Value {
 		}
 
 		return cty.ListVal(values)
+	case "dict":
+		dict := v.v.(*starlark.Dict)
+		values := make(map[string]cty.Value)
+		for _, t := range dict.Items() {
+			key := fmt.Sprintf("%s", MustValue(t.Index(0)).Interface())
+			values[key] = MustValue(t.Index(1)).Cty()
+		}
+
+		return cty.MapVal(values)
 	case "Computed":
 		return cty.StringVal(v.v.(*Computed).GoString())
 	default:
@@ -96,6 +105,15 @@ func (v *Value) Interface() interface{} {
 		}
 
 		return out
+
+	case *starlark.Dict:
+		values := make(map[string]interface{})
+		for _, t := range cast.Items() {
+			key := fmt.Sprintf("%s", MustValue(t.Index(0)).Interface())
+			values[key] = MustValue(t.Index(1)).Interface()
+		}
+
+		return values
 	default:
 		return v
 	}

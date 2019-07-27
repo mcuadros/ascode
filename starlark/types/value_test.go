@@ -10,6 +10,10 @@ import (
 )
 
 func TestMustValue(t *testing.T) {
+
+	dict := starlark.NewDict(1)
+	dict.SetKey(starlark.String("foo"), starlark.MakeInt(42))
+
 	testCases := []struct {
 		v      starlark.Value
 		cty    cty.Type
@@ -45,6 +49,12 @@ func TestMustValue(t *testing.T) {
 			cty.List(cty.NilType),
 			cty.ListVal([]cty.Value{cty.StringVal("foo")}),
 			[]interface{}{"foo"},
+		},
+		{
+			dict,
+			cty.Map(cty.NilType),
+			cty.MapVal(map[string]cty.Value{"foo": cty.NumberIntVal(42)}),
+			map[string]interface{}{"foo": int64(42)},
 		},
 	}
 

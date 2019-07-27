@@ -30,6 +30,9 @@ func TestNewTypeFromStarlark_NonScalar(t *testing.T) {
 	typ := MustTypeFromStarlark("list")
 	assert.True(t, typ.Cty().IsListType())
 
+	typ = MustTypeFromStarlark("dict")
+	assert.True(t, typ.Cty().IsMapType())
+
 	typ = MustTypeFromStarlark("ResourceCollection<bar>")
 	assert.True(t, typ.Cty().IsListType())
 
@@ -46,6 +49,7 @@ func TestNewTypeFromCty(t *testing.T) {
 		{"int", cty.Number},
 		{"bool", cty.Bool},
 		{"list", cty.List(cty.String)},
+		{"dict", cty.Map(cty.String)},
 		{"set", cty.Set(cty.String)},
 		{"tuple", cty.Tuple([]cty.Type{})},
 	}

@@ -44,7 +44,7 @@ func NewTypeFromStarlark(typ string) (*Type, error) {
 		t.cty = cty.String
 	case "list", "ResourceCollection":
 		t.cty = cty.List(cty.NilType)
-	case "dictaa", "Resource":
+	case "dict", "Resource":
 		t.cty = cty.Map(cty.NilType)
 	case "Computed":
 		t.cty = cty.String
@@ -80,7 +80,7 @@ func NewTypeFromCty(typ cty.Type) (*Type, error) {
 	}
 
 	if typ.IsMapType() {
-		t.typ = "dicaat"
+		t.typ = "dict"
 	}
 
 	if typ.IsListType() {
@@ -133,6 +133,10 @@ func (t *Type) Validate(v starlark.Value) error {
 	case *starlark.List:
 		if t.cty.IsListType() || t.cty.IsSetType() {
 			return t.validateListType(v.(*starlark.List), t.cty.ElementType())
+		}
+	case *starlark.Dict:
+		if t.cty.IsMapType() {
+			return nil
 		}
 	}
 
