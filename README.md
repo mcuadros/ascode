@@ -84,13 +84,7 @@ print(msg.body())
 
 ## Installation
 
-The recommended way to install *ascode* is:
-
-```
-GO111MODULE=on go get -u github.com/mcuadros/ascode/...
-```
-
-Or you can download the binary from the [releases](https://github.com/mcuadros/ascode/releases) section.
+The recommended way to install *ascode* it's download the binary from the [releases](https://github.com/mcuadros/ascode/releases) section.
 
 
 ## License
