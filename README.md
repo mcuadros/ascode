@@ -21,7 +21,7 @@ Creating am Amazon EC2 Instance is as easy as:
 aws = provider("aws", "2.13.0")
 aws.region = "us-west-2"
 
-aws.resource.instance(instance_type ="t2.micro", type="ami-2757f631")
+aws.resource.instance(instance_type ="t2.micro", ami="ami-2757f631")
 ```
 ### Using functions
 
