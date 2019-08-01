@@ -89,6 +89,7 @@ func (c *Computed) doNested(name, path string, t cty.Type, index int) *Computed 
 	}
 
 }
+
 func (c *Computed) Index(i int) starlark.Value {
 	path := fmt.Sprintf("%s.%d", c.path, i)
 

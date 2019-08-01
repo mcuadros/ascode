@@ -18,4 +18,9 @@ assert.eq(len(p.resource.instance), 2)
 p.region = "us-west-2"
 assert.eq(p.region, "us-west-2")
 
-ignition = provider("ignition")
+alias = provider("aws", "2.13.0", "alias")
+assert.eq(alias.alias, "alias")
+assert.eq(alias.version, "2.13.0")
+
+kwargs = provider("aws", region="foo")
+assert.eq(kwargs.region, "foo")

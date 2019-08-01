@@ -1,11 +1,11 @@
 provider "aws" {
-  alias   = "id_40"
+  alias   = "id_1"
   version = "2.13.0"
   region  = "us-west-2"
 }
 
-data "aws_ami" "id_44" {
-  provider    = aws.id_40
+data "aws_ami" "id_5" {
+  provider    = aws.id_1
   most_recent = true
   owners      = ["099720109477"]
 
@@ -20,8 +20,8 @@ data "aws_ami" "id_44" {
   }
 }
 
-resource "aws_autoscaling_group" "id_47" {
-  provider           = aws.id_40
+resource "aws_autoscaling_group" "id_8" {
+  provider           = aws.id_1
   availability_zones = ["us-east-1a"]
   desired_capacity   = 1
   max_size           = 1
@@ -30,7 +30,7 @@ resource "aws_autoscaling_group" "id_47" {
   mixed_instances_policy {
     launch_template {
       launch_template_specification {
-        launch_template_id = "${aws_launch_template.id_46.id}"
+        launch_template_id = "${aws_launch_template.id_7.id}"
       }
 
       override {
@@ -44,9 +44,9 @@ resource "aws_autoscaling_group" "id_47" {
   }
 }
 
-resource "aws_instance" "id_45" {
-  provider      = aws.id_40
-  ami           = "${data.aws_ami.id_44.id}"
+resource "aws_instance" "id_6" {
+  provider      = aws.id_1
+  ami           = "${data.aws_ami.id_5.id}"
   instance_type = "t2.micro"
 
   credit_specification {
@@ -55,47 +55,47 @@ resource "aws_instance" "id_45" {
 
   network_interface {
     device_index         = 0
-    network_interface_id = "${aws_network_interface.id_43.id}"
+    network_interface_id = "${aws_network_interface.id_4.id}"
   }
 }
 
-resource "aws_instance" "id_49" {
-  provider      = aws.id_40
+resource "aws_instance" "id_10" {
+  provider      = aws.id_1
   ami           = "ami-2757f631"
   instance_type = "t2.micro"
-  depends_on    = [aws_s3_bucket.id_48]
+  depends_on    = [aws_s3_bucket.id_9]
 }
 
-resource "aws_launch_template" "id_46" {
-  provider      = aws.id_40
-  image_id      = "${data.aws_ami.id_44.id}"
+resource "aws_launch_template" "id_7" {
+  provider      = aws.id_1
+  image_id      = "${data.aws_ami.id_5.id}"
   instance_type = "c5.large"
   name_prefix   = "example"
 }
 
-resource "aws_network_interface" "id_43" {
-  provider    = aws.id_40
+resource "aws_network_interface" "id_4" {
+  provider    = aws.id_1
   private_ips = ["172.16.10.100"]
-  subnet_id   = "${aws_subnet.id_42.id}"
+  subnet_id   = "${aws_subnet.id_3.id}"
   tags        = { Name = "primary_network_iterface" }
 }
 
-resource "aws_s3_bucket" "id_48" {
-  provider = aws.id_40
+resource "aws_s3_bucket" "id_9" {
+  provider = aws.id_1
   acl      = "private"
   bucket   = "terraform-getting-started-guide"
 }
 
-resource "aws_subnet" "id_42" {
-  provider          = aws.id_40
+resource "aws_subnet" "id_3" {
+  provider          = aws.id_1
   availability_zone = "us-west-2a"
   cidr_block        = "172.16.0.0/24"
   tags              = { Name = "tf-example" }
-  vpc_id            = "${aws_vpc.id_41.id}"
+  vpc_id            = "${aws_vpc.id_2.id}"
 }
 
-resource "aws_vpc" "id_41" {
-  provider   = aws.id_40
+resource "aws_vpc" "id_2" {
+  provider   = aws.id_1
   cidr_block = "172.16.0.0/16"
   tags       = { Name = "tf-example" }
 }

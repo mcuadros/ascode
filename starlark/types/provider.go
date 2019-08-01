@@ -13,9 +13,16 @@ import (
 )
 
 func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
-	return starlark.NewBuiltin("provider", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
-		var name, version starlark.String
+	return starlark.NewBuiltin("provider", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		var name, version, alias starlark.String
 		switch len(args) {
+		case 3:
+			var ok bool
+			alias, ok = args.Index(2).(starlark.String)
+			if !ok {
+				return nil, fmt.Errorf("expected string, go %s", args.Index(2).Type())
+			}
+			fallthrough
 		case 2:
 			var ok bool
 			version, ok = args.Index(1).(starlark.String)
@@ -33,14 +40,20 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
-		return MakeProvider(pm, name.GoString(), version.GoString())
+		p, err := MakeProvider(pm, name.GoString(), version.GoString(), alias.GoString())
+		if err != nil {
+			return nil, err
+		}
+
+		return p, p.loadKeywordArgs(kwargs)
 	})
 }
 
+// Provider represents a provider as a starlark.Value.
 type Provider struct {
-	name     string
-	provider *plugin.GRPCProvider
-	meta     discovery.PluginMeta
+	name, alias string
+	provider    *plugin.GRPCProvider
+	meta        discovery.PluginMeta
 
 	dataSources *MapSchema
 	resources   *MapSchema
@@ -48,7 +61,8 @@ type Provider struct {
 	*Resource
 }
 
-func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider, error) {
+// MakeProvider returns a new Provider instance from a given name version and alias.
+func MakeProvider(pm *terraform.PluginManager, name, version, alias string) (*Provider, error) {
 	cli, meta, err := pm.Provider(name, version, false)
 	if err != nil {
 		return nil, err
@@ -64,16 +78,21 @@ func MakeProvider(pm *terraform.PluginManager, name, version string) (*Provider,
 		return nil, err
 	}
 
+	if alias == "" {
+		alias = NameGenerator()
+	}
+
 	provider := raw.(*plugin.GRPCProvider)
 	response := provider.GetSchema()
 
 	defer cli.Kill()
 	p := &Provider{
 		name:     name,
+		alias:    alias,
 		provider: provider,
 		meta:     meta,
 
-		Resource: MakeResource(NameGenerator(), name, ProviderKind, response.Provider.Block, nil),
+		Resource: MakeResource(alias, name, ProviderKind, response.Provider.Block, nil),
 	}
 
 	p.dataSources = NewMapSchema(p, name, DataSourceKind, response.DataSources)
@@ -94,6 +113,8 @@ func (p *Provider) Type() string {
 // Attr honors the starlark.HasAttrs interface.
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
+	case "alias":
+		return starlark.String(p.alias), nil
 	case "version":
 		return starlark.String(p.meta.Version), nil
 	case "data":

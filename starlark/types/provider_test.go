@@ -13,8 +13,9 @@ import (
 	"go.starlark.net/starlarktest"
 )
 
+var id int
+
 func init() {
-	var id int
 	NameGenerator = func() string {
 		id++
 		return fmt.Sprintf("id_%d", id)
@@ -48,6 +49,8 @@ func TestHCL(t *testing.T) {
 }
 
 func test(t *testing.T, filename string) {
+	id = 0
+
 	log.SetOutput(ioutil.Discard)
 	thread := &starlark.Thread{Load: load}
 	starlarktest.SetReporter(thread, t)
