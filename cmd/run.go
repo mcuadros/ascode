@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ascode-dev/ascode/starlark/types"
+	"github.com/mcuadros/ascode/starlark/types"
 	"github.com/hashicorp/hcl2/hclwrite"
 	"go.starlark.net/starlark"
 )

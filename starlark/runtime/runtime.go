@@ -3,10 +3,10 @@ package runtime
 import (
 	"fmt"
 
-	"github.com/ascode-dev/ascode/starlark/module/filepath"
-	"github.com/ascode-dev/ascode/starlark/module/os"
-	"github.com/ascode-dev/ascode/starlark/types"
-	"github.com/ascode-dev/ascode/terraform"
+	"github.com/mcuadros/ascode/starlark/module/filepath"
+	"github.com/mcuadros/ascode/starlark/module/os"
+	"github.com/mcuadros/ascode/starlark/types"
+	"github.com/mcuadros/ascode/terraform"
 	"github.com/qri-io/starlib/encoding/base64"
 	"github.com/qri-io/starlib/encoding/csv"
 	"github.com/qri-io/starlib/encoding/json"

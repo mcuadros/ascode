@@ -8,8 +8,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/ascode-dev/ascode/terraform"
 	"github.com/hashicorp/terraform/plugin"
+	"github.com/mcuadros/ascode/terraform"
 	"github.com/stretchr/testify/assert"
 )
 

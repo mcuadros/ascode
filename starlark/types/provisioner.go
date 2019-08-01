@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	"github.com/ascode-dev/ascode/terraform"
+	"github.com/mcuadros/ascode/terraform"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/plugin/discovery"
 	"go.starlark.net/starlark"

@@ -6,8 +6,8 @@ import (
 	"log"
 	"testing"
 
-	"github.com/ascode-dev/ascode/starlark/module/os"
-	"github.com/ascode-dev/ascode/terraform"
+	"github.com/mcuadros/ascode/starlark/module/os"
+	"github.com/mcuadros/ascode/terraform"
 	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarktest"

@@ -9,8 +9,8 @@ DOCUMENTATION_PATH ?= _documentation
 DOCUMENTATION_RUNTIME_PATH ?= $(DOCUMENTATION_PATH)/runtime
 
 RUNTIME_MODULES = \
-	github.com/ascode-dev/ascode/starlark/module/os \
-	github.com/ascode-dev/ascode/starlark/module/filepath \
+	github.com/mcuadros/ascode/starlark/module/os \
+	github.com/mcuadros/ascode/starlark/module/filepath \
 	github.com/qri-io/starlib/encoding/base64 \
 	github.com/qri-io/starlib/encoding/csv \
 	github.com/qri-io/starlib/encoding/json \

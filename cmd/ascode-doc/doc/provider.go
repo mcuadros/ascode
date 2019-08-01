@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ascode-dev/ascode/starlark/types"
+	"github.com/mcuadros/ascode/starlark/types"
 	"github.com/b5/outline/lib"
 	"github.com/hashicorp/terraform/configs/configschema"
 	"github.com/hashicorp/terraform/providers"

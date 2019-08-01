@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ascode-dev/ascode/cmd"
 	"github.com/jessevdk/go-flags"
+	"github.com/mcuadros/ascode/cmd"
 )
 
 var version string
