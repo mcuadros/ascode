@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
+	"github.com/hashicorp/terraform/addrs"
 	"github.com/hashicorp/terraform/command"
 	tfplugin "github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/plugin/discovery"
@@ -94,7 +95,8 @@ func (m *PluginManager) getProviderRemote(provider, v string) (discovery.PluginM
 		Ui:                    cli.NewMockUi(),
 	}
 
-	meta, _, err := installer.Get(provider, discovery.ConstraintStr(v).MustParse())
+	addr := addrs.NewLegacyProvider(provider)
+	meta, _, err := installer.Get(addr, discovery.ConstraintStr(v).MustParse())
 	if err != nil {
 		return discovery.PluginMeta{}, false, err
 	}

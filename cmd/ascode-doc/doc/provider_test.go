@@ -26,9 +26,14 @@ func TestDocumentation(t *testing.T) {
 }
 
 func TestDo(t *testing.T) {
+	t.Skip()
 
 	pm := &terraform.PluginManager{".providers"}
-	cli, meta := pm.Provider("ignition", "1.1.0")
+	cli, meta, err := pm.Provider("ignition", "1.1.0", false)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println(meta)
 
 	rpc, err := cli.Client()

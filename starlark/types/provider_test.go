@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/mcuadros/ascode/starlark/module/os"
+	"github.com/mcuadros/ascode/starlark/test"
 	"github.com/mcuadros/ascode/terraform"
 	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
-	"go.starlark.net/starlarktest"
 )
 
 var id int
@@ -29,31 +29,31 @@ func init() {
 }
 
 func TestProvider(t *testing.T) {
-	test(t, "testdata/provider.star")
+	doTest(t, "testdata/provider.star")
 }
 
 func TestProvisioner(t *testing.T) {
-	test(t, "testdata/provisioner.star")
+	doTest(t, "testdata/provisioner.star")
 }
 
 func TestNestedBlock(t *testing.T) {
-	test(t, "testdata/nested.star")
+	doTest(t, "testdata/nested.star")
 }
 
 func TestResource(t *testing.T) {
-	test(t, "testdata/resource.star")
+	doTest(t, "testdata/resource.star")
 }
 
 func TestHCL(t *testing.T) {
-	test(t, "testdata/hcl.star")
+	doTest(t, "testdata/hcl.star")
 }
 
-func test(t *testing.T, filename string) {
+func doTest(t *testing.T, filename string) {
 	id = 0
 
 	log.SetOutput(ioutil.Discard)
 	thread := &starlark.Thread{Load: load}
-	starlarktest.SetReporter(thread, t)
+	test.SetReporter(thread, t)
 
 	pm := &terraform.PluginManager{".providers"}
 
@@ -75,7 +75,7 @@ func test(t *testing.T, filename string) {
 // load implements the 'load' operation as used in the evaluator tests.
 func load(thread *starlark.Thread, module string) (starlark.StringDict, error) {
 	if module == "assert.star" {
-		return starlarktest.LoadAssertModule()
+		return test.LoadAssertModule()
 	}
 
 	if module == os.ModuleName {
