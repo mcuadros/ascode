@@ -8,13 +8,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/mcuadros/ascode/starlark/types"
 	"github.com/b5/outline/lib"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/hashicorp/terraform/configs/configschema"
 	"github.com/hashicorp/terraform/providers"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	"gopkg.in/src-d/go-git.v4/storage/memory"
+	"github.com/mcuadros/ascode/starlark/types"
 )
 
 type ResourceDocumentation struct {
