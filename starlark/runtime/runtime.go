@@ -17,6 +17,7 @@ import (
 	"go.starlark.net/repl"
 	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
+	"go.starlark.net/starlarkstruct"
 )
 
 func init() {
@@ -39,6 +40,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 		modules: map[string]LoadModuleFunc{
 			filepath.ModuleName: filepath.LoadModule,
 			os.ModuleName:       os.LoadModule,
+			docker.ModuleName:   docker.LoadModule,
 
 			"encoding/json":   json.LoadModule,
 			"encoding/base64": base64.LoadModule,
@@ -46,14 +48,13 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"encoding/yaml":   yaml.LoadModule,
 			"re":              re.LoadModule,
 			"http":            http.LoadModule,
-
-			"experimental/docker": docker.LoadModule,
 		},
 		predeclared: starlark.StringDict{
 			"provider":    types.BuiltinProvider(pm),
 			"provisioner": types.BuiltinProvisioner(pm),
 			"backend":     types.BuiltinBackend(),
 			"hcl":         types.BuiltinHCL(),
+			"struct":      starlark.NewBuiltin("struct", starlarkstruct.Make),
 		},
 	}
 }
