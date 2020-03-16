@@ -28,6 +28,7 @@ const (
 	ResourceKind   Kind = "resource"
 	DataSourceKind Kind = "data"
 	NestedKind     Kind = "nested"
+	BackendKind    Kind = "backend"
 )
 
 // Resource represents a resource as a starlark.Value, it can be of four kinds,

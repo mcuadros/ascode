@@ -35,6 +35,7 @@ func BuiltinHCL() starlark.Value {
 
 func (s *Provider) ToHCL(b *hclwrite.Body) {
 	block := b.AppendNewBlock("provider", []string{s.name})
+
 	block.Body().SetAttributeValue("alias", cty.StringVal(s.Name()))
 	block.Body().SetAttributeValue("version", cty.StringVal(string(s.meta.Version)))
 	s.Resource.doToHCLAttributes(block.Body())
@@ -45,6 +46,13 @@ func (s *Provider) ToHCL(b *hclwrite.Body) {
 
 func (s *Provisioner) ToHCL(b *hclwrite.Body) {
 	block := b.AppendNewBlock("provisioner", []string{s.name})
+	s.Resource.doToHCLAttributes(block.Body())
+}
+
+func (s *Backend) ToHCL(b *hclwrite.Body) {
+	parent := b.AppendNewBlock("terraform", nil)
+
+	block := parent.Body().AppendNewBlock("backend", []string{s.name})
 	s.Resource.doToHCLAttributes(block.Body())
 }
 
@@ -75,7 +83,8 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 
 	var block *hclwrite.Block
 	if r.kind != NestedKind {
-		block = b.AppendNewBlock(string(r.kind), []string{r.typ, r.Name()})
+		labels := []string{r.typ, r.Name()}
+		block = b.AppendNewBlock(string(r.kind), labels)
 	} else {
 		block = b.AppendNewBlock(r.typ, nil)
 	}

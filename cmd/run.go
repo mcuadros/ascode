@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/mcuadros/ascode/starlark/types"
 	"github.com/hashicorp/hcl2/hclwrite"
+	"github.com/mcuadros/ascode/starlark/types"
 	"go.starlark.net/starlark"
 )
 
@@ -54,12 +54,13 @@ func (c *RunCmd) dumpToHCL(ctx starlark.StringDict) error {
 
 	f := hclwrite.NewEmptyFile()
 	for _, v := range ctx {
-		p, ok := v.(*types.Provider)
-		if !ok {
-			continue
+		// TODO(mcuadros): replace this logic with a global object terraform
+		switch o := v.(type) {
+		case *types.Provider:
+			o.ToHCL(f.Body())
+		case *types.Backend:
+			o.ToHCL(f.Body())
 		}
-
-		p.ToHCL(f.Body())
 	}
 
 	return ioutil.WriteFile(c.ToHCL, f.Bytes(), 0644)
