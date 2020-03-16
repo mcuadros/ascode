@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 
+	"github.com/mcuadros/ascode/starlark/module/experimental/docker"
 	"github.com/mcuadros/ascode/starlark/module/filepath"
 	"github.com/mcuadros/ascode/starlark/module/os"
 	"github.com/mcuadros/ascode/starlark/types"
@@ -45,6 +46,8 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"encoding/yaml":   yaml.LoadModule,
 			"re":              re.LoadModule,
 			"http":            http.LoadModule,
+
+			"experimental/docker": docker.LoadModule,
 		},
 		predeclared: starlark.StringDict{
 			"provider":    types.BuiltinProvider(pm),

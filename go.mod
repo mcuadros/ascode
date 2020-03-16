@@ -3,7 +3,11 @@ module github.com/mcuadros/ascode
 go 1.14
 
 require (
+	github.com/Masterminds/semver/v3 v3.0.3
 	github.com/b5/outline v0.0.0-20190307020728-8cdd78996e40
+	github.com/containers/image/v5 v5.2.1
+	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/go-git/go-git/v5 v5.0.0
 	github.com/hashicorp/go-hclog v0.9.2
 	github.com/hashicorp/go-plugin v1.0.1
