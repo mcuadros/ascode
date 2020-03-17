@@ -23,6 +23,7 @@ func NewComputed(r *Resource, t cty.Type, name string) *Computed {
 	var path string
 
 	child := r
+
 	for {
 		if child.parent.kind == ProviderKind {
 			if child.kind == ResourceKind {
@@ -40,6 +41,12 @@ func NewComputed(r *Resource, t cty.Type, name string) *Computed {
 
 	for i := len(parts) - 1; i >= 0; i-- {
 		path += "." + parts[i]
+	}
+
+	// handling of MaxItems equals 1
+	block, ok := r.parent.block.BlockTypes[r.typ]
+	if ok && block.MaxItems == 1 {
+		name = "0." + name
 	}
 
 	return NewComputedWithPath(r, t, name, path+"."+name)
