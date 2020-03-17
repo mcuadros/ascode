@@ -8,20 +8,24 @@ import (
 )
 
 type ResourceCollection struct {
-	typ    string
-	kind   Kind
-	block  *configschema.Block
-	parent *Resource
+	typ      string
+	kind     Kind
+	block    *configschema.Block
+	provider *Provider
+	parent   *Resource
 	*starlark.List
 }
 
-func NewResourceCollection(typ string, k Kind, block *configschema.Block, parent *Resource) *ResourceCollection {
+func NewResourceCollection(
+	typ string, k Kind, block *configschema.Block, provider *Provider, parent *Resource,
+) *ResourceCollection {
 	return &ResourceCollection{
-		typ:    typ,
-		kind:   k,
-		block:  block,
-		parent: parent,
-		List:   starlark.NewList(nil),
+		typ:      typ,
+		kind:     k,
+		block:    block,
+		provider: provider,
+		parent:   parent,
+		List:     starlark.NewList(nil),
 	}
 }
 
@@ -85,7 +89,7 @@ func (c *ResourceCollection) MakeResource(name string, dict *starlark.Dict) (*Re
 		name = NameGenerator()
 	}
 
-	resource := MakeResource(name, c.typ, c.kind, c.block, c.parent)
+	resource := MakeResource(name, c.typ, c.kind, c.block, c.provider, c.parent)
 	if dict != nil && dict.Len() != 0 {
 		if err := resource.LoadDict(dict); err != nil {
 			return nil, err

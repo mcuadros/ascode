@@ -24,3 +24,7 @@ assert.eq(alias.version, "2.13.0")
 
 kwargs = provider("aws", region="foo")
 assert.eq(kwargs.region, "foo")
+
+# compare
+assert.ne(p, kwargs)
+assert.ne(p, kwargs)

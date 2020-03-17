@@ -40,6 +40,7 @@ type Resource struct {
 	block  *configschema.Block
 	values *Values
 
+	provider     *Provider
 	parent       *Resource
 	dependenies  []*Resource
 	provisioners []*Provisioner
@@ -47,14 +48,15 @@ type Resource struct {
 
 // MakeResource returns a new resource of the given kind, type based on the
 // given configschema.Block.
-func MakeResource(name, typ string, k Kind, b *configschema.Block, parent *Resource) *Resource {
+func MakeResource(name, typ string, k Kind, b *configschema.Block, provider *Provider, parent *Resource) *Resource {
 	return &Resource{
-		name:   name,
-		typ:    typ,
-		kind:   k,
-		block:  b,
-		values: NewValues(),
-		parent: parent,
+		name:     name,
+		typ:      typ,
+		kind:     k,
+		block:    b,
+		values:   NewValues(),
+		provider: provider,
+		parent:   parent,
 	}
 }
 
@@ -117,6 +119,12 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 		return starlark.NewBuiltin("depends_on", r.dependsOn), nil
 	case "add_provisioner":
 		return starlark.NewBuiltin("add_provisioner", r.addProvisioner), nil
+	case "__provider__":
+		if r.provider == nil {
+			return starlark.None, nil
+		}
+
+		return r.provider, nil
 	case "__dict__":
 		return r.toDict(), nil
 	}
@@ -139,10 +147,10 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 	}
 
 	if b.MaxItems != 1 {
-		return r.values.Set(name, MustValue(NewResourceCollection(name, NestedKind, &b.Block, r))).Starlark(), nil
+		return r.values.Set(name, MustValue(NewResourceCollection(name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
 	}
 
-	return r.values.Set(name, MustValue(MakeResource("", name, NestedKind, &b.Block, r))).Starlark(), nil
+	return r.values.Set(name, MustValue(MakeResource("", name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
 }
 
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {

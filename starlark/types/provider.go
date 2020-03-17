@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/plugin/discovery"
 	"github.com/hashicorp/terraform/providers"
 	"go.starlark.net/starlark"
+	"go.starlark.net/syntax"
 )
 
 func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
@@ -91,10 +92,9 @@ func MakeProvider(pm *terraform.PluginManager, name, version, alias string) (*Pr
 		alias:    alias,
 		provider: provider,
 		meta:     meta,
-
-		Resource: MakeResource(alias, name, ProviderKind, response.Provider.Block, nil),
 	}
 
+	p.Resource = MakeResource(alias, name, ProviderKind, response.Provider.Block, p, nil)
 	p.dataSources = NewMapSchema(p, name, DataSourceKind, response.DataSources)
 	p.resources = NewMapSchema(p, name, ResourceKind, response.ResourceTypes)
 
@@ -129,6 +129,19 @@ func (p *Provider) Attr(name string) (starlark.Value, error) {
 // AttrNames honors the starlark.HasAttrs interface.
 func (p *Provider) AttrNames() []string {
 	return append(p.Resource.AttrNames(), "data", "resource", "version")
+}
+
+// CompareSameType honors starlark.Comprable interface.
+func (x *Provider) CompareSameType(op syntax.Token, y_ starlark.Value, depth int) (bool, error) {
+	y := y_.(*Provider)
+	switch op {
+	case syntax.EQL:
+		return x == y, nil
+	case syntax.NEQ:
+		return x != y, nil
+	default:
+		return false, fmt.Errorf("%s %s %s not implemented", x.Type(), op, y.Type())
+	}
 }
 
 type MapSchema struct {
@@ -171,7 +184,7 @@ func (m *MapSchema) Attr(name string) (starlark.Value, error) {
 	}
 
 	if schema, ok := m.schemas[name]; ok {
-		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, m.p.Resource)
+		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, m.p, m.p.Resource)
 		return m.collections[name], nil
 	}
 

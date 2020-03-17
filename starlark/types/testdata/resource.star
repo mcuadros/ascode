@@ -193,3 +193,9 @@ assert.fails(dependsOnNestedResource, "expected Resource<\\[data|resource\\].\\*
 
 def dependsOnItself(): userA.depends_on(userA)
 assert.fails(dependsOnItself, "can't depend on itself")
+
+# __provider__
+assert.eq(web.__provider__, aws)
+assert.eq(baz.__provider__, p)
+assert.eq(userA.__provider__, p)
+assert.eq(home.__provider__, p)

@@ -45,6 +45,6 @@ func MakeBackend(name string) (*Backend, error) {
 	}
 
 	return &Backend{
-		Resource: MakeResource(name, "", BackendKind, fn().ConfigSchema(), nil),
+		Resource: MakeResource(name, "", BackendKind, fn().ConfigSchema(), nil, nil),
 	}, nil
 }

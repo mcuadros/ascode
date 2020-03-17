@@ -3,9 +3,9 @@ package types
 import (
 	"fmt"
 
-	"github.com/mcuadros/ascode/terraform"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/plugin/discovery"
+	"github.com/mcuadros/ascode/terraform"
 	"go.starlark.net/starlark"
 )
 
@@ -65,7 +65,7 @@ func MakeProvisioner(pm *terraform.PluginManager, name string) (*Provisioner, er
 		provisioner: provisioner,
 		meta:        meta,
 
-		Resource: MakeResource(NameGenerator(), name, ProviderKind, response.Provisioner, nil),
+		Resource: MakeResource(NameGenerator(), name, ProviderKind, response.Provisioner, nil, nil),
 	}, nil
 }
 
