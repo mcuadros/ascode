@@ -48,6 +48,10 @@ func TestHCL(t *testing.T) {
 	doTest(t, "testdata/hcl.star")
 }
 
+func TestHCLIntegration(t *testing.T) {
+	doTest(t, "testdata/hcl_integration.star")
+}
+
 func doTest(t *testing.T, filename string) {
 	id = 0
 

@@ -91,7 +91,7 @@ func (r *Resource) ToHCL(b *hclwrite.Body) {
 
 	body := block.Body()
 
-	if r.parent != nil && r.parent.kind == ProviderKind {
+	if r.kind != NestedKind && r.parent != nil && r.parent.kind == ProviderKind {
 		body.SetAttributeTraversal("provider", hcl.Traversal{
 			hcl.TraverseRoot{Name: r.parent.typ},
 			hcl.TraverseAttr{Name: r.parent.Name()},
