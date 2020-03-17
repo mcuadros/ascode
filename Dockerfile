@@ -7,7 +7,7 @@ LABEL "com.github.actions.color"="blue"
 
 RUN ["/bin/sh", "-c", "apk add --update --no-cache bash ca-certificates curl git jq openssh"]
 
-RUN GO111MODULE=on go get github.com/mcuadros/ascode@08d1962
+RUN GO111MODULE=on go get github.com/mcuadros/ascode@2acd020
 
 COPY entrypoint.sh /
 
