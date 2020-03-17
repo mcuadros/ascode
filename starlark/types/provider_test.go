@@ -62,6 +62,7 @@ func doTest(t *testing.T, filename string) {
 		"provisioner": BuiltinProvisioner(pm),
 		"backend":     BuiltinBackend(),
 		"hcl":         BuiltinHCL(),
+		"fn":          BuiltinFunctionComputed(),
 	}
 
 	_, err := starlark.ExecFile(thread, filename, nil, predeclared)

@@ -54,6 +54,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"provisioner": types.BuiltinProvisioner(pm),
 			"backend":     types.BuiltinBackend(),
 			"hcl":         types.BuiltinHCL(),
+			"fn":          types.BuiltinFunctionComputed(),
 			"struct":      starlark.NewBuiltin("struct", starlarkstruct.Make),
 		},
 	}

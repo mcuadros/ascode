@@ -118,3 +118,28 @@ func (c *Computed) Len() int {
 
 	return 1024
 }
+
+func BuiltinFunctionComputed() starlark.Value {
+	return starlark.NewBuiltin("fn", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		var function starlark.String
+		var computed *Computed
+		switch len(args) {
+		case 2:
+			var ok bool
+			function, ok = args.Index(0).(starlark.String)
+			if !ok {
+				return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
+			}
+
+			computed, ok = args.Index(1).(*Computed)
+			if !ok {
+				return nil, fmt.Errorf("expected Computed, got %s", args.Index(1).Type())
+			}
+		default:
+			return nil, fmt.Errorf("unexpected positional arguments count")
+		}
+
+		path := fmt.Sprintf("%s(%s)", function.GoString(), computed.path)
+		return NewComputedWithPath(computed.r, computed.t, computed.name, path), nil
+	})
+}

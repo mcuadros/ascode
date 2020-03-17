@@ -35,3 +35,6 @@ gcp = provider("google", "3.13.0")
 # computed on list with MaxItem:1
 cluster = gcp.resource.container_cluster("foo")
 assert.eq(str(cluster.master_auth.client_certificate), '"${google_container_cluster.foo.master_auth.0.client_certificate}"')
+
+# fn wrapping
+assert.eq(str(fn("base64encode", web.ami)), '"${base64encode(data.aws_ami.id_3.id)}"')

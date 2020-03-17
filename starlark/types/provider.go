@@ -20,14 +20,14 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 			var ok bool
 			alias, ok = args.Index(2).(starlark.String)
 			if !ok {
-				return nil, fmt.Errorf("expected string, go %s", args.Index(2).Type())
+				return nil, fmt.Errorf("expected string, got %s", args.Index(2).Type())
 			}
 			fallthrough
 		case 2:
 			var ok bool
 			version, ok = args.Index(1).(starlark.String)
 			if !ok {
-				return nil, fmt.Errorf("expected string, go %s", args.Index(1).Type())
+				return nil, fmt.Errorf("expected string, got %s", args.Index(1).Type())
 			}
 			fallthrough
 		case 1:
