@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	osfilepath "path/filepath"
 
 	"github.com/mcuadros/ascode/starlark/module/experimental/docker"
 	"github.com/mcuadros/ascode/starlark/module/filepath"
@@ -32,6 +33,8 @@ type Runtime struct {
 	predeclared starlark.StringDict
 	modules     map[string]LoadModuleFunc
 	moduleCache map[string]*moduleCache
+
+	path string
 }
 
 func NewRuntime(pm *terraform.PluginManager) *Runtime {
@@ -61,6 +64,9 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 }
 
 func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
+	filename, _ = osfilepath.Abs(filename)
+	r.path, _ = osfilepath.Split(filename)
+
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
 	return starlark.ExecFile(thread, filename, nil, r.predeclared)
 }
@@ -75,7 +81,8 @@ func (r *Runtime) load(t *starlark.Thread, module string) (starlark.StringDict, 
 		return m()
 	}
 
-	return r.loadFile(t, module)
+	filename := osfilepath.Join(r.path, module)
+	return r.loadFile(t, filename)
 }
 
 type moduleCache struct {
