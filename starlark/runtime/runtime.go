@@ -58,7 +58,9 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"backend":     types.BuiltinBackend(),
 			"hcl":         types.BuiltinHCL(),
 			"fn":          types.BuiltinFunctionComputed(),
+			"evaluate":    types.BuiltinEvaluate(),
 			"struct":      starlark.NewBuiltin("struct", starlarkstruct.Make),
+			"module":      starlark.NewBuiltin("module", starlarkstruct.MakeModule),
 		},
 	}
 }
@@ -68,6 +70,8 @@ func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
 	r.path, _ = osfilepath.Split(filename)
 
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
+	thread.SetLocal("base_path", r.path)
+
 	return starlark.ExecFile(thread, filename, nil, r.predeclared)
 }
 

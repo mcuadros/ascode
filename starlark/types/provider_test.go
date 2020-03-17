@@ -57,6 +57,8 @@ func doTest(t *testing.T, filename string) {
 
 	log.SetOutput(ioutil.Discard)
 	thread := &starlark.Thread{Load: load}
+	thread.SetLocal("base_path", "testdata")
+
 	test.SetReporter(thread, t)
 
 	pm := &terraform.PluginManager{".providers"}
@@ -67,6 +69,7 @@ func doTest(t *testing.T, filename string) {
 		"backend":     BuiltinBackend(),
 		"hcl":         BuiltinHCL(),
 		"fn":          BuiltinFunctionComputed(),
+		"evaluate":    BuiltinEvaluate(),
 	}
 
 	_, err := starlark.ExecFile(thread, filename, nil, predeclared)
