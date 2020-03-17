@@ -11,7 +11,7 @@ require (
 	github.com/go-git/go-git/v5 v5.0.0
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/hashicorp/go-hclog v0.11.0
-	github.com/hashicorp/go-plugin v1.1.0
+	github.com/hashicorp/go-plugin v1.0.1-0.20190610192547-a1bc61569a26
 	github.com/hashicorp/hcl2 v0.0.0-20190618163856-0b64543c968c
 	github.com/hashicorp/terraform v0.12.23
 	github.com/jessevdk/go-flags v1.4.0
