@@ -1,16 +1,25 @@
 name: Docker Push
 on: [push, create]
 jobs:
-  test:
+  docker:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build Docker image
+    - name: Build image
       uses: mr-smithers-excellent/docker-build-push@v2
       with:
         image: mcuadros/ascode
         registry: docker.io
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Tag image
+      uses: mr-smithers-excellent/docker-build-push@v2
+      with:
+        image: mcuadros/ascode
+        registry: docker.io
+        tag: latest
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
