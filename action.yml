@@ -8,7 +8,7 @@ inputs:
   hcl:  
     description: 'hcl output file'
     required: true
-    default: 'generated.hcl'
+    default: 'generated.tf'
 runs:
   using: 'docker'
   image: 'Dockerfile'
