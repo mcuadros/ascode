@@ -9,22 +9,22 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/go-git/go-git/v5 v5.0.0
-	github.com/hashicorp/go-hclog v0.9.2
-	github.com/hashicorp/go-plugin v1.0.1
+	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
+	github.com/hashicorp/go-hclog v0.11.0
+	github.com/hashicorp/go-plugin v1.1.0
 	github.com/hashicorp/hcl2 v0.0.0-20190618163856-0b64543c968c
 	github.com/hashicorp/terraform v0.12.23
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/mitchellh/cli v1.0.0
-	github.com/oklog/ulid v2.0.0+incompatible
-	github.com/qri-io/starlib v0.4.2-0.20190710173850-cb41fc97dda5
-	github.com/stretchr/testify v1.4.0
+	github.com/oklog/ulid/v2 v2.0.2
+	github.com/qri-io/starlib v0.4.2-0.20200213133954-ff2e8cd5ef8d
+	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
+	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
+	github.com/stretchr/testify v1.5.1
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
-	github.com/zclconf/go-cty v1.2.1
+	github.com/zclconf/go-cty v1.3.1
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
-
-replace github.com/golangci/golangci-lint => github.com/golangci/golangci-lint v1.18.0
-
-replace github.com/go-critic/go-critic v0.0.0-20181204210945-ee9bf5809ead => github.com/go-critic/go-critic v0.3.5-0.20190526074819-1df300866540
 
 replace github.com/hashicorp/hcl2 => github.com/mcuadros/hcl2 v0.0.0-20190711172820-dd3dbf62a554

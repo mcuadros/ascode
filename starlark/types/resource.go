@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform/configs/configschema"
-	"github.com/oklog/ulid"
+	"github.com/oklog/ulid/v2"
 	"go.starlark.net/starlark"
 	"go.starlark.net/syntax"
 )
