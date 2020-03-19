@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"sync"
 
@@ -131,7 +132,7 @@ func (i *image) getTags() (*starlark.List, error) {
 	}
 
 	var err error
-	i.tags, err = docker.GetRepositoryTags(context.TODO(), nil, i.ref)
+	i.tags, err = docker.GetRepositoryTags(context.TODO(), imageSystemContext(), i.ref)
 	if err != nil {
 		return nil, fmt.Errorf("error listing repository tags: %v", err)
 	}
@@ -225,4 +226,10 @@ func versionToList(versions []*semver.Version, other []string) []string {
 	}
 
 	return append(output, other...)
+}
+
+func imageSystemContext() *types.SystemContext {
+	return &types.SystemContext{
+		AuthFilePath: os.Getenv("DOCKER_CONFIG"),
+	}
 }
