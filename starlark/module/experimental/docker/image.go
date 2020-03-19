@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 
@@ -239,7 +240,14 @@ func versionToList(versions []*semver.Version, other []string) []string {
 }
 
 func imageSystemContext() *types.SystemContext {
+	cfgFile := os.Getenv("DOCKER_CONFIG_FILE")
+	if cfgFile == "" {
+		if cfgPath := os.Getenv("DOCKER_CONFIG"); cfgPath != "" {
+			cfgFile = filepath.Join(cfgPath, "config.json")
+		}
+	}
+
 	return &types.SystemContext{
-		AuthFilePath: os.Getenv("DOCKER_CONFIG"),
+		AuthFilePath: cfgFile,
 	}
 }
