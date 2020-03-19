@@ -98,6 +98,12 @@ func (i *image) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "name":
 		return starlark.String(i.ref.DockerReference().Name()), nil
+	case "domain":
+		name := i.ref.DockerReference()
+		return starlark.String(reference.Domain(name)), nil
+	case "path":
+		name := i.ref.DockerReference()
+		return starlark.String(reference.Path(name)), nil
 	case "tags":
 		return i.getTags()
 	case "version":
@@ -105,6 +111,10 @@ func (i *image) Attr(name string) (starlark.Value, error) {
 	}
 
 	return nil, nil
+}
+
+func (i *image) AttrNames() []string {
+	return []string{"name", "domain", "path", "tags", "version"}
 }
 
 func (i *image) builtinVersionFunc(
