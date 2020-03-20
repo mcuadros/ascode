@@ -1,17 +1,25 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 
-	backend "github.com/hashicorp/terraform/backend/init"
+	"github.com/hashicorp/terraform/addrs"
+	"github.com/hashicorp/terraform/backend"
+	binit "github.com/hashicorp/terraform/backend/init"
+	"github.com/hashicorp/terraform/providers"
+	"github.com/hashicorp/terraform/states"
+	"github.com/hashicorp/terraform/states/statemgr"
+	"github.com/mcuadros/ascode/terraform"
+	"github.com/qri-io/starlib/util"
 	"go.starlark.net/starlark"
 )
 
 func init() {
-	backend.Init(nil)
+	binit.Init(nil)
 }
 
-func BuiltinBackend() starlark.Value {
+func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 	return starlark.NewBuiltin("backend", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var name starlark.String
 		switch len(args) {
@@ -25,7 +33,7 @@ func BuiltinBackend() starlark.Value {
 			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
-		p, err := MakeBackend(name.GoString())
+		p, err := MakeBackend(pm, name.GoString())
 		if err != nil {
 			return nil, err
 		}
@@ -35,16 +43,251 @@ func BuiltinBackend() starlark.Value {
 }
 
 type Backend struct {
+	pm *terraform.PluginManager
+	b  backend.Backend
 	*Resource
 }
 
-func MakeBackend(name string) (*Backend, error) {
-	fn := backend.Backend(name)
+func MakeBackend(pm *terraform.PluginManager, name string) (*Backend, error) {
+	fn := binit.Backend(name)
 	if fn == nil {
 		return nil, fmt.Errorf("unable to find backend %q", name)
 	}
 
+	b := fn()
+
 	return &Backend{
-		Resource: MakeResource(name, "", BackendKind, fn().ConfigSchema(), nil, nil),
+		pm:       pm,
+		b:        b,
+		Resource: MakeResource(name, "", BackendKind, b.ConfigSchema(), nil, nil),
 	}, nil
+}
+
+func (c *Backend) Attr(name string) (starlark.Value, error) {
+	switch name {
+	case "state":
+		return starlark.NewBuiltin("state", c.state), nil
+	}
+
+	return c.Resource.Attr(name)
+}
+
+func (b *Backend) getStateMgr(workspace string) (statemgr.Full, error) {
+	values, diag := b.b.PrepareConfig(b.values.Cty(b.b.ConfigSchema()))
+	if err := diag.Err(); err != nil {
+		return nil, err
+	}
+
+	diag = b.b.Configure(values)
+	if err := diag.Err(); err != nil {
+		return nil, err
+	}
+
+	workspaces, err := b.b.Workspaces()
+	if err != nil {
+		return nil, err
+	}
+
+	var found bool
+	for _, w := range workspaces {
+		if w == workspace {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return nil, fmt.Errorf("unable to find %q workspace", workspace)
+	}
+
+	return b.b.StateMgr(workspace)
+}
+
+func (b *Backend) state(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+
+	workspace := "default"
+	module := ""
+
+	err := starlark.UnpackArgs("state", args, kwargs, "module?", &module, "workspace?", &workspace)
+	if err != nil {
+		return nil, err
+	}
+
+	sm, err := b.getStateMgr(workspace)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := sm.RefreshState(); err != nil {
+		return nil, err
+	}
+
+	state := sm.State()
+	if state == nil {
+		return starlark.None, nil
+	}
+
+	return MakeState(b.pm, module, state)
+
+}
+
+type State struct {
+	*AttrDict
+	pm *terraform.PluginManager
+}
+
+func MakeState(pm *terraform.PluginManager, module string, state *states.State) (*State, error) {
+	var mod *states.Module
+	for _, m := range state.Modules {
+		if m.Addr.String() == module {
+			mod = m
+		}
+	}
+
+	if mod == nil {
+		return nil, fmt.Errorf("unable to find module with addr %q", module)
+	}
+
+	s := &State{
+		AttrDict: &AttrDict{starlark.NewDict(0)},
+		pm:       pm,
+	}
+	return s, s.initialize(state, mod)
+}
+
+func (s *State) initialize(state *states.State, mod *states.Module) error {
+	providers := make(map[string]*Provider, 0)
+	addrs := state.ProviderAddrs()
+	for _, addr := range addrs {
+		typ := addr.ProviderConfig.Type.Type
+		p, err := MakeProvider(s.pm, typ, "", addr.ProviderConfig.Alias)
+		if err != nil {
+			return err
+		}
+
+		providers[addr.ProviderConfig.String()] = p
+	}
+
+	for _, r := range mod.Resources {
+		provider := r.ProviderConfig.String()
+		if err := s.initializeResource(providers[provider], r); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *State) initializeResource(p *Provider, r *states.Resource) error {
+	typ := r.Addr.Type
+	name := r.Addr.Name
+
+	mode := addrsResourceModeString(r.Addr.Mode)
+
+	var schema providers.Schema
+	switch r.Addr.Mode {
+	case addrs.DataResourceMode:
+		schema = p.dataSources.schemas[typ]
+	case addrs.ManagedResourceMode:
+		schema = p.resources.schemas[typ]
+	default:
+		return fmt.Errorf("invalid resource type")
+	}
+
+	multi := r.EachMode != states.NoEach
+	for _, instance := range r.Instances {
+		r := MakeResource(name, typ, ResourceKind, schema.Block, p, p.Resource)
+
+		var val interface{}
+		if err := json.Unmarshal(instance.Current.AttrsJSON, &val); err != nil {
+			return err
+		}
+
+		values, _ := util.Marshal(val)
+		if err := r.LoadDict(values.(*starlark.Dict)); err != nil {
+			return err
+		}
+
+		if err := s.set(mode, typ, name, r, multi); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func addrsResourceModeString(m addrs.ResourceMode) string {
+	switch m {
+	case addrs.ManagedResourceMode:
+		return "resource"
+	case addrs.DataResourceMode:
+		return "data"
+	}
+
+	return ""
+}
+func (s *State) set(mode, typ, name string, r *Resource, multi bool) error {
+	p := starlark.String(r.provider.name)
+	m := starlark.String(mode)
+	t := starlark.String(typ[len(r.provider.name)+1:])
+	n := starlark.String(name)
+
+	if _, ok, _ := s.Get(p); !ok {
+		s.SetKey(p, NewAttrDict())
+	}
+
+	providers, _, _ := s.Get(p)
+	if _, ok, _ := providers.(*AttrDict).Get(m); !ok {
+		providers.(*AttrDict).SetKey(m, NewAttrDict())
+	}
+
+	modes, _, _ := providers.(*AttrDict).Get(m)
+	if _, ok, _ := modes.(*AttrDict).Get(t); !ok {
+		modes.(*AttrDict).SetKey(t, NewAttrDict())
+	}
+
+	resources, _, _ := modes.(*AttrDict).Get(t)
+
+	if !multi {
+		return resources.(*AttrDict).SetKey(n, r)
+	}
+
+	if _, ok, _ := resources.(*AttrDict).Get(n); !ok {
+		resources.(*AttrDict).SetKey(n, starlark.NewList(nil))
+	}
+
+	instances, _, _ := resources.(*AttrDict).Get(n)
+	if err := instances.(*starlark.List).Append(r); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type AttrDict struct {
+	*starlark.Dict
+}
+
+func NewAttrDict() *AttrDict {
+	return &AttrDict{Dict: starlark.NewDict(0)}
+}
+
+// Attr honors the starlark.Attr interface.
+func (d *AttrDict) Attr(name string) (starlark.Value, error) {
+	v, _, err := d.Get(starlark.String(name))
+	if err != nil {
+		return starlark.None, err
+	}
+
+	return v, nil
+}
+
+// AttrNames honors the starlark.HasAttrs interface.
+func (d *AttrDict) AttrNames() []string {
+	var names []string
+	for _, k := range d.Keys() {
+		names = append(names, k.(starlark.String).GoString())
+	}
+
+	return names
 }
