@@ -65,7 +65,7 @@ func (r *Resource) LoadDict(d *starlark.Dict) error {
 	for _, k := range d.Keys() {
 		name := k.(starlark.String)
 		value, _, _ := d.Get(k)
-		if err := r.SetField(string(name), value); err != nil {
+		if err := r.doSetField(string(name), value, true); err != nil {
 			return err
 		}
 	}
@@ -155,7 +155,7 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
 	if attr.Computed {
-		if !attr.Optional || !r.values.Has(name) {
+		if !r.values.Has(name) {
 			return NewComputed(r, attr.Type, name), nil
 		}
 	}
@@ -187,6 +187,14 @@ func (r *Resource) AttrNames() []string {
 
 // SetField honors the starlark.HasSetField interface.
 func (r *Resource) SetField(name string, v starlark.Value) error {
+	return r.doSetField(name, v, false)
+}
+
+func (r *Resource) doSetField(name string, v starlark.Value, allowComputed bool) error {
+	if v == starlark.None {
+		return nil
+	}
+
 	if b, ok := r.block.BlockTypes[name]; ok {
 		return r.setFieldFromNestedBlock(name, b, v)
 	}
@@ -197,7 +205,7 @@ func (r *Resource) SetField(name string, v starlark.Value) error {
 		return starlark.NoSuchAttrError(errmsg)
 	}
 
-	if attr.Computed && !attr.Optional {
+	if attr.Computed && !attr.Optional && !allowComputed {
 		return fmt.Errorf("%s: can't set computed %s attribute", r.typ, name)
 	}
 
@@ -214,6 +222,15 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 
 	switch resource := attr.(type) {
 	case *Resource:
+		if b.MaxItems == 1 && v.Type() == "list" {
+			list := v.(*starlark.List)
+			if list.Len() == 0 {
+				return nil
+			}
+
+			v = list.Index(0)
+		}
+
 		if v.Type() != "dict" {
 			return fmt.Errorf("expected dict, got %s", v.Type())
 		}
@@ -227,7 +244,7 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 		return resource.LoadList(v.(*starlark.List))
 	}
 
-	return fmt.Errorf("unexpected value %s", v.Type())
+	return fmt.Errorf("unexpected value %s at %s", v.Type(), name)
 }
 
 func (r *Resource) toDict() *starlark.Dict {

@@ -19,6 +19,8 @@ func init() {
 	binit.Init(nil)
 }
 
+// BuiltinBackend returns a starlak.Builtin function capable of instantiate
+// new Backend instances.
 func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 	return starlark.NewBuiltin("backend", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var name starlark.String
@@ -42,12 +44,15 @@ func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 	})
 }
 
+// Backend represent a Terraform Backend.
+// https://www.terraform.io/docs/backends/index.html
 type Backend struct {
 	pm *terraform.PluginManager
 	b  backend.Backend
 	*Resource
 }
 
+// MakeBackend returns a new Backend instance based on given arguments,
 func MakeBackend(pm *terraform.PluginManager, name string) (*Backend, error) {
 	fn := binit.Backend(name)
 	if fn == nil {
@@ -63,13 +68,19 @@ func MakeBackend(pm *terraform.PluginManager, name string) (*Backend, error) {
 	}, nil
 }
 
-func (c *Backend) Attr(name string) (starlark.Value, error) {
+// Attr honors the starlark.HasAttrs interface.
+func (b *Backend) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "state":
-		return starlark.NewBuiltin("state", c.state), nil
+		return starlark.NewBuiltin("state", b.state), nil
 	}
 
-	return c.Resource.Attr(name)
+	return b.Resource.Attr(name)
+}
+
+// AttrNames honors the starlark.HasAttrs interface.
+func (b *Backend) AttrNames() []string {
+	return append(b.Resource.AttrNames(), "state")
 }
 
 func (b *Backend) getStateMgr(workspace string) (statemgr.Full, error) {
@@ -103,7 +114,9 @@ func (b *Backend) getStateMgr(workspace string) (statemgr.Full, error) {
 	return b.b.StateMgr(workspace)
 }
 
-func (b *Backend) state(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+func (b *Backend) state(
+	_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
+) (starlark.Value, error) {
 
 	workspace := "default"
 	module := ""
@@ -131,11 +144,14 @@ func (b *Backend) state(_ *starlark.Thread, _ *starlark.Builtin, args starlark.T
 
 }
 
+// State represents a Terraform state read by a backed.
+// https://www.terraform.io/docs/state/index.html
 type State struct {
 	*AttrDict
 	pm *terraform.PluginManager
 }
 
+// MakeState returns a new instance of State based on the given arguments,
 func MakeState(pm *terraform.PluginManager, module string, state *states.State) (*State, error) {
 	var mod *states.Module
 	for _, m := range state.Modules {
@@ -262,32 +278,4 @@ func (s *State) set(mode, typ, name string, r *Resource, multi bool) error {
 	}
 
 	return nil
-}
-
-type AttrDict struct {
-	*starlark.Dict
-}
-
-func NewAttrDict() *AttrDict {
-	return &AttrDict{Dict: starlark.NewDict(0)}
-}
-
-// Attr honors the starlark.Attr interface.
-func (d *AttrDict) Attr(name string) (starlark.Value, error) {
-	v, _, err := d.Get(starlark.String(name))
-	if err != nil {
-		return starlark.None, err
-	}
-
-	return v, nil
-}
-
-// AttrNames honors the starlark.HasAttrs interface.
-func (d *AttrDict) AttrNames() []string {
-	var names []string
-	for _, k := range d.Keys() {
-		names = append(names, k.(starlark.String).GoString())
-	}
-
-	return names
 }

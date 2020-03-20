@@ -79,7 +79,7 @@ func NewTypeFromCty(typ cty.Type) (*Type, error) {
 		t.typ = "bool"
 	}
 
-	if typ.IsMapType() {
+	if typ.IsMapType() || typ.IsObjectType() {
 		t.typ = "dict"
 	}
 
@@ -135,7 +135,7 @@ func (t *Type) Validate(v starlark.Value) error {
 			return t.validateListType(v.(*starlark.List), t.cty.ElementType())
 		}
 	case *starlark.Dict:
-		if t.cty.IsMapType() {
+		if t.cty.IsMapType() || t.cty.IsObjectType() {
 			return nil
 		}
 	}

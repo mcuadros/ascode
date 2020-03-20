@@ -110,7 +110,7 @@ func (p *Provider) Type() string {
 	return fmt.Sprintf("Provider<%s>", p.name)
 }
 
-// Attr honors the starlark.HasAttrs interface.
+// Attr honors the starlark.Attr interface.
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "alias":

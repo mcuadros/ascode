@@ -50,10 +50,6 @@ group.mixed_instances_policy = {
 
 assert.eq(group.mixed_instances_policy.launch_template.launch_template_specification.launch_template_id, "bar")
 
-# attr resource non dict
-def attrResourceNonDict(): group.mixed_instances_policy = []
-assert.fails(attrResourceNonDict, "expected dict, got list")
-
 # attr collections
 web.network_interface = [
     {"network_interface_id": "foo"},

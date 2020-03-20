@@ -21,9 +21,9 @@ semver = docker.image("fedora", ">=22 <30")
 assert.eq(semver.name, "docker.io/library/fedora")
 assert.eq(semver.version(), "29")
 
-golang = docker.image("golang", "1.13.x")
+golang = docker.image("golang", "1.2.x")
 assert.eq(golang.name, "docker.io/library/golang")
-assert.eq(golang.version(), "1.13.8")
+assert.eq(golang.version(), "1.2.2")
 
 tagNotFound = docker.image("fedora", "not-found")
 assert.eq(tagNotFound.name, "docker.io/library/fedora")

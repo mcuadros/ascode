@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/hashicorp/terraform/configs/configschema"
 	"github.com/zclconf/go-cty/cty"
 	"go.starlark.net/starlark"
 )
@@ -246,4 +247,49 @@ func (a Values) List() []*NamedValue {
 // Len return the length.
 func (a Values) Len() int {
 	return len(a.values)
+}
+
+// Cty returns the cty.Value based on a given schema.
+func (a Values) Cty(schema *configschema.Block) cty.Value {
+	values := make(map[string]cty.Value)
+	for key, value := range schema.Attributes {
+		v := value.EmptyValue()
+		if a.Has(key) {
+			v = a.Get(key).Cty()
+		}
+
+		values[key] = v
+	}
+
+	return cty.ObjectVal(values)
+}
+
+// AttrDict implements starlark.HasAttrs for starlark.Dictionaries
+type AttrDict struct {
+	*starlark.Dict
+}
+
+// NewAttrDict returns an empty AttrDict.
+func NewAttrDict() *AttrDict {
+	return &AttrDict{Dict: starlark.NewDict(0)}
+}
+
+// Attr honors the starlark.Attr interface.
+func (d *AttrDict) Attr(name string) (starlark.Value, error) {
+	v, _, err := d.Get(starlark.String(name))
+	if err != nil {
+		return starlark.None, err
+	}
+
+	return v, nil
+}
+
+// AttrNames honors the starlark.HasAttrs interface.
+func (d *AttrDict) AttrNames() []string {
+	var names []string
+	for _, k := range d.Keys() {
+		names = append(names, k.(starlark.String).GoString())
+	}
+
+	return names
 }

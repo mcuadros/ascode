@@ -66,7 +66,7 @@ func doTest(t *testing.T, filename string) {
 	predeclared := starlark.StringDict{
 		"provider":    BuiltinProvider(pm),
 		"provisioner": BuiltinProvisioner(pm),
-		"backend":     BuiltinBackend(),
+		"backend":     BuiltinBackend(pm),
 		"hcl":         BuiltinHCL(),
 		"fn":          BuiltinFunctionComputed(),
 		"evaluate":    BuiltinEvaluate(),
