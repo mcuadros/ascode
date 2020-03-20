@@ -12,6 +12,7 @@ assert.eq(type(p), "Provider<aws>")
 assert.eq(type(p.resource.instance), "ResourceCollection<resource.aws_instance>")
 assert.eq(type(p.resource.instance()), "Resource<resource.aws_instance>")
 
+
 p.resource.instance()
 assert.eq(len(p.resource.instance), 2)
 
@@ -28,3 +29,17 @@ assert.eq(kwargs.region, "foo")
 # compare
 assert.ne(p, kwargs)
 assert.ne(p, kwargs)
+
+foo = p.resource.instance("foo", ami="valueA")
+bar = p.resource.instance("bar", ami="valueA", disable_api_termination=False)
+qux = p.resource.instance("qux", ami="valueB", disable_api_termination=True)
+
+result = p.resource.instance.search("id", "foo")
+assert.eq(len(result), 1)
+assert.eq(result[0], foo)
+
+assert.eq(len(p.resource.instance.search("ami", "valueA")), 2)
+assert.eq(len(p.resource.instance.search("disable_api_termination", True)), 1)
+assert.eq(len(p.resource.instance.search("disable_api_termination", False)), 1)
+
+assert.eq(p.resource.instance.search("foo")[0], foo)

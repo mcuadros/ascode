@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform/configs/configschema"
 	"go.starlark.net/starlark"
+	"go.starlark.net/syntax"
 )
 
 type ResourceCollection struct {
@@ -176,4 +177,74 @@ func (c *ResourceCollection) toDict() *starlark.List {
 	}
 
 	return starlark.NewList(values)
+}
+
+// Attr honors the starlark.HasAttrs interface.
+func (c *ResourceCollection) Attr(name string) (starlark.Value, error) {
+	switch name {
+	case "search":
+		return starlark.NewBuiltin("search", c.search), nil
+	case "__dict__":
+		return c.toDict(), nil
+	}
+
+	return c.List.Attr(name)
+}
+
+// AttrNames honors the starlark.HasAttrs interface.
+func (c *ResourceCollection) AttrNames() []string {
+	return append(c.List.AttrNames(), "search", "__dict__")
+}
+
+func (c *ResourceCollection) search(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
+	var key string
+	var value starlark.Value
+
+	switch len(args) {
+	case 1:
+		key = "id"
+		value = args.Index(0)
+	case 2:
+		string, ok := args.Index(0).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("resource: expected string, got %s", args.Index(0).Type())
+		}
+
+		key = string.GoString()
+		value = args.Index(1)
+	default:
+		return nil, fmt.Errorf("search: unexpected positional arguments count")
+	}
+
+	list := starlark.NewList(nil)
+	for i := 0; i < c.Len(); i++ {
+		r := c.Index(i).(*Resource)
+		v, ok := getValue(r, key).(starlark.Comparable)
+		if !ok || v.Type() != value.Type() {
+			continue
+		}
+
+		match, err := v.CompareSameType(syntax.EQL, value, 2)
+		if err != nil {
+			return starlark.None, err
+		}
+
+		if match {
+			list.Append(r)
+		}
+	}
+
+	return list, nil
+}
+
+func getValue(r *Resource, key string) starlark.Value {
+	if key == "id" {
+		return starlark.String(r.name)
+	}
+
+	if !r.values.Has(key) {
+		return starlark.None
+	}
+
+	return r.values.Get(key).Starlark()
 }
