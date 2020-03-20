@@ -1,6 +1,6 @@
 load("assert.star", "assert")
 
-p = provider("ignition", "1.1.0")
+p = tf.provider("ignition", "1.1.0")
 
 # attr
 qux = p.data.user()
@@ -21,7 +21,7 @@ assert.eq(type(qux.id), "Computed")
 assert.eq(str(qux.id), '"${data.ignition_user.id_2.id}"')
 
 # attr output assignation
-aws = provider("aws", "2.13.0")
+aws = tf.provider("aws", "2.13.0")
 def invalidOutput(): aws.data.instance().public_dns = "foo"
 assert.fails(invalidOutput, "aws_instance: can't set computed public_dns attribute")
 

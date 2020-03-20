@@ -1,3 +1,3 @@
-b = backend("gcs")
-b.bucket = "tf-state-prod"
-b.prefix = "terraform/state"
+tf.backend = backend("gcs")
+tf.backend.bucket = "tf-state-prod"
+tf.backend.prefix = "terraform/state"

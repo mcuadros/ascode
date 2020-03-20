@@ -1,4 +1,4 @@
-ignition = provider("ignition", "1.1.0")
+ignition = tf.provider("ignition", "1.1.0")
 
 user = ignition.data.user()
 user.name = "foo"

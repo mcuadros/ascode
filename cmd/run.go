@@ -23,7 +23,8 @@ const (
 type RunCmd struct {
 	commonCmd
 
-	ToHCL          string `long:"to-hcl" description:"dumps context resources to a hcl file"`
+	ToHCL          string `long:"to-hcl" description:"dumps resources to a hcl file"`
+	PrintHCL       bool   `long:"print-hcl" description:"print resources to a hcl file"`
 	PositionalArgs struct {
 		File string `positional-arg-name:"file" description:"starlark source file"`
 	} `positional-args:"true" required:"1"`
@@ -47,12 +48,20 @@ func (c *RunCmd) Execute(args []string) error {
 }
 
 func (c *RunCmd) dumpToHCL(ctx starlark.StringDict) error {
-	if c.ToHCL == "" {
+	if c.ToHCL == "" && !c.PrintHCL {
 		return nil
 	}
 
 	f := hclwrite.NewEmptyFile()
 	c.runtime.Terraform.ToHCL(f.Body())
+
+	if c.PrintHCL {
+		os.Stdout.Write(f.Bytes())
+	}
+
+	if c.ToHCL == "" {
+		return nil
+	}
 
 	return ioutil.WriteFile(c.ToHCL, f.Bytes(), 0644)
 }

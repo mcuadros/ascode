@@ -64,7 +64,6 @@ func doTest(t *testing.T, filename string) {
 	pm := &terraform.PluginManager{".providers"}
 
 	predeclared := starlark.StringDict{
-		"provider":    BuiltinProvider(pm),
 		"provisioner": BuiltinProvisioner(pm),
 		"backend":     BuiltinBackend(pm),
 		"hcl":         BuiltinHCL(),

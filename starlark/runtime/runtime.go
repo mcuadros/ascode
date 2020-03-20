@@ -58,7 +58,6 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 		},
 		predeclared: starlark.StringDict{
 			"tf":          tf,
-			"provider":    types.BuiltinProvider(pm),
 			"provisioner": types.BuiltinProvisioner(pm),
 			"backend":     types.BuiltinBackend(pm),
 			"hcl":         types.BuiltinHCL(),

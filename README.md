@@ -18,7 +18,7 @@ Terraform is a great tool, with support for almost everything you can imagine, m
 Creating am Amazon EC2 Instance is as easy as:
 
 ```pyhon
-aws = provider("aws", "2.13.0")
+aws = tf.provider("aws", "2.13.0")
 aws.region = "us-west-2"
 
 aws.resource.instance(instance_type ="t2.micro", ami="ami-2757f631")
@@ -28,7 +28,7 @@ aws.resource.instance(instance_type ="t2.micro", ami="ami-2757f631")
 In this example we create 40 instances, 20 using ubuntu and 20 using ECS.
 
 ```python
-aws = provider("aws")
+aws = tf.provider("aws")
 aws.region = "us-west-2"
 
 # It creates a new instance for the given name, distro and type.

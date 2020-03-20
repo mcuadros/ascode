@@ -1,7 +1,7 @@
 load("os", "os")
 load("assert.star", "assert")
 
-aws = provider("aws", "2.13.0")
+aws = tf.provider("aws", "2.13.0")
 aws.region = "us-west-2"
 
 # Based on:
@@ -71,4 +71,4 @@ example.ami = "ami-2757f631"
 example.instance_type = "t2.micro"
 example.depends_on(bucket)
 
-assert.eq(hcl(aws), os.read_file("fixtures/aws.tf"))
+assert.eq(hcl(tf), os.read_file("fixtures/aws.tf"))

@@ -1,6 +1,6 @@
 load("assert.star", "assert")
 
-aws = provider("aws", "2.13.0")
+aws = tf.provider("aws", "2.13.0")
 
 # compute of scalar
 web = aws.resource.instance()
@@ -30,7 +30,7 @@ assert.eq(str(aws.resource.instance().id), '"${aws_instance.id_7.id}"')
 # compute on resource
 assert.eq(str(aws.data.ami().id), '"${data.aws_ami.id_8.id}"')
 
-gcp = provider("google", "3.13.0")
+gcp = tf.provider("google", "3.13.0")
 
 # computed on list with MaxItem:1
 cluster = gcp.resource.container_cluster("foo")

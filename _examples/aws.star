@@ -1,4 +1,4 @@
-aws = provider("aws")
+aws = tf.provider("aws")
 aws.region = "us-west-2"
 
 # It creates a new instance for the given name, distro and type.

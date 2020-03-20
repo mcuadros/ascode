@@ -1,6 +1,6 @@
 load("assert.star", "assert")
 
-p = provider("aws", "2.13.0")
+p = tf.provider("aws", "2.13.0")
 assert.eq(p.version, "2.13.0")
 
 assert.eq(len(dir(p.data)), 131)
@@ -19,11 +19,11 @@ assert.eq(len(p.resource.instance), 2)
 p.region = "us-west-2"
 assert.eq(p.region, "us-west-2")
 
-alias = provider("aws", "2.13.0", "alias")
+alias = tf.provider("aws", "2.13.0", "alias")
 assert.eq(alias.alias, "alias")
 assert.eq(alias.version, "2.13.0")
 
-kwargs = provider("aws", region="foo")
+kwargs = tf.provider("aws", region="foo")
 assert.eq(kwargs.region, "foo")
 
 # compare

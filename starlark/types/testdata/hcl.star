@@ -1,6 +1,6 @@
 load("assert.star", "assert")
 
-helm = provider("helm", "1.0.0", "default")
+helm = tf.provider("helm", "1.0.0", "default")
 helm.kubernetes.token = "foo"
 
 # hcl
