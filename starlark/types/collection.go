@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/configs/configschema"
+	"github.com/mcuadros/ascode/terraform"
 	"go.starlark.net/starlark"
 	"go.starlark.net/syntax"
 )
@@ -67,7 +68,9 @@ func (c *ResourceCollection) Truth() starlark.Bool {
 func (c *ResourceCollection) Freeze() {}
 
 // Hash honors the starlark.Value interface.
-func (c *ResourceCollection) Hash() (uint32, error) { return 42, nil }
+func (c *ResourceCollection) Hash() (uint32, error) {
+	return 0, fmt.Errorf("unhashable type: ResourceCollection")
+}
 
 // Name honors the starlark.Callable interface.
 func (c *ResourceCollection) Name() string {
@@ -247,4 +250,108 @@ func getValue(r *Resource, key string) starlark.Value {
 	}
 
 	return r.values.Get(key).Starlark()
+}
+
+type ProviderCollection struct {
+	pm *terraform.PluginManager
+	*AttrDict
+}
+
+func NewProviderCollection(pm *terraform.PluginManager) *ProviderCollection {
+	return &ProviderCollection{
+		pm:       pm,
+		AttrDict: NewAttrDict(),
+	}
+}
+
+// String honors the starlark.Value interface.
+func (c *ProviderCollection) String() string {
+	return "foo"
+}
+
+// Type honors the starlark.Value interface.
+func (c *ProviderCollection) Type() string {
+	return "ProviderCollection"
+}
+
+// Truth honors the starlark.Value interface.
+func (c *ProviderCollection) Truth() starlark.Bool {
+	return true // even when empty
+}
+
+// Freeze honors the starlark.Value interface.
+func (c *ProviderCollection) Freeze() {}
+
+// Hash honors the starlark.Value interface.
+func (c *ProviderCollection) Hash() (uint32, error) {
+	return 0, fmt.Errorf("unhashable type: ProviderCollection")
+}
+
+// Name honors the starlark.Callable interface.
+func (c *ProviderCollection) Name() string {
+	return "foo"
+}
+
+// CallInternal honors the starlark.Callable interface.
+func (c *ProviderCollection) CallInternal(thread *starlark.Thread, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	name, version, alias, err := c.unpackArgs(args)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.MakeProvider(name, version, alias, kwargs)
+}
+
+func (c *ProviderCollection) MakeProvider(name, version, alias string, kwargs []starlark.Tuple) (*Provider, error) {
+	n := starlark.String(name)
+	a := starlark.String(alias)
+
+	if _, ok, _ := c.Get(n); !ok {
+		c.SetKey(n, NewAttrDict())
+	}
+	providers, _, _ := c.Get(n)
+	if _, ok, _ := providers.(*AttrDict).Get(a); ok {
+		return nil, fmt.Errorf("already exists a provider %q with the alias %q", name, alias)
+	}
+
+	p, err := MakeProvider(c.pm, name, version, alias)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := providers.(*AttrDict).SetKey(starlark.String(p.alias), p); err != nil {
+		return nil, err
+	}
+
+	return p, p.loadKeywordArgs(kwargs)
+}
+
+func (c *ProviderCollection) unpackArgs(args starlark.Tuple) (string, string, string, error) {
+	var name, version, alias starlark.String
+	switch len(args) {
+	case 3:
+		var ok bool
+		alias, ok = args.Index(2).(starlark.String)
+		if !ok {
+			return "", "", "", fmt.Errorf("expected string, got %s", args.Index(2).Type())
+		}
+		fallthrough
+	case 2:
+		var ok bool
+		version, ok = args.Index(1).(starlark.String)
+		if !ok {
+			return "", "", "", fmt.Errorf("expected string, got %s", args.Index(1).Type())
+		}
+		fallthrough
+	case 1:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return "", "", "", fmt.Errorf("expected string, got %s", args.Index(0).Type())
+		}
+	default:
+		return "", "", "", fmt.Errorf("unexpected positional arguments count")
+	}
+
+	return string(name), string(version), string(alias), nil
 }

@@ -11,4 +11,4 @@ assert.eq(hcl(helm), "" +
 '  kubernetes {\n' + \
 '    token = "foo"\n' + \
 '  }\n' + \
-'}\n')
+'}\n\n')

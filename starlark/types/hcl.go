@@ -33,6 +33,26 @@ func BuiltinHCL() starlark.Value {
 	})
 }
 
+func (s *Terraform) ToHCL(b *hclwrite.Body) {
+	if s.b != nil {
+		s.b.ToHCL(b)
+	}
+
+	s.p.ToHCL(b)
+}
+
+func (s *AttrDict) ToHCL(b *hclwrite.Body) {
+	for _, v := range s.Keys() {
+		p, _, _ := s.Get(v)
+		hcl, ok := p.(HCLCompatible)
+		if !ok {
+			continue
+		}
+
+		hcl.ToHCL(b)
+	}
+}
+
 func (s *Provider) ToHCL(b *hclwrite.Body) {
 	block := b.AppendNewBlock("provider", []string{s.name})
 
@@ -42,6 +62,7 @@ func (s *Provider) ToHCL(b *hclwrite.Body) {
 
 	s.dataSources.ToHCL(b)
 	s.resources.ToHCL(b)
+	b.AppendNewline()
 }
 
 func (s *Provisioner) ToHCL(b *hclwrite.Body) {
@@ -54,6 +75,7 @@ func (s *Backend) ToHCL(b *hclwrite.Body) {
 
 	block := parent.Body().AppendNewBlock("backend", []string{s.name})
 	s.Resource.doToHCLAttributes(block.Body())
+	b.AppendNewline()
 }
 
 func (t *MapSchema) ToHCL(b *hclwrite.Body) {

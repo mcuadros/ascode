@@ -21,11 +21,11 @@ func init() {
 		return fmt.Sprintf("id_%d", id)
 	}
 
-	// The tests make extensive use of these not-yet-standard features.
 	resolve.AllowLambda = true
 	resolve.AllowNestedDef = true
 	resolve.AllowFloat = true
 	resolve.AllowSet = true
+	resolve.AllowGlobalReassign = true
 }
 
 func TestProvider(t *testing.T) {
@@ -70,6 +70,7 @@ func doTest(t *testing.T, filename string) {
 		"hcl":         BuiltinHCL(),
 		"fn":          BuiltinFunctionComputed(),
 		"evaluate":    BuiltinEvaluate(),
+		"tf":          MakeTerraform(pm),
 	}
 
 	_, err := starlark.ExecFile(thread, filename, nil, predeclared)

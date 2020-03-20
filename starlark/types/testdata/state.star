@@ -1,4 +1,3 @@
-
 load("assert.star", "assert")
 
 b = backend("local")

@@ -47,24 +47,26 @@ func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 // Backend represent a Terraform Backend.
 // https://www.terraform.io/docs/backends/index.html
 type Backend struct {
-	pm *terraform.PluginManager
-	b  backend.Backend
+	typ string
+	pm  *terraform.PluginManager
+	b   backend.Backend
 	*Resource
 }
 
 // MakeBackend returns a new Backend instance based on given arguments,
-func MakeBackend(pm *terraform.PluginManager, name string) (*Backend, error) {
-	fn := binit.Backend(name)
+func MakeBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
+	fn := binit.Backend(typ)
 	if fn == nil {
-		return nil, fmt.Errorf("unable to find backend %q", name)
+		return nil, fmt.Errorf("unable to find backend %q", typ)
 	}
 
 	b := fn()
 
 	return &Backend{
+		typ:      typ,
 		pm:       pm,
 		b:        b,
-		Resource: MakeResource(name, "", BackendKind, b.ConfigSchema(), nil, nil),
+		Resource: MakeResource(typ, "", BackendKind, b.ConfigSchema(), nil, nil),
 	}, nil
 }
 
@@ -73,6 +75,8 @@ func (b *Backend) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "state":
 		return starlark.NewBuiltin("state", b.state), nil
+	case "__type__":
+		return starlark.String(b.typ), nil
 	}
 
 	return b.Resource.Attr(name)
@@ -80,7 +84,7 @@ func (b *Backend) Attr(name string) (starlark.Value, error) {
 
 // AttrNames honors the starlark.HasAttrs interface.
 func (b *Backend) AttrNames() []string {
-	return append(b.Resource.AttrNames(), "state")
+	return append(b.Resource.AttrNames(), "state", "__type__")
 }
 
 func (b *Backend) getStateMgr(workspace string) (statemgr.Full, error) {
@@ -142,6 +146,11 @@ func (b *Backend) state(
 
 	return MakeState(b.pm, module, state)
 
+}
+
+// Type honors the starlark.Value interface.
+func (b *Backend) Type() string {
+	return fmt.Sprintf("Backend<%s>", b.typ)
 }
 
 // State represents a Terraform state read by a backed.

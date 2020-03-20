@@ -30,6 +30,7 @@ func init() {
 type LoadModuleFunc func() (starlark.StringDict, error)
 
 type Runtime struct {
+	Terraform   *types.Terraform
 	predeclared starlark.StringDict
 	modules     map[string]LoadModuleFunc
 	moduleCache map[string]*moduleCache
@@ -38,7 +39,10 @@ type Runtime struct {
 }
 
 func NewRuntime(pm *terraform.PluginManager) *Runtime {
+	tf := types.MakeTerraform(pm)
+
 	return &Runtime{
+		Terraform:   tf,
 		moduleCache: make(map[string]*moduleCache),
 		modules: map[string]LoadModuleFunc{
 			filepath.ModuleName: filepath.LoadModule,
@@ -53,6 +57,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"http":            http.LoadModule,
 		},
 		predeclared: starlark.StringDict{
+			"tf":          tf,
 			"provider":    types.BuiltinProvider(pm),
 			"provisioner": types.BuiltinProvisioner(pm),
 			"backend":     types.BuiltinBackend(pm),
