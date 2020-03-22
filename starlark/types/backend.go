@@ -25,7 +25,8 @@ func init() {
 //   outline: types
 //     functions:
 //       backend(type) Backend
-//         Instantiates a new [`Backend`](#Backend)
+//         Instantiates a new [`Backend`](#backend)
+//
 //         params:
 //           type string
 //             [backend type](https://www.terraform.io/docs/backends/types/index.html)
@@ -59,11 +60,20 @@ func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 //       Backend
 //         A [backend](https://www.terraform.io/docs/backends/index.html) in
 //         Terraform determines how state is loaded and how an operation such
-//         as apply is executed.
+//         as apply is executed. The backend can be set as a `tf.backend` or
+//         be used standalone to read the same from this or other Terraform
+//         configuration.
 //
 //         fields:
+//           __kind__ string
+//             Kind of the backend. Always `backend`.
 //           __type__ string
-//             backend type
+//             Type of the backend. Eg.: `local`.
+//           __dict__ Dict
+//             A dictionary containing all the config values of the backend.
+//           <argument> <scalar>
+//             Arguments defined by the backend schema, thus can be of any
+//             scalar type.
 //
 //         methods:
 //           state(module="", workspace="default") State
@@ -186,15 +196,20 @@ func (b *Backend) Type() string {
 //         Terraform to map real world resources to your configuration, keep
 //         track of metadata, and to improve performance for large infrastructures.
 //
-//         State implements an AttrDict, where the first level are the providers
+//         State implements a Dict, where the first level are the providers
 //         containing the keys `data` with the data sources and `resources` with
 //         the resources.
 //
+//         examples:
+//           backend_local.star
+//             An example of how print a resume of providers and resources
+//             count from the state.
+//
 //         fields:
 //           <provider> AttrDict
-//             provider state and all the resources
+//             provider and all the resources state.
 type State struct {
-	*AttrDict
+	*starlark.Dict
 	pm *terraform.PluginManager
 }
 
@@ -212,8 +227,8 @@ func MakeState(pm *terraform.PluginManager, module string, state *states.State) 
 	}
 
 	s := &State{
-		AttrDict: &AttrDict{starlark.NewDict(0)},
-		pm:       pm,
+		Dict: starlark.NewDict(0),
+		pm:   pm,
 	}
 
 	return s, s.initialize(state, mod)
@@ -297,30 +312,30 @@ func (s *State) set(mode, typ, name string, r *Resource, multi bool) error {
 	n := starlark.String(name)
 
 	if _, ok, _ := s.Get(p); !ok {
-		s.SetKey(p, NewAttrDict())
+		s.SetKey(p, starlark.NewDict(0))
 	}
 
 	providers, _, _ := s.Get(p)
-	if _, ok, _ := providers.(*AttrDict).Get(m); !ok {
-		providers.(*AttrDict).SetKey(m, NewAttrDict())
+	if _, ok, _ := providers.(*starlark.Dict).Get(m); !ok {
+		providers.(*starlark.Dict).SetKey(m, starlark.NewDict(0))
 	}
 
-	modes, _, _ := providers.(*AttrDict).Get(m)
-	if _, ok, _ := modes.(*AttrDict).Get(t); !ok {
-		modes.(*AttrDict).SetKey(t, NewAttrDict())
+	modes, _, _ := providers.(*starlark.Dict).Get(m)
+	if _, ok, _ := modes.(*starlark.Dict).Get(t); !ok {
+		modes.(*starlark.Dict).SetKey(t, starlark.NewDict(0))
 	}
 
-	resources, _, _ := modes.(*AttrDict).Get(t)
+	resources, _, _ := modes.(*starlark.Dict).Get(t)
 
 	if !multi {
-		return resources.(*AttrDict).SetKey(n, r)
+		return resources.(*starlark.Dict).SetKey(n, r)
 	}
 
-	if _, ok, _ := resources.(*AttrDict).Get(n); !ok {
-		resources.(*AttrDict).SetKey(n, starlark.NewList(nil))
+	if _, ok, _ := resources.(*starlark.Dict).Get(n); !ok {
+		resources.(*starlark.Dict).SetKey(n, starlark.NewList(nil))
 	}
 
-	instances, _, _ := resources.(*AttrDict).Get(n)
+	instances, _, _ := resources.(*starlark.Dict).Get(n)
 	if err := instances.(*starlark.List).Append(r); err != nil {
 		return err
 	}
