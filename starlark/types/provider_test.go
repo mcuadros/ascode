@@ -53,10 +53,14 @@ func TestHCLIntegration(t *testing.T) {
 }
 
 func doTest(t *testing.T, filename string) {
+	doTestPrint(t, filename, nil)
+}
+
+func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, string)) {
 	id = 0
 
 	log.SetOutput(ioutil.Discard)
-	thread := &starlark.Thread{Load: load}
+	thread := &starlark.Thread{Load: load, Print: print}
 	thread.SetLocal("base_path", "testdata")
 
 	test.SetReporter(thread, t)
