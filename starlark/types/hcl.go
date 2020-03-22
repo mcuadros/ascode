@@ -15,6 +15,17 @@ type HCLCompatible interface {
 	ToHCL(b *hclwrite.Body)
 }
 
+// BuiltinHCL returns a starlak.Builtin function to generate HCL from objects
+// implementing the HCLCompatible interface.
+//
+//   outline: types
+//     functions:
+//       hcl(resource) string
+//         Returns the HCL encoding of the given resource.
+//         params:
+//           resource <resource>
+//             resource to be encoded.
+//
 func BuiltinHCL() starlark.Value {
 	return starlark.NewBuiltin("hcl", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, _ []starlark.Tuple) (starlark.Value, error) {
 		if args.Len() != 1 {
@@ -41,7 +52,7 @@ func (s *Terraform) ToHCL(b *hclwrite.Body) {
 	s.p.ToHCL(b)
 }
 
-func (s *AttrDict) ToHCL(b *hclwrite.Body) {
+func (s *Dict) ToHCL(b *hclwrite.Body) {
 	for _, v := range s.Keys() {
 		p, _, _ := s.Get(v)
 		hcl, ok := p.(HCLCompatible)

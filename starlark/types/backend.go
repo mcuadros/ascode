@@ -185,7 +185,7 @@ func (b *Backend) Type() string {
 	return fmt.Sprintf("Backend<%s>", b.typ)
 }
 
-// State represents a Terraform state read by a backed.
+// State represents a Terraform state read by a backend.
 // https://www.terraform.io/docs/state/index.html
 //
 //   outline: types

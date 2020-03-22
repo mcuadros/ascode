@@ -24,3 +24,4 @@ assert.eq(cluster.addons_config.network_policy_config.disabled, True)
 release = s["helm"]["resource"]["release"]["nats-operator"]
 assert.eq(release.set[0].name, "cluster.auth.enabled")
 assert.eq(release.set[1].name, "image.tag")
+

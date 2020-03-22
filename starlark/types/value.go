@@ -264,32 +264,10 @@ func (a Values) Cty(schema *configschema.Block) cty.Value {
 	return cty.ObjectVal(values)
 }
 
-// AttrDict implements starlark.HasAttrs for starlark.Dictionaries
-type AttrDict struct {
+type Dict struct {
 	*starlark.Dict
 }
 
-// NewAttrDict returns an empty AttrDict.
-func NewAttrDict() *AttrDict {
-	return &AttrDict{Dict: starlark.NewDict(0)}
-}
-
-// Attr honors the starlark.Attr interface.
-func (d *AttrDict) Attr(name string) (starlark.Value, error) {
-	v, _, err := d.Get(starlark.String(name))
-	if err != nil {
-		return starlark.None, err
-	}
-
-	return v, nil
-}
-
-// AttrNames honors the starlark.HasAttrs interface.
-func (d *AttrDict) AttrNames() []string {
-	var names []string
-	for _, k := range d.Keys() {
-		names = append(names, k.(starlark.String).GoString())
-	}
-
-	return names
+func NewDict() *Dict {
+	return &Dict{starlark.NewDict(0)}
 }

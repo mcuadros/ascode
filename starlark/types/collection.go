@@ -254,13 +254,13 @@ func getValue(r *Resource, key string) starlark.Value {
 
 type ProviderCollection struct {
 	pm *terraform.PluginManager
-	*AttrDict
+	*Dict
 }
 
 func NewProviderCollection(pm *terraform.PluginManager) *ProviderCollection {
 	return &ProviderCollection{
-		pm:       pm,
-		AttrDict: NewAttrDict(),
+		pm:   pm,
+		Dict: NewDict(),
 	}
 }
 
@@ -307,10 +307,10 @@ func (c *ProviderCollection) MakeProvider(name, version, alias string, kwargs []
 	a := starlark.String(alias)
 
 	if _, ok, _ := c.Get(n); !ok {
-		c.SetKey(n, NewAttrDict())
+		c.SetKey(n, NewDict())
 	}
 	providers, _, _ := c.Get(n)
-	if _, ok, _ := providers.(*AttrDict).Get(a); ok {
+	if _, ok, _ := providers.(*Dict).Get(a); ok {
 		return nil, fmt.Errorf("already exists a provider %q with the alias %q", name, alias)
 	}
 
@@ -319,7 +319,7 @@ func (c *ProviderCollection) MakeProvider(name, version, alias string, kwargs []
 		return nil, err
 	}
 
-	if err := providers.(*AttrDict).SetKey(starlark.String(p.Resource.name), p); err != nil {
+	if err := providers.(*Dict).SetKey(starlark.String(p.Resource.name), p); err != nil {
 		return nil, err
 	}
 

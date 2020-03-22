@@ -54,3 +54,4 @@ assert.eq(len(p.resource.instance.search("disable_api_termination", True)), 1)
 assert.eq(len(p.resource.instance.search("disable_api_termination", False)), 1)
 
 assert.eq(p.resource.instance.search("foo")[0], foo)
+
