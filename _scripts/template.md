@@ -1,8 +1,17 @@
-{{- define "mdFn" }}
+{{- define "functionName" }}
+{{- if ne .Receiver "types" -}}
+#
+{{- end -}}
+### def {{ if ne .Receiver "types" -}}
+	 <i>{{ .Receiver }}</i>.
+	{{- end -}}
+	<b>{{- (index (split .Signature "(") 0) -}}</b>
+{{- end -}}
+{{- define "function" }}
 
-#### def <b>{{ (index (split .Signature "(") 0) }}</b>
+{{ template "functionName" . }}
 ```go
-{{ .Signature }}
+{{if ne .Receiver "types" -}}{{.Receiver}}.{{- end }}{{ .Signature }}
 ```
 
 {{- if ne .Description "" }}
@@ -11,15 +20,26 @@
 
 {{- if gt (len .Params) 0 }}
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
 {{ range .Params -}}
-| '{{ .Name }}' | '{{ .Type }}' | {{ .Description }} |
+| `{{ .Name }}` | `{{ .Type }}` | {{ .Description }} |
 {{ end -}}
 
 {{- end -}}
+
+{{- if gt (len .Examples) 0 }}
+
+{{ range .Examples -}}
+```python
+{{ .Code }}
+```
+{{ end -}}
+
+{{- end -}}
+
 {{- end -}}
 
 {{- range . -}}
@@ -32,7 +52,7 @@ title: '{{ .Path }}'
 {{- if gt (len .Functions) 0 }}
 ## Functions
 {{ range .Functions -}}
-{{ template "mdFn" . }}
+{{ template "function" . }}
 {{ end -}}
 {{- end }}
 
@@ -41,29 +61,41 @@ title: '{{ .Path }}'
 {{ range .Types -}}
 
 
-### '{{ .Name }}'
+### <b>{{ .Name }}</b>
 {{ if ne .Description "" }}{{ .Description }}{{ end -}}
 {{ if gt (len .Fields) 0 }}
 
-**Fields**
+###### Properties
 
 | name | type | description |
 |------|------|-------------|
 {{ range .Fields -}}
-| {{ .Name }} | {{ .Type }} | {{ .Description }} |
+| `{{ .Name }}` | `{{ .Type }}` | {{ .Description }} |
 {{ end -}}
 
+{{ if gt (len .Examples) 0 }}
+###### Examples
+{{ range .Examples -}}
+{{ .Description }}
+```python
+{{ .Code }}
+```
 {{ end -}}
+{{ end -}}
+
+
+{{ end -}}
+
 {{ if gt (len .Methods) 0 }}
 
-**Methods**
+###### Methods
 
 {{- range .Methods -}}
-{{ template "mdFn" . }}
+{{ template "function" . }}
 {{ end -}}
 {{- if gt (len .Operators) 0 }}
 
-**Operators**
+###### Operators
 
 | operator | description |
 |----------|-------------|
@@ -72,6 +104,7 @@ title: '{{ .Path }}'
 {{ end }}
 
 {{ end }}
+
 {{ end }}
 {{- end -}}
 {{- end -}}

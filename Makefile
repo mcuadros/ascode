@@ -7,9 +7,11 @@ DEPENDENCIES =
 OUTLINE_CMD ?= outline
 DOCUMENTATION_PATH ?= _documentation
 DOCUMENTATION_RUNTIME_PATH ?= $(DOCUMENTATION_PATH)/runtime
+EXAMPLES_PATH ?= starlark/types/testdata/examples
 
 RUNTIME_MODULES = \
 	github.com/mcuadros/ascode/starlark/module/os \
+	github.com/mcuadros/ascode/starlark/types \
 	github.com/mcuadros/ascode/starlark/module/filepath \
 	github.com/qri-io/starlib/encoding/base64 \
 	github.com/qri-io/starlib/encoding/csv \
@@ -50,7 +52,8 @@ BIN_PATH := $(BUILD_PATH)/bin
 
 documentation: $(RUNTIME_MODULES)
 $(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH)
-	@$(OUTLINE_CMD) package -t _scripts/template.md $@ > $(DOCUMENTATION_RUNTIME_PATH)/`basename $@`.md
+	$(OUTLINE_CMD) package -t _scripts/template.md -d $(EXAMPLES_PATH) $@ \
+		> $(DOCUMENTATION_RUNTIME_PATH)/`basename $@`.md
 
 $(DOCUMENTATION_RUNTIME_PATH):
 	mkdir -p $@
