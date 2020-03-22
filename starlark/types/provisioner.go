@@ -33,15 +33,13 @@ func BuiltinProvisioner(pm *terraform.PluginManager) starlark.Value {
 }
 
 type Provisioner struct {
-	name        string
 	provisioner *plugin.GRPCProvisioner
 	meta        discovery.PluginMeta
-
 	*Resource
 }
 
-func MakeProvisioner(pm *terraform.PluginManager, name string) (*Provisioner, error) {
-	cli, meta, err := pm.Provisioner(name)
+func MakeProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, error) {
+	cli, meta, err := pm.Provisioner(typ)
 	if err != nil {
 		return nil, err
 	}
@@ -61,15 +59,14 @@ func MakeProvisioner(pm *terraform.PluginManager, name string) (*Provisioner, er
 
 	defer cli.Kill()
 	return &Provisioner{
-		name:        name,
 		provisioner: provisioner,
 		meta:        meta,
 
-		Resource: MakeResource(NameGenerator(), name, ProviderKind, response.Provisioner, nil, nil),
+		Resource: MakeResource(NameGenerator(), typ, ProvisionerKind, response.Provisioner, nil, nil),
 	}, nil
 }
 
 // Type honors the starlark.Value interface. It shadows p.Resource.Type.
 func (p *Provisioner) Type() string {
-	return fmt.Sprintf("Provisioner<%s>", p.name)
+	return fmt.Sprintf("Provisioner<%s>", p.typ)
 }

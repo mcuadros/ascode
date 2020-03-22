@@ -21,6 +21,14 @@ func init() {
 
 // BuiltinBackend returns a starlak.Builtin function capable of instantiate
 // new Backend instances.
+//
+//   outline: types
+//     functions:
+//       backend(type) Backend
+//         Instantiates a new [`Backend`](#Backend)
+//         params:
+//           type string
+//             [backend type](https://www.terraform.io/docs/backends/types/index.html)
 func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 	return starlark.NewBuiltin("backend", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var name starlark.String
@@ -45,11 +53,29 @@ func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 }
 
 // Backend represent a Terraform Backend.
-// https://www.terraform.io/docs/backends/index.html
+//
+//   outline: types
+//     types:
+//       Backend
+//         A [backend](https://www.terraform.io/docs/backends/index.html) in
+//         Terraform determines how state is loaded and how an operation such
+//         as apply is executed.
+//
+//         fields:
+//           __type__ string
+//             backend type
+//
+//         methods:
+//           state(module="", workspace="default") State
+//             Loads the latest state for a given module or workspace.
+//             params:
+//               module string
+//                 name of the module, empty equals to root.
+//               workspace string
+//                 backend workspace
 type Backend struct {
-	typ string
-	pm  *terraform.PluginManager
-	b   backend.Backend
+	pm *terraform.PluginManager
+	b  backend.Backend
 	*Resource
 }
 
@@ -63,20 +89,16 @@ func MakeBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
 	b := fn()
 
 	return &Backend{
-		typ:      typ,
 		pm:       pm,
 		b:        b,
-		Resource: MakeResource(typ, "", BackendKind, b.ConfigSchema(), nil, nil),
+		Resource: MakeResource(NameGenerator(), typ, BackendKind, b.ConfigSchema(), nil, nil),
 	}, nil
 }
 
-// Attr honors the starlark.HasAttrs interface.
 func (b *Backend) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "state":
 		return starlark.NewBuiltin("state", b.state), nil
-	case "__type__":
-		return starlark.String(b.typ), nil
 	}
 
 	return b.Resource.Attr(name)
@@ -84,7 +106,7 @@ func (b *Backend) Attr(name string) (starlark.Value, error) {
 
 // AttrNames honors the starlark.HasAttrs interface.
 func (b *Backend) AttrNames() []string {
-	return append(b.Resource.AttrNames(), "state", "__type__")
+	return append(b.Resource.AttrNames(), "state")
 }
 
 func (b *Backend) getStateMgr(workspace string) (statemgr.Full, error) {
@@ -155,6 +177,22 @@ func (b *Backend) Type() string {
 
 // State represents a Terraform state read by a backed.
 // https://www.terraform.io/docs/state/index.html
+//
+//   outline: types
+//     types:
+//       State
+//         State about your managed infrastructure and configuration. This
+//         [state](https://www.terraform.io/docs/state/index.html) is used by
+//         Terraform to map real world resources to your configuration, keep
+//         track of metadata, and to improve performance for large infrastructures.
+//
+//         State implements an AttrDict, where the first level are the providers
+//         containing the keys `data` with the data sources and `resources` with
+//         the resources.
+//
+//         fields:
+//           <provider> AttrDict
+//             provider state and all the resources
 type State struct {
 	*AttrDict
 	pm *terraform.PluginManager
@@ -177,6 +215,7 @@ func MakeState(pm *terraform.PluginManager, module string, state *states.State) 
 		AttrDict: &AttrDict{starlark.NewDict(0)},
 		pm:       pm,
 	}
+
 	return s, s.initialize(state, mod)
 }
 
@@ -252,9 +291,9 @@ func addrsResourceModeString(m addrs.ResourceMode) string {
 	return ""
 }
 func (s *State) set(mode, typ, name string, r *Resource, multi bool) error {
-	p := starlark.String(r.provider.name)
+	p := starlark.String(r.provider.typ)
 	m := starlark.String(mode)
-	t := starlark.String(typ[len(r.provider.name)+1:])
+	t := starlark.String(typ[len(r.provider.typ)+1:])
 	n := starlark.String(name)
 
 	if _, ok, _ := s.Get(p); !ok {

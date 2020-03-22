@@ -15,11 +15,11 @@ import (
 
 func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 	return starlark.NewBuiltin("provider", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-		var name, version, alias starlark.String
+		var typ, version, name starlark.String
 		switch len(args) {
 		case 3:
 			var ok bool
-			alias, ok = args.Index(2).(starlark.String)
+			name, ok = args.Index(2).(starlark.String)
 			if !ok {
 				return nil, fmt.Errorf("expected string, got %s", args.Index(2).Type())
 			}
@@ -33,7 +33,7 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 			fallthrough
 		case 1:
 			var ok bool
-			name, ok = args.Index(0).(starlark.String)
+			typ, ok = args.Index(0).(starlark.String)
 			if !ok {
 				return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
 			}
@@ -41,7 +41,7 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
-		p, err := MakeProvider(pm, name.GoString(), version.GoString(), alias.GoString())
+		p, err := MakeProvider(pm, typ.GoString(), version.GoString(), name.GoString())
 		if err != nil {
 			return nil, err
 		}
@@ -52,9 +52,8 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 
 // Provider represents a provider as a starlark.Value.
 type Provider struct {
-	name, alias string
-	provider    *plugin.GRPCProvider
-	meta        discovery.PluginMeta
+	provider *plugin.GRPCProvider
+	meta     discovery.PluginMeta
 
 	dataSources *MapSchema
 	resources   *MapSchema
@@ -62,9 +61,9 @@ type Provider struct {
 	*Resource
 }
 
-// MakeProvider returns a new Provider instance from a given name version and alias.
-func MakeProvider(pm *terraform.PluginManager, name, version, alias string) (*Provider, error) {
-	cli, meta, err := pm.Provider(name, version, false)
+// MakeProvider returns a new Provider instance from a given type, version and name.
+func MakeProvider(pm *terraform.PluginManager, typ, version, name string) (*Provider, error) {
+	cli, meta, err := pm.Provider(typ, version, false)
 	if err != nil {
 		return nil, err
 	}
@@ -79,8 +78,8 @@ func MakeProvider(pm *terraform.PluginManager, name, version, alias string) (*Pr
 		return nil, err
 	}
 
-	if alias == "" {
-		alias = NameGenerator()
+	if name == "" {
+		name = NameGenerator()
 	}
 
 	provider := raw.(*plugin.GRPCProvider)
@@ -88,34 +87,30 @@ func MakeProvider(pm *terraform.PluginManager, name, version, alias string) (*Pr
 
 	defer cli.Kill()
 	p := &Provider{
-		name:     name,
-		alias:    alias,
 		provider: provider,
 		meta:     meta,
 	}
 
-	p.Resource = MakeResource(alias, name, ProviderKind, response.Provider.Block, p, nil)
-	p.dataSources = NewMapSchema(p, name, DataSourceKind, response.DataSources)
-	p.resources = NewMapSchema(p, name, ResourceKind, response.ResourceTypes)
+	p.Resource = MakeResource(name, typ, ProviderKind, response.Provider.Block, p, nil)
+	p.dataSources = NewMapSchema(p, typ, DataSourceKind, response.DataSources)
+	p.resources = NewMapSchema(p, typ, ResourceKind, response.ResourceTypes)
 
 	return p, nil
 }
 
 func (p *Provider) String() string {
-	return fmt.Sprintf("provider(%q)", p.name)
+	return fmt.Sprintf("provider(%q)", p.typ)
 }
 
 // Type honors the starlark.Value interface. It shadows p.Resource.Type.
 func (p *Provider) Type() string {
-	return fmt.Sprintf("Provider<%s>", p.name)
+	return fmt.Sprintf("Provider<%s>", p.typ)
 }
 
 // Attr honors the starlark.Attr interface.
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
-	case "alias":
-		return starlark.String(p.alias), nil
-	case "version":
+	case "__version__":
 		return starlark.String(p.meta.Version), nil
 	case "data":
 		return p.dataSources, nil
@@ -128,7 +123,7 @@ func (p *Provider) Attr(name string) (starlark.Value, error) {
 
 // AttrNames honors the starlark.HasAttrs interface.
 func (p *Provider) AttrNames() []string {
-	return append(p.Resource.AttrNames(), "data", "resource", "version")
+	return append(p.Resource.AttrNames(), "data", "resource", "__version__")
 }
 
 // CompareSameType honors starlark.Comprable interface.

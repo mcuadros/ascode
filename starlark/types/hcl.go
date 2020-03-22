@@ -54,9 +54,9 @@ func (s *AttrDict) ToHCL(b *hclwrite.Body) {
 }
 
 func (s *Provider) ToHCL(b *hclwrite.Body) {
-	block := b.AppendNewBlock("provider", []string{s.name})
+	block := b.AppendNewBlock("provider", []string{s.typ})
 
-	block.Body().SetAttributeValue("alias", cty.StringVal(s.Name()))
+	block.Body().SetAttributeValue("alias", cty.StringVal(s.name))
 	block.Body().SetAttributeValue("version", cty.StringVal(string(s.meta.Version)))
 	s.Resource.doToHCLAttributes(block.Body())
 
@@ -66,14 +66,14 @@ func (s *Provider) ToHCL(b *hclwrite.Body) {
 }
 
 func (s *Provisioner) ToHCL(b *hclwrite.Body) {
-	block := b.AppendNewBlock("provisioner", []string{s.name})
+	block := b.AppendNewBlock("provisioner", []string{s.typ})
 	s.Resource.doToHCLAttributes(block.Body())
 }
 
 func (s *Backend) ToHCL(b *hclwrite.Body) {
 	parent := b.AppendNewBlock("terraform", nil)
 
-	block := parent.Body().AppendNewBlock("backend", []string{s.name})
+	block := parent.Body().AppendNewBlock("backend", []string{s.typ})
 	s.Resource.doToHCLAttributes(block.Body())
 	b.AppendNewline()
 }

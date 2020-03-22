@@ -319,7 +319,7 @@ func (c *ProviderCollection) MakeProvider(name, version, alias string, kwargs []
 		return nil, err
 	}
 
-	if err := providers.(*AttrDict).SetKey(starlark.String(p.alias), p); err != nil {
+	if err := providers.(*AttrDict).SetKey(starlark.String(p.Resource.name), p); err != nil {
 		return nil, err
 	}
 

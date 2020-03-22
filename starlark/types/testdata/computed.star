@@ -2,11 +2,19 @@ load("assert.star", "assert")
 
 aws = tf.provider("aws", "2.13.0")
 
+ami = aws.data.ami()
+
 # compute of scalar
 web = aws.resource.instance()
-web.ami = aws.data.ami().id
-assert.eq(type(web.ami), "Computed")
-assert.eq(str(web.ami), '"${data.aws_ami.id_3.id}"')
+web.ami = ami.id
+assert.eq(type(web.ami), "Computed<string>")
+assert.eq(str(web.ami), '"${data.aws_ami.id_2.id}"')
+assert.eq(web.ami.__resource__, ami)
+assert.eq(web.ami.__type__, "string")
+
+# attr names
+assert.eq("__resource__" in dir(web.ami), True)
+assert.eq("__type__" in dir(web.ami), True)
 
 # compute of set
 table = aws.data.dynamodb_table()
@@ -37,4 +45,4 @@ cluster = gcp.resource.container_cluster("foo")
 assert.eq(str(cluster.master_auth.client_certificate), '"${google_container_cluster.foo.master_auth.0.client_certificate}"')
 
 # fn wrapping
-assert.eq(str(fn("base64encode", web.ami)), '"${base64encode(data.aws_ami.id_3.id)}"')
+assert.eq(str(fn("base64encode", web.ami)), '"${base64encode(data.aws_ami.id_2.id)}"')

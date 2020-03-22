@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform/version"
 	"github.com/mcuadros/ascode/terraform"
 	"go.starlark.net/starlark"
 )
@@ -21,6 +22,8 @@ func MakeTerraform(pm *terraform.PluginManager) *Terraform {
 // Attr honors the starlark.HasAttrs interface.
 func (t *Terraform) Attr(name string) (starlark.Value, error) {
 	switch name {
+	case "version":
+		return starlark.String(version.String()), nil
 	case "provider":
 		return t.p, nil
 	case "backend":
@@ -51,7 +54,7 @@ func (t *Terraform) SetField(name string, val starlark.Value) error {
 
 // AttrNames honors the starlark.HasAttrs interface.
 func (t *Terraform) AttrNames() []string {
-	return []string{"provider", "backend"}
+	return []string{"provider", "backend", "version"}
 }
 
 // Freeze honors the starlark.Value interface.

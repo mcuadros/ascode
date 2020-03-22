@@ -1,14 +1,24 @@
 load("assert.star", "assert")
 
-p = tf.provider("ignition", "1.1.0")
+ignition = tf.provider("ignition", "1.1.0")
 
 # attr
-qux = p.data.user()
+qux = ignition.data.user()
 qux.uid = 42
 assert.eq(qux.uid, 42)
 
 qux.uid *= 2
 assert.eq(qux.uid, 84)
+
+# attr names
+assert.eq("uid" in dir(qux), True)
+assert.eq("depends_on" in dir(qux), True)
+assert.eq("add_provisioner" in dir(qux), True)
+assert.eq("__provider__" in dir(qux), True)
+assert.eq("__type__" in dir(qux), True)
+assert.eq("__name__" in dir(qux), True)
+assert.eq("__kind__" in dir(qux), True)
+assert.eq("__dict__" in dir(qux), True)
 
 # attr not-set
 assert.eq(qux.name, None)
@@ -17,13 +27,14 @@ assert.eq(qux.name, None)
 assert.fails(lambda: qux.foo, "Resource<data.ignition_user> has no .foo field or method")
 
 # attr id
-assert.eq(type(qux.id), "Computed")
+assert.eq(type(qux.id), "Computed<string>")
 assert.eq(str(qux.id), '"${data.ignition_user.id_2.id}"')
+aws = tf.provider("aws", "2.13.0")
 
 # attr output assignation
-aws = tf.provider("aws", "2.13.0")
 def invalidOutput(): aws.data.instance().public_dns = "foo"
 assert.fails(invalidOutput, "aws_instance: can't set computed public_dns attribute")
+
 
 # attr output in asignation
 web = aws.resource.instance()
@@ -77,12 +88,12 @@ def attrCollectionNonDictElement(): web.network_interface = [{}, 42]
 assert.fails(attrCollectionNonDictElement, "1: expected dict, got int")
 
 # comparasion simple values
-assert.eq(p.data.disk(), p.data.disk())
-assert.ne(p.data.disk(device="foo"), p.data.disk())
+assert.eq(ignition.data.disk(), ignition.data.disk())
+assert.ne(ignition.data.disk(device="foo"), ignition.data.disk())
 
 # comparasion with nested
-y = p.data.disk()
-x = p.data.disk()
+y = ignition.data.disk()
+x = ignition.data.disk()
 
 y.partition(start=42)
 assert.ne(x, y)
@@ -91,53 +102,53 @@ x.partition(start=42)
 assert.eq(x, y)
 
 # comparasion with list
-assert.ne(p.data.user(groups=["foo"]), p.data.user())
-assert.eq(p.data.user(groups=["foo"]), p.data.user(groups=["foo"]))
+assert.ne(ignition.data.user(groups=["foo"]), ignition.data.user())
+assert.eq(ignition.data.user(groups=["foo"]), ignition.data.user(groups=["foo"]))
 
 # constructor with name
-quux = p.data.user("quux")
+quux = ignition.data.user("quux")
 assert.eq(str(quux.id), '"${data.ignition_user.quux.id}"')
 
 # constructor from kwargs
-bar = p.data.user(uid=42, system=True)
+bar = ignition.data.user(uid=42, system=True)
 assert.eq(bar.uid, 42)
 assert.eq(bar.system, True)
 
 # constructor from kwargs with name
-fred = p.data.user("fred", uid=42, system=True)
+fred = ignition.data.user("fred", uid=42, system=True)
 assert.eq(fred.uid, 42)
 assert.eq(fred.system, True)
 assert.eq(str(fred.id), '"${data.ignition_user.fred.id}"')
 
 # constructor from dict
-foo = p.data.user({"uid": 42, "system": True})
+foo = ignition.data.user({"uid": 42, "system": True})
 assert.eq(foo.uid, 42)
 assert.eq(foo.system, True)
 
 # constructor from dict with name
-baz = p.data.user("baz", {"uid": 42, "system": True})
+baz = ignition.data.user("baz", {"uid": 42, "system": True})
 assert.eq(baz.uid, 42)
 assert.eq(baz.system, True)
 assert.eq(str(baz.id), '"${data.ignition_user.baz.id}"')
 
 assert.eq(bar, foo)
-assert.eq(foo, p.data.user(foo.__dict__))
+assert.eq(foo, ignition.data.user(foo.__dict__))
 
 # constructor errors
-def consNonDict(): p.data.user(1)
+def consNonDict(): ignition.data.user(1)
 assert.fails(consNonDict, "resource: expected string or dict, got int")
 
-def consNonNameDict(): p.data.user(1, 1)
+def consNonNameDict(): ignition.data.user(1, 1)
 assert.fails(consNonNameDict, "resource: expected string, got int")
 
-def consNameDict(): p.data.user("foo", 1)
+def consNameDict(): ignition.data.user("foo", 1)
 assert.fails(consNameDict, "resource: expected dict, got int")
 
-def consKwargsNonName(): p.data.user(1, uid=42)
+def consKwargsNonName(): ignition.data.user(1, uid=42)
 assert.fails(consKwargsNonName, "resource: expected string, got int")
 
 # full coverage
-user = p.data.user()
+user = ignition.data.user()
 user.name = "foo"
 user.uid = 42
 user.groups = ["foo", "bar"]
@@ -151,7 +162,7 @@ assert.eq(user.__dict__, {
     "system": True,
 })
 
-disk = p.data.disk()
+disk = ignition.data.disk()
 
 root = disk.partition()
 root.label = "root"
@@ -177,8 +188,8 @@ assert.eq(disk.__dict__, {
 
 
 # depends_on
-userA = p.data.user()
-userB = p.data.user()
+userA = ignition.data.user()
+userB = ignition.data.user()
 userA.depends_on(userB)
 
 def dependsOnNonResource(): userA.depends_on(42)
@@ -192,6 +203,22 @@ assert.fails(dependsOnItself, "can't depend on itself")
 
 # __provider__
 assert.eq(web.__provider__, aws)
-assert.eq(baz.__provider__, p)
-assert.eq(userA.__provider__, p)
-assert.eq(home.__provider__, p)
+assert.eq(baz.__provider__, ignition)
+assert.eq(userA.__provider__, ignition)
+assert.eq(home.__provider__, ignition)
+
+# __kind__
+assert.eq(ignition.data.user().__kind__, "data")
+assert.eq(aws.resource.instance().__kind__, "resource")
+assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__kind__, "nested")
+
+# __type__
+assert.eq(ignition.data.user().__type__, "ignition_user")
+assert.eq(aws.resource.instance().__type__, "aws_instance")
+assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__type__, "mixed_instances_policy")
+
+# __name__
+assert.eq(ignition.data.user().__name__, "id_30")
+assert.eq(aws.resource.instance().__name__, "id_31")
+assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__name__, "")
+assert.eq(ignition.data.user("given").__name__, "given")

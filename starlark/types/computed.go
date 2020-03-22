@@ -62,8 +62,8 @@ func NewComputedWithPath(r *Resource, t cty.Type, name, path string) *Computed {
 	}
 }
 
-func (*Computed) Type() string {
-	return "Computed"
+func (c *Computed) Type() string {
+	return fmt.Sprintf("Computed<%s>", MustTypeFromCty(c.t).Starlark())
 }
 
 func (c *Computed) InnerType() *Type {
@@ -72,6 +72,13 @@ func (c *Computed) InnerType() *Type {
 }
 
 func (c *Computed) Attr(name string) (starlark.Value, error) {
+	switch name {
+	case "__resource__":
+		return c.r, nil
+	case "__type__":
+		return starlark.String(MustTypeFromCty(c.t).Starlark()), nil
+	}
+
 	if !c.t.IsObjectType() {
 		return nil, nil
 	}
@@ -85,7 +92,7 @@ func (c *Computed) Attr(name string) (starlark.Value, error) {
 }
 
 func (c *Computed) AttrNames() []string {
-	return nil
+	return []string{"__resource__", "__type__"}
 }
 
 func (c *Computed) doNested(name, path string, t cty.Type, index int) *Computed {

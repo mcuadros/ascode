@@ -24,15 +24,76 @@ var NameGenerator = func() string {
 type Kind string
 
 const (
-	ProviderKind   Kind = "provider"
-	ResourceKind   Kind = "resource"
-	DataSourceKind Kind = "data"
-	NestedKind     Kind = "nested"
-	BackendKind    Kind = "backend"
+	ProviderKind    Kind = "provider"
+	ProvisionerKind Kind = "provisioner"
+	ResourceKind    Kind = "resource"
+	DataSourceKind  Kind = "data"
+	NestedKind      Kind = "nested"
+	BackendKind     Kind = "backend"
 )
 
 // Resource represents a resource as a starlark.Value, it can be of four kinds,
 // provider, resource, data source or a nested resource.
+//
+//   outline: types
+//     types:
+//       Resource
+//         [Resources](https://www.terraform.io/docs/configuration/resources.html)
+//         are the most important element in the Terraform language. Each
+//         resource block describes one or more infrastructure objects, such as
+//         virtual networks, compute instances, or higher-level components such
+//         as DNS records.
+//
+//         Each resource is associated with a single resource type, which
+//         determines the kind of infrastructure object it manages and what
+//         arguments and other attributes the resource supports.
+//
+//         Each resource type in turn belongs to a provider, which is a plugin
+//         for Terraform that offers a collection of resource types. A provider
+//         usually provides resources to manage a single cloud or on-premises
+//         infrastructure platform.
+//
+//         fields:
+//           __provider__ Provider
+//             Provider of this resource if any.
+//           __kind__ string
+//             Kind of the resource. Eg.: `data`
+//           __type__ string
+//             Type of the resource. Eg.: `aws_instance`
+//           __name__ string
+//             Local name of the resource, if none was provided to the constructor
+//             the name is auto-generated following the parter `id_`. Some kind
+//             or resources are unamed.
+//           __dict__ Dict
+//             A dictionary containing all the values of the resource.
+//           <argument> <scalar>|Computed
+//             Arguments defined by the resource schema, thus can be of any
+//             scalar type or Computed values.
+//           <block> Resource
+//             Blocks defined by the resource schema, thus are nested resources,
+//             containing other arguments and/or blocks.
+//
+//         methods:
+//           depends_on(resource)
+//             Explicitly declares a dependency with another resource. Use the
+//             [depends_on](https://www.terraform.io/docs/configuration/resources.html#depends_on-explicit-resource-dependencies)
+//             meta-argument to handle hidden resource dependencies that
+//             Terraform can't automatically infer.
+//             params:
+//               resource Resource
+//                 depended data or resource kind.
+//           add_provisioner(provisioner)
+//             Create-time actions like these can be described using resource
+//             provisioners. A provisioner is another type of plugin supported
+//             by Terraform, and each provisioner takes a different kind of
+//             action in the context of a resource being created.
+//             Provisioning steps should be used sparingly, since they represent
+//             non-declarative actions taken during the creation of a resource
+//             and so Terraform is not able to model changes to them as it can
+//             for the declarative portions of the Terraform language.
+//             params:
+//               provisioner Provisioner
+//                 provisioner resource to be executed.
 type Resource struct {
 	name   string
 	typ    string
@@ -125,6 +186,12 @@ func (r *Resource) Attr(name string) (starlark.Value, error) {
 		}
 
 		return r.provider, nil
+	case "__kind__":
+		return starlark.String(r.kind), nil
+	case "__name__":
+		return starlark.String(r.name), nil
+	case "__type__":
+		return starlark.String(r.typ), nil
 	case "__dict__":
 		return r.toDict(), nil
 	}
@@ -182,7 +249,10 @@ func (r *Resource) AttrNames() []string {
 		i++
 	}
 
-	return names
+	return append(names,
+		"depends_on", "add_provisioner",
+		"__kind__", "__type__", "__provider__", "__name__", "__dict__",
+	)
 }
 
 // SetField honors the starlark.HasSetField interface.
