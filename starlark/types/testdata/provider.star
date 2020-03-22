@@ -7,6 +7,9 @@ assert.eq(p.__name__, "id_1")
 assert.eq(p.__version__, "2.13.0")
 
 # attr names
+assert.eq("__provider__" in dir(p), False)
+assert.eq("depends_on" in dir(p), False)
+assert.eq("add_provisioner" in dir(p), False)
 assert.eq("__version__" in dir(p), True)
 assert.eq("data" in dir(p), True)
 assert.eq("resource" in dir(p), True)

@@ -23,6 +23,24 @@ var NameGenerator = func() string {
 // Kind describes what kind of resource is represented by a Resource isntance.
 type Kind string
 
+// IsNamed returns true if this kind of resources contains a name.
+func (k Kind) IsNamed() bool {
+	if k == ResourceKind || k == DataSourceKind || k == ProviderKind {
+		return true
+	}
+
+	return false
+}
+
+// IsProviderRelated returns true if this kind of resources contains a provider.
+func (k Kind) IsProviderRelated() bool {
+	if k == ResourceKind || k == DataSourceKind || k == NestedKind {
+		return true
+	}
+
+	return false
+}
+
 const (
 	ProviderKind    Kind = "provider"
 	ProvisionerKind Kind = "provisioner"
@@ -62,11 +80,11 @@ const (
 //             Type of the resource. Eg.: `aws_instance`
 //           __name__ string
 //             Local name of the resource, if none was provided to the constructor
-//             the name is auto-generated following the parter `id_`. Some kind
-//             or resources are unamed.
+//             the name is auto-generated following the partern `id_`. Nested kind
+//             resources are unamed.
 //           __dict__ Dict
 //             A dictionary containing all the values of the resource.
-//           <argument> <scalar>|Computed
+//           <argument> <scalar>/Computed
 //             Arguments defined by the resource schema, thus can be of any
 //             scalar type or Computed values.
 //           <block> Resource
@@ -79,6 +97,7 @@ const (
 //             [depends_on](https://www.terraform.io/docs/configuration/resources.html#depends_on-explicit-resource-dependencies)
 //             meta-argument to handle hidden resource dependencies that
 //             Terraform can't automatically infer.
+//             (Only in resources of kind "resource")
 //             params:
 //               resource Resource
 //                 depended data or resource kind.
@@ -91,6 +110,7 @@ const (
 //             non-declarative actions taken during the creation of a resource
 //             and so Terraform is not able to model changes to them as it can
 //             for the declarative portions of the Terraform language.
+//             (Only in resources of kind "resource")
 //             params:
 //               provisioner Provisioner
 //                 provisioner resource to be executed.
@@ -177,19 +197,27 @@ func (r *Resource) Hash() (uint32, error) {
 func (r *Resource) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "depends_on":
-		return starlark.NewBuiltin("depends_on", r.dependsOn), nil
-	case "add_provisioner":
-		return starlark.NewBuiltin("add_provisioner", r.addProvisioner), nil
-	case "__provider__":
-		if r.provider == nil {
-			return starlark.None, nil
+		if r.kind == ResourceKind {
+			return starlark.NewBuiltin("depends_on", r.dependsOn), nil
 		}
+	case "add_provisioner":
+		if r.kind == ResourceKind {
+			return starlark.NewBuiltin("add_provisioner", r.addProvisioner), nil
+		}
+	case "__provider__":
+		if r.kind.IsProviderRelated() {
+			if r.provider == nil {
+				return starlark.None, nil
+			}
 
-		return r.provider, nil
+			return r.provider, nil
+		}
 	case "__kind__":
 		return starlark.String(r.kind), nil
 	case "__name__":
-		return starlark.String(r.name), nil
+		if r.kind.IsNamed() {
+			return starlark.String(r.name), nil
+		}
 	case "__type__":
 		return starlark.String(r.typ), nil
 	case "__dict__":
@@ -249,10 +277,19 @@ func (r *Resource) AttrNames() []string {
 		i++
 	}
 
-	return append(names,
-		"depends_on", "add_provisioner",
-		"__kind__", "__type__", "__provider__", "__name__", "__dict__",
-	)
+	if r.kind == ResourceKind {
+		names = append(names, "depends_on", "add_provisioner")
+	}
+
+	if r.kind.IsProviderRelated() {
+		names = append(names, "__provider__")
+	}
+
+	if r.kind.IsNamed() {
+		names = append(names, "__name__")
+	}
+
+	return append(names, "__kind__", "__type__", "__dict__")
 }
 
 // SetField honors the starlark.HasSetField interface.

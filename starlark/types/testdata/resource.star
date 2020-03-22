@@ -10,10 +10,12 @@ assert.eq(qux.uid, 42)
 qux.uid *= 2
 assert.eq(qux.uid, 84)
 
-# attr names
+# attr names 
 assert.eq("uid" in dir(qux), True)
-assert.eq("depends_on" in dir(qux), True)
-assert.eq("add_provisioner" in dir(qux), True)
+
+# attr names in data sources
+assert.eq("depends_on" in dir(qux), False)
+assert.eq("add_provisioner" in dir(qux), False)
 assert.eq("__provider__" in dir(qux), True)
 assert.eq("__type__" in dir(qux), True)
 assert.eq("__name__" in dir(qux), True)
@@ -43,6 +45,15 @@ def invalidType(): web.get_password_data = web.id
 assert.fails(invalidType, "expected bool, got string")
 
 group = aws.resource.autoscaling_group()
+
+# attr names in resources
+assert.eq("depends_on" in dir(web), True)
+assert.eq("add_provisioner" in dir(web), True)
+assert.eq("__provider__" in dir(web), True)
+assert.eq("__type__" in dir(web), True)
+assert.eq("__name__" in dir(web), True)
+assert.eq("__kind__" in dir(web), True)
+assert.eq("__dict__" in dir(web), True)
 
 # attr optional computed
 assert.eq(str(group.name), '"${aws_autoscaling_group.id_6.name}"')
@@ -188,23 +199,23 @@ assert.eq(disk.__dict__, {
 
 
 # depends_on
-userA = ignition.data.user()
-userB = ignition.data.user()
-userA.depends_on(userB)
+instanceA = aws.resource.instance()
+instanceB = aws.resource.instance()
+instanceA.depends_on(instanceB)
 
-def dependsOnNonResource(): userA.depends_on(42)
+def dependsOnNonResource(): instanceA.depends_on(42)
 assert.fails(dependsOnNonResource, "expected Resource<\\[data|resource\\].\\*>, got int")
 
-def dependsOnNestedResource(): userA.depends_on(disk.partition())
+def dependsOnNestedResource(): instanceA.depends_on(disk.partition())
 assert.fails(dependsOnNestedResource, "expected Resource<\\[data|resource\\].\\*>, got Resource<nested.partition>")
 
-def dependsOnItself(): userA.depends_on(userA)
+def dependsOnItself(): instanceA.depends_on(instanceA)
 assert.fails(dependsOnItself, "can't depend on itself")
 
 # __provider__
 assert.eq(web.__provider__, aws)
 assert.eq(baz.__provider__, ignition)
-assert.eq(userA.__provider__, ignition)
+assert.eq(instanceA.__provider__, aws)
 assert.eq(home.__provider__, ignition)
 
 # __kind__
@@ -220,5 +231,4 @@ assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__type__, "mix
 # __name__
 assert.eq(ignition.data.user().__name__, "id_30")
 assert.eq(aws.resource.instance().__name__, "id_31")
-assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__name__, "")
 assert.eq(ignition.data.user("given").__name__, "given")

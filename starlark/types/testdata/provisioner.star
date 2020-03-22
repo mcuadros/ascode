@@ -9,13 +9,16 @@ assert.eq(foo.destination, "/etc/myapp.conf")
 file = provisioner("file")
 assert.eq(file.__kind__, "provisioner")
 assert.eq(file.__type__, "file")
-assert.eq(file.__name__, "id_2")
 
 # attr
 file.content = "foo"
 assert.eq(file.content, "foo")
 
 # attr names
+assert.eq("__provider__" in dir(file), False)
+assert.eq("__name__" in dir(file), False)
+assert.eq("depends_on" in dir(file), False)
+assert.eq("add_provisioner" in dir(file), False)
 assert.eq("content" in dir(file), True)
 
 # hcl
