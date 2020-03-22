@@ -16,6 +16,9 @@ import (
 //         Terraform holds all the configuration defined by an script. A global
 //         variable called `tf` holds the unique instance of Terraform.
 //
+//         examples:
+//           tf_overview.star
+//
 //         fields:
 //           version string
 //             Terraform version.
@@ -23,11 +26,16 @@ import (
 //             Backend used to store the state, if None a `local` backend it's
 //             used.
 //           provider ProviderCollection
-//             Dict of all the providers defined.
+//             Dict with all the providers defined by provider type.
 //
 //         methods:
 //           provider(type, version="", name="") Provider
 //             Returns a new provider instance of the given type.
+//
+//             examples:
+//               tf_provider.star
+//                 Defining multiple providers and traversing `tf.providers`
+//
 //             params:
 //               type string
 //                 Provider type. Eg.: `aws`
@@ -43,6 +51,7 @@ type Terraform struct {
 	p *ProviderCollection
 }
 
+// MakeTerraform returns a new instance of Terraform
 func MakeTerraform(pm *terraform.PluginManager) *Terraform {
 	return &Terraform{
 		p: NewProviderCollection(pm),

@@ -31,8 +31,9 @@
 {{- end -}}
 
 {{- if gt (len .Examples) 0 }}
-
+###### Examples
 {{ range .Examples -}}
+{{ .Description }}
 ```python
 {{ .Code }}
 ```

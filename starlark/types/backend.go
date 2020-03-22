@@ -101,7 +101,7 @@ func MakeBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
 	return &Backend{
 		pm:       pm,
 		b:        b,
-		Resource: MakeResource(NameGenerator(), typ, BackendKind, b.ConfigSchema(), nil, nil),
+		Resource: MakeResource("", typ, BackendKind, b.ConfigSchema(), nil, nil),
 	}, nil
 }
 

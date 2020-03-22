@@ -39,9 +39,9 @@ func doTestExample(t *testing.T, filename string) {
 	}
 
 	doTestPrint(t, filename, printer)
-	expected := getExpectedFromExample(t, filename)
+	expected := strings.TrimSpace(getExpectedFromExample(t, filename))
 
-	assert.Equal(t, output, expected)
+	assert.Equal(t, strings.TrimSpace(output), expected)
 }
 
 func getExpectedFromExample(t *testing.T, filename string) string {
