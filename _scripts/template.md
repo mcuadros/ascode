@@ -42,6 +42,30 @@
 {{- end -}}
 
 {{- end -}}
+{{- define "indexFunctionName" -}}
+{{- $receiver := "" -}}
+{{ if ne .Receiver "types" -}}{{ $receiver = printf "<i>%s</i>." .Receiver }}{{- end -}}
+{{- $name := printf "def <b>%s</b>" (index (split .Signature "(") 0) -}}
+{{- $anchor := printf "def %s<b>%s</b>" $receiver (index (split .Signature "(") 0) -}}
+* [{{ $name }}({{ (index (split .Signature "(") 1) }}](#{{ sanitizeAnchor $anchor }})
+{{- end -}}
+
+{{- define "index" -}}
+## Index
+
+{{ range .Functions }}
+{{ template "indexFunctionName" . }}
+{{- end -}}
+{{ range .Types -}}
+{{ $name := printf "type <b>%s</b>" .Name }}
+* [{{ $name }}](#{{ sanitizeAnchor $name }})
+{{- range .Methods }}
+    {{ template "indexFunctionName" . -}}
+{{- end -}}
+{{- end }}
+
+{{ end -}}
+
 
 {{- range . -}}
 ---
@@ -49,6 +73,9 @@ title: '{{ .Path }}'
 ---
 
 {{ if ne .Description "" }}{{ .Description }}{{ end }}
+
+{{ template "index" . }}
+
 
 {{- if gt (len .Functions) 0 }}
 ## Functions
@@ -62,7 +89,7 @@ title: '{{ .Path }}'
 {{ range .Types -}}
 
 
-### <b>{{ .Name }}</b>
+### type <b>{{ .Name }}</b>
 {{ if ne .Description "" }}{{ .Description }}{{ end -}}
 {{ if gt (len .Fields) 0 }}
 
