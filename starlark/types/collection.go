@@ -252,6 +252,19 @@ func getValue(r *Resource, key string) starlark.Value {
 	return r.values.Get(key).Starlark()
 }
 
+// ProviderCollection represents a nested Dict of providers, indexed by
+// provider type and provider name.
+//
+//   outline: types
+//     types:
+//       ProviderCollection
+//         ProviderCollection holds the providers in a nested dictionary,
+//         indexed by provider type and provider name. The values can be
+//         accessed by indexing or using the built-in method of `dict`.
+//
+//         examples:
+//           provider_collection.star
+//
 type ProviderCollection struct {
 	pm *terraform.PluginManager
 	*Dict

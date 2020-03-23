@@ -80,7 +80,7 @@ const (
 //             Type of the resource. Eg.: `aws_instance`
 //           __name__ string
 //             Local name of the resource, if none was provided to the constructor
-//             the name is auto-generated following the partern `id_`. Nested kind
+//             the name is auto-generated following the partern `id_%s`. Nested kind
 //             resources are unamed.
 //           __dict__ Dict
 //             A dictionary containing all the values of the resource.

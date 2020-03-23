@@ -66,7 +66,7 @@ func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 //
 //         fields:
 //           __kind__ string
-//             Kind of the backend. Always `backend`.
+//             Kind of the backend. Fixed value `backend`.
 //           __type__ string
 //             Type of the backend. Eg.: `local`.
 //           __dict__ Dict

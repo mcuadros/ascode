@@ -51,6 +51,44 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 }
 
 // Provider represents a provider as a starlark.Value.
+//
+//   outline: types
+//     types:
+//       Provider
+//         Terraform is used to create, manage, and update infrastructure
+//         resources such as physical machines, VMs, network switches,
+//         containers, and more. Almost any infrastructure type can be
+//         represented as a resource in Terraform.
+//
+//         examples:
+//           provider.star
+//           provider_resource.star
+//             Resource instantiation from a Provider.
+//
+//         fields:
+//           __version__ string
+//             Provider version
+//           __kind__ string
+//             Kind of the provider. Fixed value `provider`
+//           __type__ string
+//             Type of the resource. Eg.: `aws_instance`
+//           __name__ string
+//             Local name of the provider, if none was provided to the constructor
+//             the name is auto-generated following the partern `id_%s`.  At
+//             Terraform is called [`alias`](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances)
+//           __dict__ Dict
+//             A dictionary containing all the values of the resource.
+//           data MapSchema
+//             Data sources defined by the provider.
+//           resource MapSchema
+//             Resources defined by the provider.
+//           <argument> <scalar>
+//             Arguments defined by the provider schema, thus can be of any
+//             scalar type.
+//           <block> Resource
+//             Blocks defined by the provider schema, thus are nested resources,
+//             containing other arguments and/or blocks.
+//
 type Provider struct {
 	provider *plugin.GRPCProvider
 	meta     discovery.PluginMeta

@@ -31,6 +31,10 @@ def backendWrongType(): tf.backend = "foo"
 assert.fails(backendWrongType, "unexpected value string at backend")
 assert.eq(type(tf.backend), "Backend<local>")
 
+# pop provider
+baz = tf.provider("aws", "2.13.0", "baz", region="baz")
+pop = tf.provider["aws"].pop("baz")
+
 # hcl
 assert.eq(hcl(tf), "" +
 'terraform {\n' + \
