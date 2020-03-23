@@ -1,149 +1,167 @@
 ---
-title: 'http'
+title: ''
 ---
 
 http defines an HTTP client implementation
+
+## Index
+
+
+* [def <b>delete</b>(url,params={},headers={},body="",form_body={},json_body={},auth=](#def-ihttpibdeleteb)
+* [def <b>get</b>(url,params={},headers={},auth=](#def-ihttpibgetb)
+* [def <b>options</b>(url,params={},headers={},body="",form_body={},json_body={},auth=](#def-ihttpiboptionsb)
+* [def <b>patch</b>(url,params={},headers={},body="",form_body={},json_body={},auth=](#def-ihttpibpatchb)
+* [def <b>post</b>(url,params={},headers={},body="",form_body={},json_body={},auth=](#def-ihttpibpostb)
+* [def <b>put</b>(url,params={},headers={},body="",form_body={},json_body={},auth=](#def-ihttpibputb)
+* [type <b>response</b>](#type-bresponseb)
+    * [def <b>body</b>() string](#def-iresponseibbodyb)
+    * [def <b>json</b>()](#def-iresponseibjsonb)
+
+
 ## Functions
 
 
-#### def <b>delete</b>
+#### def <i>http</i>.<b>delete</b>
 ```go
-delete(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
+http.delete(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
 ```
 perform an HTTP DELETE request, returning a response
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'url' | 'string' | url to request |
-| 'headers' | 'dict' | optional. dictionary of headers to add to request |
-| 'body' | 'string' | optional. raw string body to provide to the request |
-| 'form_body' | 'dict' | optional. dict of values that will be encoded as form data |
-| 'json_body' | 'any' | optional. json data to supply as a request. handy for working with JSON-API's |
-| 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+| `url` | `string` | url to request |
+| `headers` | `dict` | optional. dictionary of headers to add to request |
+| `body` | `string` | optional. raw string body to provide to the request |
+| `form_body` | `dict` | optional. dict of values that will be encoded as form data |
+| `json_body` | `any` | optional. json data to supply as a request. handy for working with JSON-API's |
+| `auth` | `tuple` | optional. (username,password) tuple for http basic authorization |
 
 
 
-#### def <b>get</b>
+#### def <i>http</i>.<b>get</b>
 ```go
-get(url,params={},headers={},auth=()) response
+http.get(url,params={},headers={},auth=()) response
 ```
 perform an HTTP GET request, returning a response
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'url' | 'string' | url to request |
-| 'headers' | 'dict' | optional. dictionary of headers to add to request |
-| 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+| `url` | `string` | url to request |
+| `headers` | `dict` | optional. dictionary of headers to add to request |
+| `auth` | `tuple` | optional. (username,password) tuple for http basic authorization |
 
 
 
-#### def <b>options</b>
+#### def <i>http</i>.<b>options</b>
 ```go
-options(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
+http.options(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
 ```
 perform an HTTP OPTIONS request, returning a response
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'url' | 'string' | url to request |
-| 'headers' | 'dict' | optional. dictionary of headers to add to request |
-| 'body' | 'string' | optional. raw string body to provide to the request |
-| 'form_body' | 'dict' | optional. dict of values that will be encoded as form data |
-| 'json_body' | 'any' | optional. json data to supply as a request. handy for working with JSON-API's |
-| 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+| `url` | `string` | url to request |
+| `headers` | `dict` | optional. dictionary of headers to add to request |
+| `body` | `string` | optional. raw string body to provide to the request |
+| `form_body` | `dict` | optional. dict of values that will be encoded as form data |
+| `json_body` | `any` | optional. json data to supply as a request. handy for working with JSON-API's |
+| `auth` | `tuple` | optional. (username,password) tuple for http basic authorization |
 
 
 
-#### def <b>patch</b>
+#### def <i>http</i>.<b>patch</b>
 ```go
-patch(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
+http.patch(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
 ```
 perform an HTTP PATCH request, returning a response
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'url' | 'string' | url to request |
-| 'headers' | 'dict' | optional. dictionary of headers to add to request |
-| 'body' | 'string' | optional. raw string body to provide to the request |
-| 'form_body' | 'dict' | optional. dict of values that will be encoded as form data |
-| 'json_body' | 'any' | optional. json data to supply as a request. handy for working with JSON-API's |
-| 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+| `url` | `string` | url to request |
+| `headers` | `dict` | optional. dictionary of headers to add to request |
+| `body` | `string` | optional. raw string body to provide to the request |
+| `form_body` | `dict` | optional. dict of values that will be encoded as form data |
+| `json_body` | `any` | optional. json data to supply as a request. handy for working with JSON-API's |
+| `auth` | `tuple` | optional. (username,password) tuple for http basic authorization |
 
 
 
-#### def <b>post</b>
+#### def <i>http</i>.<b>post</b>
 ```go
-post(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
+http.post(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
 ```
 perform an HTTP POST request, returning a response
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'url' | 'string' | url to request |
-| 'headers' | 'dict' | optional. dictionary of headers to add to request |
-| 'body' | 'string' | optional. raw string body to provide to the request |
-| 'form_body' | 'dict' | optional. dict of values that will be encoded as form data |
-| 'json_body' | 'any' | optional. json data to supply as a request. handy for working with JSON-API's |
-| 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+| `url` | `string` | url to request |
+| `headers` | `dict` | optional. dictionary of headers to add to request |
+| `body` | `string` | optional. raw string body to provide to the request |
+| `form_body` | `dict` | optional. dict of values that will be encoded as form data |
+| `json_body` | `any` | optional. json data to supply as a request. handy for working with JSON-API's |
+| `auth` | `tuple` | optional. (username,password) tuple for http basic authorization |
 
 
 
-#### def <b>put</b>
+#### def <i>http</i>.<b>put</b>
 ```go
-put(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
+http.put(url,params={},headers={},body="",form_body={},json_body={},auth=()) response
 ```
 perform an HTTP PUT request, returning a response
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'url' | 'string' | url to request |
-| 'headers' | 'dict' | optional. dictionary of headers to add to request |
-| 'body' | 'string' | optional. raw string body to provide to the request |
-| 'form_body' | 'dict' | optional. dict of values that will be encoded as form data |
-| 'json_body' | 'any' | optional. json data to supply as a request. handy for working with JSON-API's |
-| 'auth' | 'tuple' | optional. (username,password) tuple for http basic authorization |
+| `url` | `string` | url to request |
+| `headers` | `dict` | optional. dictionary of headers to add to request |
+| `body` | `string` | optional. raw string body to provide to the request |
+| `form_body` | `dict` | optional. dict of values that will be encoded as form data |
+| `json_body` | `any` | optional. json data to supply as a request. handy for working with JSON-API's |
+| `auth` | `tuple` | optional. (username,password) tuple for http basic authorization |
 
 
 
 
 ## Types
-### 'response'
+### type <b>response</b>
 the result of performing a http request
 
-**Fields**
+###### Properties
 
 | name | type | description |
 |------|------|-------------|
-| url | string | the url that was ultimately requested (may change after redirects) |
-| status_code | int | response status code (for example: 200 == OK) |
-| headers | dict | dictionary of response headers |
-| encoding | string | transfer encoding. example: "octet-stream" or "application/json" |
+| `url` | `string` | the url that was ultimately requested (may change after redirects) |
+| `status_code` | `int` | response status code (for example: 200 == OK) |
+| `headers` | `dict` | dictionary of response headers |
+| `encoding` | `string` | transfer encoding. example: "octet-stream" or "application/json" |
 
 
-**Methods**
 
-#### def <b>body</b>
+
+###### Methods
+
+#### def <i>response</i>.<b>body</b>
 ```go
-body() string
+response.body() string
 ```
 output response body as a string
 
 
-#### def <b>json</b>
+#### def <i>response</i>.<b>json</b>
 ```go
-json()
+response.json()
 ```
 attempt to parse resonse body as json, returning a JSON-decoded result
+
 

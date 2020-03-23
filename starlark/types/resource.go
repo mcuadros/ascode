@@ -83,7 +83,7 @@ const (
 //             the name is auto-generated following the partern `id_%s`. Nested kind
 //             resources are unamed.
 //           __dict__ Dict
-//             A dictionary containing all the values of the resource.
+//             A dictionary containing all set arguments and blocks of the resource.
 //           <argument> <scalar>/Computed
 //             Arguments defined by the resource schema, thus can be of any
 //             scalar type or Computed values.
@@ -167,12 +167,21 @@ func (r *Resource) loadKeywordArgs(kwargs []starlark.Tuple) error {
 
 // String honors the starlark.Value interface.
 func (r *Resource) String() string {
-	return fmt.Sprintf("%s(%q)", r.kind, r.typ)
+	return fmt.Sprintf("Resource<%s>", r.Path())
+}
+
+// Path returns the path of the Resource.
+func (r *Resource) Path() string {
+	if r.parent != nil && r.parent.kind != ProviderKind {
+		return fmt.Sprintf("%s.%s", r.parent.Path(), r.typ)
+	}
+
+	return fmt.Sprintf("%s.%s.%s", r.provider.typ, r.kind, r.typ)
 }
 
 // Type honors the starlark.Value interface.
 func (r *Resource) Type() string {
-	return fmt.Sprintf("Resource<%s.%s>", r.kind, r.typ)
+	return fmt.Sprintf("Resource<%s>", r.kind)
 }
 
 // Truth honors the starlark.Value interface.
@@ -308,12 +317,12 @@ func (r *Resource) doSetField(name string, v starlark.Value, allowComputed bool)
 
 	attr, ok := r.block.Attributes[name]
 	if !ok {
-		errmsg := fmt.Sprintf("%s has no .%s field or method", r.typ, name)
+		errmsg := fmt.Sprintf("%s has no .%s field or method", r, name)
 		return starlark.NoSuchAttrError(errmsg)
 	}
 
 	if attr.Computed && !attr.Optional && !allowComputed {
-		return fmt.Errorf("%s: can't set computed %s attribute", r.typ, name)
+		return fmt.Errorf("%s: can't set computed %s attribute", r, name)
 	}
 
 	if err := MustTypeFromCty(attr.Type).Validate(v); err != nil {
@@ -380,7 +389,7 @@ func (r *Resource) dependsOn(_ *starlark.Thread, _ *starlark.Builtin, args starl
 	for i, arg := range args {
 		resource, ok := arg.(*Resource)
 		if !ok || resource.kind != DataSourceKind && resource.kind != ResourceKind {
-			return nil, fmt.Errorf("expected Resource<[data|resource].*>, got %s", arg.Type())
+			return nil, fmt.Errorf("expected Resource<[data|resource]>, got %s", arg.Type())
 		}
 
 		if r == resource {
@@ -399,7 +408,7 @@ func (r *Resource) addProvisioner(_ *starlark.Thread, _ *starlark.Builtin, args 
 	for i, arg := range args {
 		provisioner, ok := arg.(*Provisioner)
 		if !ok {
-			return nil, fmt.Errorf("expected Provisioner<*>, got %s", arg.Type())
+			return nil, fmt.Errorf("expected Provisioner, got %s", arg.Type())
 		}
 
 		provisioners[i] = provisioner

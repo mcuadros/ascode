@@ -3,34 +3,42 @@ title: 'encoding/yaml'
 ---
 
 yaml provides functions for working with yaml data
+
+## Index
+
+
+* [def <b>dumps</b>(obj) string](#def-iyamlibdumpsb)
+* [def <b>loads</b>(source) object](#def-iyamlibloadsb)
+
+
 ## Functions
 
 
-#### def <b>dumps</b>
+#### def <i>yaml</i>.<b>dumps</b>
 ```go
-dumps(obj) string
+yaml.dumps(obj) string
 ```
 serialize obj to a yaml string
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'obj' | 'object' | input object |
+| `obj` | `object` | input object |
 
 
 
-#### def <b>loads</b>
+#### def <i>yaml</i>.<b>loads</b>
 ```go
-loads(source) object
+yaml.loads(source) object
 ```
 read a source yaml string to a starlark object
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'source' | 'string' | input string of yaml data |
+| `source` | `string` | input string of yaml data |
 
 
 

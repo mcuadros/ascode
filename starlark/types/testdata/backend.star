@@ -5,7 +5,8 @@ b = backend("gcs")
 # resource
 assert.eq(b.__kind__, "backend")
 assert.eq(b.__type__, "gcs")
-assert.eq(type(b), "Backend<gcs>")
+assert.eq(type(b), "Backend")
+assert.eq(str(b), "Backend<gcs>")
 
 # attr
 b.bucket = "tf-state-prod"

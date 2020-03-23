@@ -25,11 +25,11 @@ assert.eq(tf.backend, None)
 
 tf.backend = backend("local")
 tf.backend.path = "foo"
-assert.eq(type(tf.backend), "Backend<local>")
+assert.eq(str(tf.backend), "Backend<local>")
 
 def backendWrongType(): tf.backend = "foo"
 assert.fails(backendWrongType, "unexpected value string at backend")
-assert.eq(type(tf.backend), "Backend<local>")
+assert.eq(str(tf.backend), "Backend<local>")
 
 # pop provider
 baz = tf.provider("aws", "2.13.0", "baz", region="baz")

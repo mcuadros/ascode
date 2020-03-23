@@ -68,5 +68,9 @@ func MakeProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, err
 
 // Type honors the starlark.Value interface. It shadows p.Resource.Type.
 func (p *Provisioner) Type() string {
+	return "Provisioner"
+}
+
+func (p *Provisioner) String() string {
 	return fmt.Sprintf("Provisioner<%s>", p.typ)
 }

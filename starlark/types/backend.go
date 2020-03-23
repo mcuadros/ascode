@@ -180,9 +180,14 @@ func (b *Backend) state(
 
 }
 
+// String honors the starlark.Value interface.
+func (b *Backend) String() string {
+	return fmt.Sprintf("Backend<%s>", b.typ)
+}
+
 // Type honors the starlark.Value interface.
 func (b *Backend) Type() string {
-	return fmt.Sprintf("Backend<%s>", b.typ)
+	return "Backend"
 }
 
 // State represents a Terraform state read by a backend.

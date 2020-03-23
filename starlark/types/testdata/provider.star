@@ -20,11 +20,22 @@ assert.eq(len(dir(p.resource)), 506)
 
 resources = dir(p.resource)
 assert.contains(resources, "instance")
-assert.eq(type(p), "Provider<aws>")
-assert.eq(type(p.resource.instance), "ResourceCollection<resource.aws_instance>")
-assert.eq(type(p.resource.instance()), "Resource<resource.aws_instance>")
 
-p.resource.instance()
+# types
+assert.eq(type(p), "Provider")
+assert.eq(type(p.resource), "ResourceCollectionGroup")
+assert.eq(type(p.resource.instance), "ResourceCollection")
+assert.eq(type(p.resource.instance()), "Resource<resource>")
+assert.eq(type(p.data.ami().filter()), "Resource<nested>")
+
+# string
+assert.eq(str(p), "Provider<aws>")
+assert.eq(str(p.resource), "ResourceCollectionGroup<aws.resource>")
+assert.eq(str(p.resource.instance), "ResourceCollection<aws.resource.aws_instance>")
+assert.eq(str(p.resource.instance()), "Resource<aws.resource.aws_instance>")
+assert.eq(str(p.data.ami().filter()), "Resource<aws.data.aws_ami.filter>")
+
+
 assert.eq(len(p.resource.instance), 2)
 
 p.region = "us-west-2"

@@ -29,4 +29,5 @@ assert.eq(hcl(file), "" +
 
 
 # type
-assert.eq(type(file), "Provisioner<file>")
+assert.eq(type(file), "Provisioner")
+assert.eq(str(file), "Provisioner<file>")

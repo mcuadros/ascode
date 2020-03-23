@@ -26,7 +26,7 @@ assert.eq("__dict__" in dir(qux), True)
 assert.eq(qux.name, None)
 
 # attr not-exists
-assert.fails(lambda: qux.foo, "Resource<data.ignition_user> has no .foo field or method")
+assert.fails(lambda: qux.foo, "Resource<data> has no .foo field or method")
 
 # attr id
 assert.eq(type(qux.id), "Computed<string>")
@@ -35,7 +35,7 @@ aws = tf.provider("aws", "2.13.0")
 
 # attr output assignation
 def invalidOutput(): aws.data.instance().public_dns = "foo"
-assert.fails(invalidOutput, "aws_instance: can't set computed public_dns attribute")
+assert.fails(invalidOutput, "Resource<aws.data.aws_instance>: can't set computed public_dns attribute")
 
 
 # attr output in asignation
@@ -165,7 +165,7 @@ user.uid = 42
 user.groups = ["foo", "bar"]
 user.system = True
 
-assert.eq(type(user), "Resource<data.ignition_user>")
+assert.eq(str(user), "Resource<ignition.data.ignition_user>")
 assert.eq(user.__dict__, {
     "name": "foo",
     "uid": 42,
@@ -204,10 +204,10 @@ instanceB = aws.resource.instance()
 instanceA.depends_on(instanceB)
 
 def dependsOnNonResource(): instanceA.depends_on(42)
-assert.fails(dependsOnNonResource, "expected Resource<\\[data|resource\\].\\*>, got int")
+assert.fails(dependsOnNonResource, "expected Resource<\\[data|resource\\]>, got int")
 
 def dependsOnNestedResource(): instanceA.depends_on(disk.partition())
-assert.fails(dependsOnNestedResource, "expected Resource<\\[data|resource\\].\\*>, got Resource<nested.partition>")
+assert.fails(dependsOnNestedResource, "expected Resource<\\[data|resource\\]>, got Resource<nested.partition>")
 
 def dependsOnItself(): instanceA.depends_on(instanceA)
 assert.fails(dependsOnItself, "can't depend on itself")

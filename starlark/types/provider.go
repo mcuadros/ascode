@@ -77,7 +77,7 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 //             the name is auto-generated following the partern `id_%s`.  At
 //             Terraform is called [`alias`](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances)
 //           __dict__ Dict
-//             A dictionary containing all the values of the resource.
+//             A dictionary containing all set arguments and blocks of the provider.
 //           data MapSchema
 //             Data sources defined by the provider.
 //           resource MapSchema
@@ -93,8 +93,8 @@ type Provider struct {
 	provider *plugin.GRPCProvider
 	meta     discovery.PluginMeta
 
-	dataSources *MapSchema
-	resources   *MapSchema
+	dataSources *ResourceCollectionGroup
+	resources   *ResourceCollectionGroup
 
 	*Resource
 }
@@ -130,19 +130,19 @@ func MakeProvider(pm *terraform.PluginManager, typ, version, name string) (*Prov
 	}
 
 	p.Resource = MakeResource(name, typ, ProviderKind, response.Provider.Block, p, nil)
-	p.dataSources = NewMapSchema(p, typ, DataSourceKind, response.DataSources)
-	p.resources = NewMapSchema(p, typ, ResourceKind, response.ResourceTypes)
+	p.dataSources = NewResourceCollectionGroup(p, DataSourceKind, response.DataSources)
+	p.resources = NewResourceCollectionGroup(p, ResourceKind, response.ResourceTypes)
 
 	return p, nil
 }
 
 func (p *Provider) String() string {
-	return fmt.Sprintf("provider(%q)", p.typ)
+	return fmt.Sprintf("Provider<%s>", p.typ)
 }
 
 // Type honors the starlark.Value interface. It shadows p.Resource.Type.
 func (p *Provider) Type() string {
-	return fmt.Sprintf("Provider<%s>", p.typ)
+	return "Provider"
 }
 
 // Attr honors the starlark.Attr interface.
@@ -177,54 +177,55 @@ func (x *Provider) CompareSameType(op syntax.Token, y_ starlark.Value, depth int
 	}
 }
 
-type MapSchema struct {
-	p *Provider
-
-	prefix      string
+type ResourceCollectionGroup struct {
+	provider    *Provider
 	kind        Kind
 	schemas     map[string]providers.Schema
 	collections map[string]*ResourceCollection
 }
 
-func NewMapSchema(p *Provider, prefix string, k Kind, schemas map[string]providers.Schema) *MapSchema {
-	return &MapSchema{
-		p:           p,
-		prefix:      prefix,
+func NewResourceCollectionGroup(p *Provider, k Kind, schemas map[string]providers.Schema) *ResourceCollectionGroup {
+	return &ResourceCollectionGroup{
+		provider:    p,
 		kind:        k,
 		schemas:     schemas,
 		collections: make(map[string]*ResourceCollection),
 	}
 }
 
-func (m *MapSchema) String() string {
-	return fmt.Sprintf("schemas(%q)", m.prefix)
+// Path returns the path of the ResourceCollectionGroup.
+func (r *ResourceCollectionGroup) Path() string {
+	return fmt.Sprintf("%s.%s", r.provider.typ, r.kind)
 }
 
-func (m *MapSchema) Type() string {
-	return "schemas"
+func (r *ResourceCollectionGroup) String() string {
+	return fmt.Sprintf("ResourceCollectionGroup<%s>", r.Path())
 }
 
-func (m *MapSchema) Freeze()               {}
-func (m *MapSchema) Truth() starlark.Bool  { return true }
-func (m *MapSchema) Hash() (uint32, error) { return 1, nil }
-func (m *MapSchema) Name() string          { return m.prefix }
+func (r *ResourceCollectionGroup) Type() string {
+	return "ResourceCollectionGroup"
+}
 
-func (m *MapSchema) Attr(name string) (starlark.Value, error) {
-	name = m.prefix + "_" + name
+func (m *ResourceCollectionGroup) Freeze()               {}
+func (m *ResourceCollectionGroup) Truth() starlark.Bool  { return true }
+func (m *ResourceCollectionGroup) Hash() (uint32, error) { return 1, nil }
+
+func (m *ResourceCollectionGroup) Attr(name string) (starlark.Value, error) {
+	name = m.provider.typ + "_" + name
 
 	if c, ok := m.collections[name]; ok {
 		return c, nil
 	}
 
 	if schema, ok := m.schemas[name]; ok {
-		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, m.p, m.p.Resource)
+		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, m.provider, m.provider.Resource)
 		return m.collections[name], nil
 	}
 
 	return starlark.None, nil
 }
 
-func (s *MapSchema) AttrNames() []string {
+func (s *ResourceCollectionGroup) AttrNames() []string {
 	names := make([]string, len(s.schemas))
 
 	var i int

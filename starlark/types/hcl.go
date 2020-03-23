@@ -89,7 +89,7 @@ func (s *Backend) ToHCL(b *hclwrite.Body) {
 	b.AppendNewline()
 }
 
-func (t *MapSchema) ToHCL(b *hclwrite.Body) {
+func (t *ResourceCollectionGroup) ToHCL(b *hclwrite.Body) {
 	names := make(sort.StringSlice, len(t.collections))
 	var i int
 	for name := range t.collections {

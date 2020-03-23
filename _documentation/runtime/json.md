@@ -3,34 +3,42 @@ title: 'encoding/json'
 ---
 
 json provides functions for working with json data
+
+## Index
+
+
+* [def <b>dumps</b>(obj) string](#def-ijsonibdumpsb)
+* [def <b>loads</b>(source) object](#def-ijsonibloadsb)
+
+
 ## Functions
 
 
-#### def <b>dumps</b>
+#### def <i>json</i>.<b>dumps</b>
 ```go
-dumps(obj) string
+json.dumps(obj) string
 ```
 serialize obj to a JSON string
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'obj' | 'object' | input object |
+| `obj` | `object` | input object |
 
 
 
-#### def <b>loads</b>
+#### def <i>json</i>.<b>loads</b>
 ```go
-loads(source) object
+json.loads(source) object
 ```
 read a source JSON string to a starlark object
 
-**parameters:**
+###### Arguments
 
 | name | type | description |
 |------|------|-------------|
-| 'source' | 'string' | input string of json data |
+| `source` | `string` | input string of json data |
 
 
 

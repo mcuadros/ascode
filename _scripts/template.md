@@ -101,6 +101,8 @@ title: '{{ .Path }}'
 | `{{ .Name }}` | `{{ .Type }}` | {{ .Description }} |
 {{ end -}}
 
+{{ end }}
+
 {{ if gt (len .Examples) 0 }}
 ###### Examples
 {{ range .Examples -}}
@@ -108,7 +110,6 @@ title: '{{ .Path }}'
 ```python
 {{ .Code }}
 ```
-{{ end -}}
 {{ end -}}
 
 

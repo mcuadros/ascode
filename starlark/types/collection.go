@@ -49,14 +49,23 @@ func (c *ResourceCollection) LoadList(l *starlark.List) error {
 	return nil
 }
 
+// Path returns the path of the ResourceCollection.
+func (c *ResourceCollection) Path() string {
+	if c.parent != nil && c.parent.kind != ProviderKind {
+		return fmt.Sprintf("%s.%s", c.parent.Path(), c.typ)
+	}
+
+	return fmt.Sprintf("%s.%s.%s", c.provider.typ, c.kind, c.typ)
+}
+
 // String honors the starlark.Value interface.
 func (c *ResourceCollection) String() string {
-	return fmt.Sprintf("%s", c.typ)
+	return fmt.Sprintf("ResourceCollection<%s>", c.Path())
 }
 
 // Type honors the starlark.Value interface.
 func (c *ResourceCollection) Type() string {
-	return fmt.Sprintf("ResourceCollection<%s.%s>", c.kind, c.typ)
+	return "ResourceCollection"
 }
 
 // Truth honors the starlark.Value interface.

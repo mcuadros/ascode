@@ -1,6 +1,7 @@
 load("assert.star", "assert")
 
 b = backend("local")
+
 b.path = "fixtures/modules/terraform.tfstate"
 
 s = b.state()
