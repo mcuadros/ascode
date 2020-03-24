@@ -13,43 +13,6 @@ import (
 	"go.starlark.net/syntax"
 )
 
-func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
-	return starlark.NewBuiltin("provider", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-		var typ, version, name starlark.String
-		switch len(args) {
-		case 3:
-			var ok bool
-			name, ok = args.Index(2).(starlark.String)
-			if !ok {
-				return nil, fmt.Errorf("expected string, got %s", args.Index(2).Type())
-			}
-			fallthrough
-		case 2:
-			var ok bool
-			version, ok = args.Index(1).(starlark.String)
-			if !ok {
-				return nil, fmt.Errorf("expected string, got %s", args.Index(1).Type())
-			}
-			fallthrough
-		case 1:
-			var ok bool
-			typ, ok = args.Index(0).(starlark.String)
-			if !ok {
-				return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
-			}
-		default:
-			return nil, fmt.Errorf("unexpected positional arguments count")
-		}
-
-		p, err := NewProvider(pm, typ.GoString(), version.GoString(), name.GoString())
-		if err != nil {
-			return nil, err
-		}
-
-		return p, p.loadKeywordArgs(kwargs)
-	})
-}
-
 // Provider represents a provider as a starlark.Value.
 //
 //   outline: types
@@ -181,6 +144,26 @@ func (x *Provider) CompareSameType(op syntax.Token, y_ starlark.Value, depth int
 	}
 }
 
+// ResourceCollectionGroup represents a group by kind (resource or data resource)
+// of ResourceCollections for a given provider.
+//
+//   outline: types
+//     types:
+//       ResourceCollectionGroup
+//         ResourceCollectionGroup represents a group by kind (resource or data
+//         resource) of ResourceCollections for a given provider.
+//
+//         fields:
+//           __provider__ Provider
+//             Provider of this group.
+//           __kind__ string
+//             Kind of the resources (`data` or `resource`).
+//           <resource-name> ResourceCollection
+//             It returns a ResourceCollection if the resource name is valid for
+//             the schema of the provider. The resource name should be provided
+//             without the provider prefix, `aws_instance` becomes
+//             just `instance`.
+//
 type ResourceCollectionGroup struct {
 	provider    *Provider
 	kind        Kind
@@ -191,11 +174,13 @@ type ResourceCollectionGroup struct {
 var _ starlark.Value = &ResourceCollectionGroup{}
 var _ starlark.HasAttrs = &ResourceCollectionGroup{}
 
-func NewResourceCollectionGroup(p *Provider, k Kind, schemas map[string]providers.Schema) *ResourceCollectionGroup {
+// NewResourceCollectionGroup returns a new ResourceCollectionGroup for a given
+// provider and kind based on the given schema.
+func NewResourceCollectionGroup(p *Provider, k Kind, schema map[string]providers.Schema) *ResourceCollectionGroup {
 	return &ResourceCollectionGroup{
 		provider:    p,
 		kind:        k,
-		schemas:     schemas,
+		schemas:     schema,
 		collections: make(map[string]*ResourceCollection),
 	}
 }
@@ -228,8 +213,14 @@ func (g *ResourceCollectionGroup) Hash() (uint32, error) {
 
 // Attr honors the starlark.HasAttrs interface.
 func (g *ResourceCollectionGroup) Attr(name string) (starlark.Value, error) {
-	name = g.provider.typ + "_" + name
+	switch name {
+	case "__provider__":
+		return g.provider, nil
+	case "__kind__":
+		return starlark.String(g.kind), nil
+	}
 
+	name = g.provider.typ + "_" + name
 	if c, ok := g.collections[name]; ok {
 		return c, nil
 	}
@@ -253,5 +244,5 @@ func (g *ResourceCollectionGroup) AttrNames() []string {
 		i++
 	}
 
-	return names
+	return append(names, "__kind__", "__provider__")
 }

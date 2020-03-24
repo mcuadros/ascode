@@ -2,6 +2,8 @@ load("assert.star", "assert")
 
 ignition = tf.provider("ignition", "1.1.0")
 
+
+
 # attr
 qux = ignition.data.user()
 qux.uid = 42
@@ -73,6 +75,10 @@ group.mixed_instances_policy = {
 assert.eq(group.mixed_instances_policy.launch_template.launch_template_specification.launch_template_id, "bar")
 
 # attr collections
+assert.eq("__provider__" in dir(web.network_interface), True)
+assert.eq("__type__" in dir(web.network_interface), True)
+assert.eq("__kind__" in dir(web.network_interface), True)
+
 web.network_interface = [
     {"network_interface_id": "foo"},
     {"network_interface_id": "bar"},
@@ -217,18 +223,37 @@ assert.eq(web.__provider__, aws)
 assert.eq(baz.__provider__, ignition)
 assert.eq(instanceA.__provider__, aws)
 assert.eq(home.__provider__, ignition)
+assert.eq(aws.resource.instance.__provider__, aws)
 
 # __kind__
 assert.eq(ignition.data.user().__kind__, "data")
+assert.eq(aws.resource.instance.__kind__, "resource")
 assert.eq(aws.resource.instance().__kind__, "resource")
 assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__kind__, "nested")
+assert.eq(web.network_interface.__kind__, "nested")
 
 # __type__
 assert.eq(ignition.data.user().__type__, "ignition_user")
+assert.eq(aws.resource.instance.__type__, "aws_instance")
 assert.eq(aws.resource.instance().__type__, "aws_instance")
 assert.eq(aws.resource.autoscaling_group().mixed_instances_policy.__type__, "mixed_instances_policy")
+assert.eq(web.network_interface.__type__, "network_interface")
 
 # __name__
 assert.eq(ignition.data.user().__name__, "id_30")
 assert.eq(aws.resource.instance().__name__, "id_31")
 assert.eq(ignition.data.user("given").__name__, "given")
+
+# __call__
+assert.eq(ignition.data.user().__name__, "id_32")
+assert.eq(ignition.data.user("foo").__name__, "foo")
+assert.eq(ignition.data.user(uid=42).uid, 42)
+assert.eq(ignition.data.user({"uid": 42}).uid, 42)
+
+foo = ignition.data.user("foo", {"uid": 42})
+assert.eq(foo.__name__, "foo")
+assert.eq(foo.uid, 42)
+
+foo = ignition.data.user("foo", uid=42)
+assert.eq(foo.__name__, "foo")
+assert.eq(foo.uid, 42)

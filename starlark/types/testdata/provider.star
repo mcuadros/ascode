@@ -15,8 +15,8 @@ assert.eq("data" in dir(p), True)
 assert.eq("resource" in dir(p), True)
 
 # attr
-assert.eq(len(dir(p.data)), 131)
-assert.eq(len(dir(p.resource)), 506)
+assert.eq(len(dir(p.data)), 133)
+assert.eq(len(dir(p.resource)), 508)
 
 resources = dir(p.resource)
 assert.contains(resources, "instance")
@@ -47,6 +47,12 @@ assert.eq(alias.__version__, "2.13.0")
 
 kwargs = tf.provider("aws", region="foo")
 assert.eq(kwargs.region, "foo")
+
+# ResourceCollectionGroup
+assert.eq("__kind__" in dir(p.resource), True)
+assert.eq(p.resource.__kind__, "resource")
+assert.eq("__provider__" in dir(p.resource), True)
+assert.eq(p.resource.__provider__, p)
 
 # compare
 assert.ne(p, kwargs)

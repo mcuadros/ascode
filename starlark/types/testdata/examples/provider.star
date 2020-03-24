@@ -11,7 +11,7 @@ provider.region = "us-central1"
 print_provider_info(provider)
 # Output:
 # Provider google[id_1] (3.13.0)
-#   Defines Data Sources: 58
-#   Defines Resources: 261
+#   Defines Data Sources: 60
+#   Defines Resources: 263
 #   Configuration: {"project": "acme-app", "region": "us-central1"}
 
