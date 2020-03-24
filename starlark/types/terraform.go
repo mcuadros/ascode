@@ -51,12 +51,16 @@ type Terraform struct {
 	p *ProviderCollection
 }
 
-// MakeTerraform returns a new instance of Terraform
-func MakeTerraform(pm *terraform.PluginManager) *Terraform {
+// NewTerraform returns a new instance of Terraform
+func NewTerraform(pm *terraform.PluginManager) *Terraform {
 	return &Terraform{
 		p: NewProviderCollection(pm),
 	}
 }
+
+var _ starlark.Value = &Terraform{}
+var _ starlark.HasAttrs = &Terraform{}
+var _ starlark.HasSetField = &Terraform{}
 
 // Attr honors the starlark.HasAttrs interface.
 func (t *Terraform) Attr(name string) (starlark.Value, error) {
@@ -101,7 +105,7 @@ func (t *Terraform) Freeze() {} // immutable
 
 // Hash honors the starlark.Value interface.
 func (t *Terraform) Hash() (uint32, error) {
-	return 0, fmt.Errorf("unhashable type: Terraform")
+	return 0, fmt.Errorf("unhashable type: %s", t.Type())
 }
 
 // String honors the starlark.Value interface.
@@ -118,5 +122,3 @@ func (t *Terraform) Truth() starlark.Bool {
 func (t *Terraform) Type() string {
 	return "Terraform"
 }
-
-var _ starlark.Value = &Terraform{}

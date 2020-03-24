@@ -44,7 +44,7 @@ func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
-		p, err := MakeBackend(pm, name.GoString())
+		p, err := NewBackend(pm, name.GoString())
 		if err != nil {
 			return nil, err
 		}
@@ -89,8 +89,12 @@ type Backend struct {
 	*Resource
 }
 
-// MakeBackend returns a new Backend instance based on given arguments,
-func MakeBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
+var _ starlark.Value = &Backend{}
+var _ starlark.HasAttrs = &Backend{}
+var _ starlark.Comparable = &Backend{}
+
+// NewBackend returns a new Backend instance based on given arguments,
+func NewBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
 	fn := binit.Backend(typ)
 	if fn == nil {
 		return nil, fmt.Errorf("unable to find backend %q", typ)
@@ -105,6 +109,7 @@ func MakeBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
 	}, nil
 }
 
+// Attr honors the starlark.HasAttrs interface.
 func (b *Backend) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "state":
@@ -176,7 +181,7 @@ func (b *Backend) state(
 		return starlark.None, nil
 	}
 
-	return MakeState(b.pm, module, state)
+	return NewState(b.pm, module, state)
 
 }
 
@@ -218,8 +223,12 @@ type State struct {
 	pm *terraform.PluginManager
 }
 
-// MakeState returns a new instance of State based on the given arguments,
-func MakeState(pm *terraform.PluginManager, module string, state *states.State) (*State, error) {
+var _ starlark.Value = &State{}
+var _ starlark.HasAttrs = &State{}
+var _ starlark.Comparable = &State{}
+
+// NewState returns a new instance of State based on the given arguments,
+func NewState(pm *terraform.PluginManager, module string, state *states.State) (*State, error) {
 	var mod *states.Module
 	for _, m := range state.Modules {
 		if m.Addr.String() == module {
@@ -244,7 +253,7 @@ func (s *State) initialize(state *states.State, mod *states.Module) error {
 	addrs := state.ProviderAddrs()
 	for _, addr := range addrs {
 		typ := addr.ProviderConfig.Type.Type
-		p, err := MakeProvider(s.pm, typ, "", addr.ProviderConfig.Alias)
+		p, err := NewProvider(s.pm, typ, "", addr.ProviderConfig.Alias)
 		if err != nil {
 			return err
 		}

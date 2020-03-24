@@ -18,6 +18,11 @@ type Computed struct {
 	sString
 }
 
+var _ starlark.Value = &Computed{}
+var _ starlark.HasAttrs = &Computed{}
+var _ starlark.Indexable = &Computed{}
+var _ starlark.Comparable = &Computed{}
+
 func NewComputed(r *Resource, t cty.Type, name string) *Computed {
 	var parts []string
 	var path string
@@ -62,6 +67,7 @@ func NewComputedWithPath(r *Resource, t cty.Type, name, path string) *Computed {
 	}
 }
 
+// Type honors the starlark.Value interface.
 func (c *Computed) Type() string {
 	return fmt.Sprintf("Computed<%s>", MustTypeFromCty(c.t).Starlark())
 }
@@ -71,6 +77,7 @@ func (c *Computed) InnerType() *Type {
 	return t
 }
 
+// Attr honors the starlark.HasAttrs interface.
 func (c *Computed) Attr(name string) (starlark.Value, error) {
 	switch name {
 	case "__resource__":
@@ -91,6 +98,7 @@ func (c *Computed) Attr(name string) (starlark.Value, error) {
 	return NewComputedWithPath(c.r, c.t.AttributeType(name), name, path), nil
 }
 
+// AttrNames honors the starlark.HasAttrs interface.
 func (c *Computed) AttrNames() []string {
 	return []string{"__resource__", "__type__"}
 }
@@ -104,6 +112,7 @@ func (c *Computed) doNested(name, path string, t cty.Type, index int) *Computed 
 
 }
 
+// Index honors the starlark.Indexable interface.
 func (c *Computed) Index(i int) starlark.Value {
 	path := fmt.Sprintf("%s.%d", c.path, i)
 
@@ -118,6 +127,7 @@ func (c *Computed) Index(i int) starlark.Value {
 	return starlark.None
 }
 
+// Len honors the starlark.Indexable interface.
 func (c *Computed) Len() int {
 	if !c.t.IsSetType() && !c.t.IsListType() {
 		return 0

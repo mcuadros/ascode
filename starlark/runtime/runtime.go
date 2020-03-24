@@ -39,7 +39,7 @@ type Runtime struct {
 }
 
 func NewRuntime(pm *terraform.PluginManager) *Runtime {
-	tf := types.MakeTerraform(pm)
+	tf := types.NewTerraform(pm)
 
 	return &Runtime{
 		Terraform:   tf,

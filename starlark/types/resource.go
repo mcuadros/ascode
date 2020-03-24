@@ -127,6 +127,11 @@ type Resource struct {
 	provisioners []*Provisioner
 }
 
+var _ starlark.Value = &Resource{}
+var _ starlark.HasAttrs = &Resource{}
+var _ starlark.HasSetField = &Resource{}
+var _ starlark.Comparable = &Resource{}
+
 // MakeResource returns a new resource of the given kind, type based on the
 // given configschema.Block.
 func MakeResource(name, typ string, k Kind, b *configschema.Block, provider *Provider, parent *Resource) *Resource {
@@ -418,7 +423,7 @@ func (r *Resource) addProvisioner(_ *starlark.Thread, _ *starlark.Builtin, args 
 	return starlark.None, nil
 }
 
-// CompareSameType honors starlark.Comprable interface.
+// CompareSameType honors starlark.Comparable interface.
 func (x *Resource) CompareSameType(op syntax.Token, y_ starlark.Value, depth int) (bool, error) {
 	y := y_.(*Resource)
 	switch op {

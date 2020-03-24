@@ -20,6 +20,9 @@ assert.eq(tf.provider["aws"]["bar"] == None, False)
 assert.eq(tf.provider["aws"]["bar"], bar)
 assert.eq(tf.provider["aws"]["bar"].region, "bar")
 
+# type
+assert.eq(type(tf.provider), "ProviderCollection")
+
 # backend
 assert.eq(tf.backend, None)
 

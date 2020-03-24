@@ -73,7 +73,7 @@ func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, str
 		"hcl":         BuiltinHCL(),
 		"fn":          BuiltinFunctionComputed(),
 		"evaluate":    BuiltinEvaluate(),
-		"tf":          MakeTerraform(pm),
+		"tf":          NewTerraform(pm),
 	}
 
 	_, err := starlark.ExecFile(thread, filename, nil, predeclared)

@@ -23,7 +23,7 @@ func BuiltinProvisioner(pm *terraform.PluginManager) starlark.Value {
 			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
-		p, err := MakeProvisioner(pm, name.GoString())
+		p, err := NewProvisioner(pm, name.GoString())
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +38,7 @@ type Provisioner struct {
 	*Resource
 }
 
-func MakeProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, error) {
+func NewProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, error) {
 	cli, meta, err := pm.Provisioner(typ)
 	if err != nil {
 		return nil, err

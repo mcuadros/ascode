@@ -18,6 +18,11 @@ type ResourceCollection struct {
 	*starlark.List
 }
 
+var _ starlark.Value = &ResourceCollection{}
+var _ starlark.HasAttrs = &ResourceCollection{}
+var _ starlark.Callable = &ResourceCollection{}
+var _ starlark.Comparable = &ResourceCollection{}
+
 func NewResourceCollection(
 	typ string, k Kind, block *configschema.Block, provider *Provider, parent *Resource,
 ) *ResourceCollection {
@@ -78,12 +83,12 @@ func (c *ResourceCollection) Freeze() {}
 
 // Hash honors the starlark.Value interface.
 func (c *ResourceCollection) Hash() (uint32, error) {
-	return 0, fmt.Errorf("unhashable type: ResourceCollection")
+	return 0, fmt.Errorf("unhashable type: %s", c.Type())
 }
 
 // Name honors the starlark.Callable interface.
 func (c *ResourceCollection) Name() string {
-	return c.typ
+	return c.Type()
 }
 
 // CallInternal honors the starlark.Callable interface.
@@ -279,16 +284,16 @@ type ProviderCollection struct {
 	*Dict
 }
 
+var _ starlark.Value = &ProviderCollection{}
+var _ starlark.HasAttrs = &ProviderCollection{}
+var _ starlark.Callable = &ProviderCollection{}
+var _ starlark.Comparable = &ProviderCollection{}
+
 func NewProviderCollection(pm *terraform.PluginManager) *ProviderCollection {
 	return &ProviderCollection{
 		pm:   pm,
 		Dict: NewDict(),
 	}
-}
-
-// String honors the starlark.Value interface.
-func (c *ProviderCollection) String() string {
-	return "foo"
 }
 
 // Type honors the starlark.Value interface.
@@ -306,12 +311,12 @@ func (c *ProviderCollection) Freeze() {}
 
 // Hash honors the starlark.Value interface.
 func (c *ProviderCollection) Hash() (uint32, error) {
-	return 0, fmt.Errorf("unhashable type: ProviderCollection")
+	return 0, fmt.Errorf("unhashable type: %s", c.Type())
 }
 
 // Name honors the starlark.Callable interface.
 func (c *ProviderCollection) Name() string {
-	return "foo"
+	return c.Type()
 }
 
 // CallInternal honors the starlark.Callable interface.
@@ -336,7 +341,7 @@ func (c *ProviderCollection) MakeProvider(name, version, alias string, kwargs []
 		return nil, fmt.Errorf("already exists a provider %q with the alias %q", name, alias)
 	}
 
-	p, err := MakeProvider(c.pm, name, version, alias)
+	p, err := NewProvider(c.pm, name, version, alias)
 	if err != nil {
 		return nil, err
 	}

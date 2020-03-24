@@ -41,7 +41,7 @@ func BuiltinProvider(pm *terraform.PluginManager) starlark.Value {
 			return nil, fmt.Errorf("unexpected positional arguments count")
 		}
 
-		p, err := MakeProvider(pm, typ.GoString(), version.GoString(), name.GoString())
+		p, err := NewProvider(pm, typ.GoString(), version.GoString(), name.GoString())
 		if err != nil {
 			return nil, err
 		}
@@ -99,8 +99,12 @@ type Provider struct {
 	*Resource
 }
 
-// MakeProvider returns a new Provider instance from a given type, version and name.
-func MakeProvider(pm *terraform.PluginManager, typ, version, name string) (*Provider, error) {
+var _ starlark.Value = &Provider{}
+var _ starlark.HasAttrs = &Provider{}
+var _ starlark.Comparable = &Provider{}
+
+// NewProvider returns a new Provider instance from a given type, version and name.
+func NewProvider(pm *terraform.PluginManager, typ, version, name string) (*Provider, error) {
 	cli, meta, err := pm.Provider(typ, version, false)
 	if err != nil {
 		return nil, err
@@ -164,7 +168,7 @@ func (p *Provider) AttrNames() []string {
 	return append(p.Resource.AttrNames(), "data", "resource", "__version__")
 }
 
-// CompareSameType honors starlark.Comprable interface.
+// CompareSameType honors starlark.Comparable interface.
 func (x *Provider) CompareSameType(op syntax.Token, y_ starlark.Value, depth int) (bool, error) {
 	y := y_.(*Provider)
 	switch op {
@@ -184,6 +188,9 @@ type ResourceCollectionGroup struct {
 	collections map[string]*ResourceCollection
 }
 
+var _ starlark.Value = &ResourceCollectionGroup{}
+var _ starlark.HasAttrs = &ResourceCollectionGroup{}
+
 func NewResourceCollectionGroup(p *Provider, k Kind, schemas map[string]providers.Schema) *ResourceCollectionGroup {
 	return &ResourceCollectionGroup{
 		provider:    p,
@@ -194,42 +201,53 @@ func NewResourceCollectionGroup(p *Provider, k Kind, schemas map[string]provider
 }
 
 // Path returns the path of the ResourceCollectionGroup.
-func (r *ResourceCollectionGroup) Path() string {
-	return fmt.Sprintf("%s.%s", r.provider.typ, r.kind)
+func (g *ResourceCollectionGroup) Path() string {
+	return fmt.Sprintf("%s.%s", g.provider.typ, g.kind)
 }
 
-func (r *ResourceCollectionGroup) String() string {
-	return fmt.Sprintf("ResourceCollectionGroup<%s>", r.Path())
+// String honors the starlark.String interface.
+func (g *ResourceCollectionGroup) String() string {
+	return fmt.Sprintf("ResourceCollectionGroup<%s>", g.Path())
 }
 
-func (r *ResourceCollectionGroup) Type() string {
+// Type honors the starlark.Value interface.
+func (*ResourceCollectionGroup) Type() string {
 	return "ResourceCollectionGroup"
 }
 
-func (m *ResourceCollectionGroup) Freeze()               {}
-func (m *ResourceCollectionGroup) Truth() starlark.Bool  { return true }
-func (m *ResourceCollectionGroup) Hash() (uint32, error) { return 1, nil }
+// Freeze honors the starlark.Value interface.
+func (*ResourceCollectionGroup) Freeze() {}
 
-func (m *ResourceCollectionGroup) Attr(name string) (starlark.Value, error) {
-	name = m.provider.typ + "_" + name
+// Truth honors the starlark.Value interface. True even if empty.
+func (*ResourceCollectionGroup) Truth() starlark.Bool { return true }
 
-	if c, ok := m.collections[name]; ok {
+// Hash honors the starlark.Value interface.
+func (g *ResourceCollectionGroup) Hash() (uint32, error) {
+	return 0, fmt.Errorf("unhashable type: %s", g.Type())
+}
+
+// Attr honors the starlark.HasAttrs interface.
+func (g *ResourceCollectionGroup) Attr(name string) (starlark.Value, error) {
+	name = g.provider.typ + "_" + name
+
+	if c, ok := g.collections[name]; ok {
 		return c, nil
 	}
 
-	if schema, ok := m.schemas[name]; ok {
-		m.collections[name] = NewResourceCollection(name, m.kind, schema.Block, m.provider, m.provider.Resource)
-		return m.collections[name], nil
+	if schema, ok := g.schemas[name]; ok {
+		g.collections[name] = NewResourceCollection(name, g.kind, schema.Block, g.provider, g.provider.Resource)
+		return g.collections[name], nil
 	}
 
 	return starlark.None, nil
 }
 
-func (s *ResourceCollectionGroup) AttrNames() []string {
-	names := make([]string, len(s.schemas))
+// AttrNames honors the starlark.HasAttrs interface.
+func (g *ResourceCollectionGroup) AttrNames() []string {
+	names := make([]string, len(g.schemas))
 
 	var i int
-	for k := range s.schemas {
+	for k := range g.schemas {
 		parts := strings.SplitN(k, "_", 2)
 		names[i] = parts[1]
 		i++
