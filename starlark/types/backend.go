@@ -29,7 +29,8 @@ func init() {
 //
 //         params:
 //           type string
-//             [backend type](https://www.terraform.io/docs/backends/types/index.html)
+//             [Backend type](https://www.terraform.io/docs/backends/types/index.html).
+//
 func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
 	return starlark.NewBuiltin("backend", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var name starlark.String

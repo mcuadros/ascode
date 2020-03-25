@@ -9,6 +9,18 @@ import (
 	"go.starlark.net/starlark"
 )
 
+// BuiltinProvisioner returns a starlak.Builtin function capable of instantiate
+// new Provisioner instances.
+//
+//   outline: types
+//     functions:
+//       provisioner(type) Provisioner
+//         Instantiates a new Provisioner
+//
+//         params:
+//           type string
+//             Provisioner type.
+//
 func BuiltinProvisioner(pm *terraform.PluginManager) starlark.Value {
 	return starlark.NewBuiltin("provisioner", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var name starlark.String
@@ -32,12 +44,33 @@ func BuiltinProvisioner(pm *terraform.PluginManager) starlark.Value {
 	})
 }
 
+// Provisioner represents a Terraform provider of a specif type.
+//
+//   outline: types
+//     types:
+//       Provisioner
+//         Provisioner represents a Terraform provider of a specif type. As
+//         written in the terraform documentation: "*Provisioners are a Last Resort*"
+//
+//         fields:
+//           __kind__ string
+//             Kind of the provisioner. Fixed value `provisioner`
+//           __type__ string
+//             Type of the resource. Eg.: `aws_instance
+//           <argument> <scalar>
+//             Arguments defined by the provisioner schema, thus can be of any
+//             scalar type.
+//           <block> Resource
+//             Blocks defined by the provisioner schema, thus are nested resources,
+//             containing other arguments and/or blocks.
+//
 type Provisioner struct {
 	provisioner *plugin.GRPCProvisioner
 	meta        discovery.PluginMeta
 	*Resource
 }
 
+// NewProvisioner returns a new Provisioner for the given type.
 func NewProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, error) {
 	cli, meta, err := pm.Provisioner(typ)
 	if err != nil {
