@@ -31,27 +31,34 @@ func init() {
 //           type string
 //             [Backend type](https://www.terraform.io/docs/backends/types/index.html).
 //
-func BuiltinBackend(pm *terraform.PluginManager) starlark.Value {
-	return starlark.NewBuiltin("backend", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-		var name starlark.String
-		switch len(args) {
-		case 1:
-			var ok bool
-			name, ok = args.Index(0).(starlark.String)
-			if !ok {
-				return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
-			}
-		default:
-			return nil, fmt.Errorf("unexpected positional arguments count")
-		}
+func BuiltinBackend() starlark.Value {
+	return starlark.NewBuiltin("backend", MakeBackend)
+}
 
-		p, err := NewBackend(pm, name.GoString())
-		if err != nil {
-			return nil, err
-		}
+// MakeBackend defines the Backend constructor.
+func MakeBackend(
+	t *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
+) (starlark.Value, error) {
 
-		return p, p.loadKeywordArgs(kwargs)
-	})
+	var name starlark.String
+	switch len(args) {
+	case 1:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
+		}
+	default:
+		return nil, fmt.Errorf("unexpected positional arguments count")
+	}
+
+	pm := t.Local(PluginManagerLocal).(*terraform.PluginManager)
+	p, err := NewBackend(pm, name.GoString())
+	if err != nil {
+		return nil, err
+	}
+
+	return p, p.loadKeywordArgs(kwargs)
 }
 
 // Backend represent a Terraform Backend.
@@ -106,7 +113,7 @@ func NewBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
 	return &Backend{
 		pm:       pm,
 		b:        b,
-		Resource: MakeResource("", typ, BackendKind, b.ConfigSchema(), nil, nil),
+		Resource: NewResource("", typ, BackendKind, b.ConfigSchema(), nil, nil),
 	}, nil
 }
 
@@ -290,7 +297,7 @@ func (s *State) initializeResource(p *Provider, r *states.Resource) error {
 
 	multi := r.EachMode != states.NoEach
 	for _, instance := range r.Instances {
-		r := MakeResource(name, typ, ResourceKind, schema.Block, p, p.Resource)
+		r := NewResource(name, typ, ResourceKind, schema.Block, p, p.Resource)
 
 		var val interface{}
 		if err := json.Unmarshal(instance.Current.AttrsJSON, &val); err != nil {
@@ -298,7 +305,7 @@ func (s *State) initializeResource(p *Provider, r *states.Resource) error {
 		}
 
 		values, _ := util.Marshal(val)
-		if err := r.LoadDict(values.(*starlark.Dict)); err != nil {
+		if err := r.loadDict(values.(*starlark.Dict)); err != nil {
 			return err
 		}
 

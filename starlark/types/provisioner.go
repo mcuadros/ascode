@@ -21,27 +21,35 @@ import (
 //           type string
 //             Provisioner type.
 //
-func BuiltinProvisioner(pm *terraform.PluginManager) starlark.Value {
-	return starlark.NewBuiltin("provisioner", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
-		var name starlark.String
-		switch len(args) {
-		case 1:
-			var ok bool
-			name, ok = args.Index(0).(starlark.String)
-			if !ok {
-				return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
-			}
-		default:
-			return nil, fmt.Errorf("unexpected positional arguments count")
-		}
+func BuiltinProvisioner() starlark.Value {
+	return starlark.NewBuiltin("provisioner", MakeProvisioner)
+}
 
-		p, err := NewProvisioner(pm, name.GoString())
-		if err != nil {
-			return nil, err
-		}
+// MakeProvisioner defines the Provisioner constructor.
+func MakeProvisioner(
+	t *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
+) (starlark.Value, error) {
 
-		return p, p.loadKeywordArgs(kwargs)
-	})
+	pm := t.Local(PluginManagerLocal).(*terraform.PluginManager)
+
+	var name starlark.String
+	switch len(args) {
+	case 1:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
+		}
+	default:
+		return nil, fmt.Errorf("unexpected positional arguments count")
+	}
+
+	p, err := NewProvisioner(pm, name.GoString())
+	if err != nil {
+		return nil, err
+	}
+
+	return p, p.loadKeywordArgs(kwargs)
 }
 
 // Provisioner represents a Terraform provider of a specif type.
@@ -95,7 +103,7 @@ func NewProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, erro
 		provisioner: provisioner,
 		meta:        meta,
 
-		Resource: MakeResource(NameGenerator(), typ, ProvisionerKind, response.Provisioner, nil, nil),
+		Resource: NewResource(NameGenerator(), typ, ProvisionerKind, response.Provisioner, nil, nil),
 	}, nil
 }
 

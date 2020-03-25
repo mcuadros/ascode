@@ -59,17 +59,18 @@ func doTest(t *testing.T, filename string) {
 func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, string)) {
 	id = 0
 
+	pm := &terraform.PluginManager{".providers"}
+
 	log.SetOutput(ioutil.Discard)
 	thread := &starlark.Thread{Load: load, Print: print}
 	thread.SetLocal("base_path", "testdata")
+	thread.SetLocal(PluginManagerLocal, pm)
 
 	test.SetReporter(thread, t)
 
-	pm := &terraform.PluginManager{".providers"}
-
 	predeclared := starlark.StringDict{
-		"provisioner": BuiltinProvisioner(pm),
-		"backend":     BuiltinBackend(pm),
+		"provisioner": BuiltinProvisioner(),
+		"backend":     BuiltinBackend(),
 		"hcl":         BuiltinHCL(),
 		"fn":          BuiltinFunctionComputed(),
 		"evaluate":    BuiltinEvaluate(),

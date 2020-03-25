@@ -50,6 +50,71 @@ const (
 	BackendKind     Kind = "backend"
 )
 
+// MakeResource defines the Resource constructor.
+func MakeResource(
+	c *ResourceCollection,
+	t *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
+) (starlark.Value, error) {
+	name, dict, err := unpackResourceArgs(args, kwargs)
+	if err != nil {
+		return nil, err
+	}
+
+	if (c.kind == ResourceKind || c.kind == DataSourceKind) && name == "" {
+		name = NameGenerator()
+	}
+
+	r := NewResource(name, c.typ, c.kind, c.block, c.provider, c.parent)
+	if dict != nil && dict.Len() != 0 {
+		if err := r.loadDict(dict); err != nil {
+			return nil, err
+		}
+	}
+
+	return r, r.loadKeywordArgs(kwargs)
+}
+
+func unpackResourceArgs(
+	args starlark.Tuple, kwargs []starlark.Tuple,
+) (string, *starlark.Dict, error) {
+	var dict *starlark.Dict
+	var name starlark.String
+
+	if len(args) == 0 && len(kwargs) == 0 {
+		return "", nil, nil
+	}
+
+	switch len(args) {
+	case 0:
+	case 1:
+		switch v := args.Index(0).(type) {
+		case starlark.String:
+			return string(v), nil, nil
+		case *starlark.Dict:
+			return "", v, nil
+		default:
+			return "", nil, fmt.Errorf("resource: expected string or dict, got %s", args.Index(0).Type())
+		}
+	case 2:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return "", nil, fmt.Errorf("resource: expected string, got %s", args.Index(0).Type())
+		}
+
+		dict, ok = args.Index(1).(*starlark.Dict)
+		if !ok {
+			return "", nil, fmt.Errorf("resource: expected dict, got %s", args.Index(1).Type())
+		}
+	default:
+		//if c.kind != NestedKind {
+		return "", nil, fmt.Errorf("resource: unexpected positional arguments count")
+		//	}
+	}
+
+	return string(name), dict, nil
+}
+
 // Resource represents a resource as a starlark.Value, it can be of four kinds,
 // provider, resource, data source or a nested resource.
 //
@@ -132,9 +197,9 @@ var _ starlark.HasAttrs = &Resource{}
 var _ starlark.HasSetField = &Resource{}
 var _ starlark.Comparable = &Resource{}
 
-// MakeResource returns a new resource of the given kind, type based on the
+// NewResource returns a new resource of the given kind, type based on the
 // given configschema.Block.
-func MakeResource(name, typ string, k Kind, b *configschema.Block, provider *Provider, parent *Resource) *Resource {
+func NewResource(name, typ string, k Kind, b *configschema.Block, provider *Provider, parent *Resource) *Resource {
 	return &Resource{
 		name:     name,
 		typ:      typ,
@@ -146,8 +211,7 @@ func MakeResource(name, typ string, k Kind, b *configschema.Block, provider *Pro
 	}
 }
 
-// LoadDict loads a dict in the resource.
-func (r *Resource) LoadDict(d *starlark.Dict) error {
+func (r *Resource) loadDict(d *starlark.Dict) error {
 	for _, k := range d.Keys() {
 		name := k.(starlark.String)
 		value, _, _ := d.Get(k)
@@ -259,7 +323,7 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 		return r.values.Set(name, MustValue(NewResourceCollection(name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
 	}
 
-	return r.values.Set(name, MustValue(MakeResource("", name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
+	return r.values.Set(name, MustValue(NewResource("", name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
 }
 
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
@@ -356,7 +420,7 @@ func (r *Resource) setFieldFromNestedBlock(name string, b *configschema.NestedBl
 			return fmt.Errorf("expected dict, got %s", v.Type())
 		}
 
-		return resource.LoadDict(v.(*starlark.Dict))
+		return resource.loadDict(v.(*starlark.Dict))
 	case *ResourceCollection:
 		if v.Type() != "list" {
 			return fmt.Errorf("expected list, got %s", v.Type())

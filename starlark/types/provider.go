@@ -13,6 +13,50 @@ import (
 	"go.starlark.net/syntax"
 )
 
+const (
+	PluginManagerLocal = "plugin_manager"
+)
+
+// MakeProvider defines the Provider constructor.
+func MakeProvider(
+	t *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
+) (starlark.Value, error) {
+
+	var name, version, alias starlark.String
+	switch len(args) {
+	case 3:
+		var ok bool
+		alias, ok = args.Index(2).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %s", args.Index(2).Type())
+		}
+		fallthrough
+	case 2:
+		var ok bool
+		version, ok = args.Index(1).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %s", args.Index(1).Type())
+		}
+		fallthrough
+	case 1:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %s", args.Index(0).Type())
+		}
+	default:
+		return nil, fmt.Errorf("unexpected positional arguments count")
+	}
+
+	pm := t.Local(PluginManagerLocal).(*terraform.PluginManager)
+	p, err := NewProvider(pm, name.GoString(), version.GoString(), alias.GoString())
+	if err != nil {
+		return nil, err
+	}
+
+	return p, p.loadKeywordArgs(kwargs)
+}
+
 // Provider represents a provider as a starlark.Value.
 //
 //   outline: types
@@ -96,11 +140,41 @@ func NewProvider(pm *terraform.PluginManager, typ, version, name string) (*Provi
 		meta:     meta,
 	}
 
-	p.Resource = MakeResource(name, typ, ProviderKind, response.Provider.Block, p, nil)
+	p.Resource = NewResource(name, typ, ProviderKind, response.Provider.Block, p, nil)
 	p.dataSources = NewResourceCollectionGroup(p, DataSourceKind, response.DataSources)
 	p.resources = NewResourceCollectionGroup(p, ResourceKind, response.ResourceTypes)
 
 	return p, nil
+}
+
+func (p *Provider) unpackArgs(args starlark.Tuple) (string, string, string, error) {
+	var name, version, alias starlark.String
+	switch len(args) {
+	case 3:
+		var ok bool
+		alias, ok = args.Index(2).(starlark.String)
+		if !ok {
+			return "", "", "", fmt.Errorf("expected string, got %s", args.Index(2).Type())
+		}
+		fallthrough
+	case 2:
+		var ok bool
+		version, ok = args.Index(1).(starlark.String)
+		if !ok {
+			return "", "", "", fmt.Errorf("expected string, got %s", args.Index(1).Type())
+		}
+		fallthrough
+	case 1:
+		var ok bool
+		name, ok = args.Index(0).(starlark.String)
+		if !ok {
+			return "", "", "", fmt.Errorf("expected string, got %s", args.Index(0).Type())
+		}
+	default:
+		return "", "", "", fmt.Errorf("unexpected positional arguments count")
+	}
+
+	return string(name), string(version), string(alias), nil
 }
 
 func (p *Provider) String() string {

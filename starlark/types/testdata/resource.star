@@ -148,6 +148,13 @@ assert.eq(baz.uid, 42)
 assert.eq(baz.system, True)
 assert.eq(str(baz.id), '"${data.ignition_user.baz.id}"')
 
+# constructor from dict with name and kwargs
+baz = ignition.data.user("baz", {"uid": 42, "system": True}, uid=84)
+assert.eq(baz.uid, 84)
+assert.eq(baz.system, True)
+assert.eq(str(baz.id), '"${data.ignition_user.baz.id}"')
+
+
 assert.eq(bar, foo)
 assert.eq(foo, ignition.data.user(foo.__dict__))
 
@@ -162,7 +169,7 @@ def consNameDict(): ignition.data.user("foo", 1)
 assert.fails(consNameDict, "resource: expected dict, got int")
 
 def consKwargsNonName(): ignition.data.user(1, uid=42)
-assert.fails(consKwargsNonName, "resource: expected string, got int")
+assert.fails(consKwargsNonName, "resource: expected string or dict, got int")
 
 # full coverage
 user = ignition.data.user()
