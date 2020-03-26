@@ -25,7 +25,7 @@
 | name | type | description |
 |------|------|-------------|
 {{ range .Params -}}
-| `{{ .Name }}` | `{{ .Type }}` | {{ .Description }} |
+| `{{ .Name }}` | `{{ .Type }}` | {{ (replace_all .Description "\n" "") }} |
 {{ end -}}
 
 {{- end -}}
@@ -52,7 +52,7 @@
 
 {{- define "index" -}}
 ## Index
-
+<div class="toc">
 {{ range .Functions }}
 {{ template "indexFunctionName" . }}
 {{- end -}}
@@ -63,7 +63,7 @@
     {{ template "indexFunctionName" . -}}
 {{- end -}}
 {{- end }}
-
+</div>
 {{ end -}}
 
 
@@ -98,7 +98,7 @@ title: '{{ .Path }}'
 | name | type | description |
 |------|------|-------------|
 {{ range .Fields -}}
-| `{{ .Name }}` | `{{ .Type }}` | {{ .Description }} |
+| `{{ .Name }}` | `{{ .Type }}` | {{ (replace_all .Description "\n" "") }} |
 {{ end -}}
 
 {{ end }}

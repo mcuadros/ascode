@@ -122,7 +122,8 @@ removes the named file or (empty) directory.
 ```go
 os.remove_all(path)
 ```
-removes path and any children it contains. It removes everything it can but returns the first error it encounters.
+removes path and any children it contains. It removes everything it
+can but returns the first error it encounters.
 
 ###### Arguments
 
@@ -136,7 +137,9 @@ removes path and any children it contains. It removes everything it can but retu
 ```go
 os.rename(oldpath, newpath)
 ```
-renames (moves) oldpath to newpath. If newpath already exists and is not a directory, Rename replaces it. OS-specific restrictions may apply when oldpath and newpath are in different directories.
+renames (moves) oldpath to newpath. If newpath already exists and is
+not a directory, Rename replaces it. OS-specific restrictions may
+apply when oldpath and newpath are in different directories.
 
 ###### Arguments
 

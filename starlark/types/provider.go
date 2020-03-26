@@ -271,8 +271,8 @@ func (g *ResourceCollectionGroup) String() string {
 }
 
 // Type honors the starlark.Value interface.
-func (*ResourceCollectionGroup) Type() string {
-	return "ResourceCollectionGroup"
+func (g *ResourceCollectionGroup) Type() string {
+	return fmt.Sprintf("ResourceCollectionGroup<%s>", g.kind)
 }
 
 // Freeze honors the starlark.Value interface.

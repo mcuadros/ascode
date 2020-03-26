@@ -2,7 +2,8 @@
 title: 'encoding/base64'
 ---
 
-base64 defines base64 encoding & decoding functions, often used to represent binary as text.
+base64 defines base64 encoding & decoding functions,
+often used to represent binary as text.
 
 ## Index
 

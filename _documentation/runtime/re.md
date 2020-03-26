@@ -2,7 +2,8 @@
 title: ''
 ---
 
-re defines regular expression functions, it's intended to be a drop-in subset of python's re module for starlark: https://docs.python.org/3/library/re.html
+re defines regular expression functions, it's intended to be a drop-in
+subset of python's re module for starlark: https://docs.python.org/3/library/re.html
 
 ## Index
 
@@ -19,7 +20,11 @@ re defines regular expression functions, it's intended to be a drop-in subset of
 ```go
 re.findall(pattern, text, flags=0)
 ```
-Returns all non-overlapping matches of pattern in string, as a list of strings. The string is scanned left-to-right, and matches are returned in the order found. If one or more groups are present in the pattern, return a list of groups; this will be a list of tuples if the pattern has more than one group. Empty matches are included in the result.
+Returns all non-overlapping matches of pattern in string, as a list of strings.
+The string is scanned left-to-right, and matches are returned in the order found.
+If one or more groups are present in the pattern, return a list of groups;
+this will be a list of tuples if the pattern has more than one group.
+Empty matches are included in the result.
 
 ###### Arguments
 
@@ -35,7 +40,10 @@ Returns all non-overlapping matches of pattern in string, as a list of strings. 
 ```go
 re.split(pattern, text, maxsplit=0, flags=0)
 ```
-Split text by the occurrences of pattern. If capturing parentheses are used in pattern, then the text of all groups in the pattern are also returned as part of the resulting list. If maxsplit is nonzero, at most maxsplit splits occur, and the remainder of the string is returned as the final element of the list.
+Split text by the occurrences of pattern. If capturing parentheses are used in pattern,
+then the text of all groups in the pattern are also returned as part of the resulting list.
+If maxsplit is nonzero, at most maxsplit splits occur, and the remainder of the string
+is returned as the final element of the list.
 
 ###### Arguments
 
@@ -52,7 +60,10 @@ Split text by the occurrences of pattern. If capturing parentheses are used in p
 ```go
 re.sub(pattern, repl, text, count=0, flags=0)
 ```
-Return the string obtained by replacing the leftmost non-overlapping occurrences of pattern in string by the replacement repl. If the pattern isn’t found, string is returned unchanged. repl can be a string or a function; if it is a string, any backslash escapes in it are processed. That is, \n is converted to a single newline character, \r is converted to a carriage return, and so forth.
+Return the string obtained by replacing the leftmost non-overlapping occurrences of pattern
+in string by the replacement repl. If the pattern isn’t found, string is returned unchanged.
+repl can be a string or a function; if it is a string, any backslash escapes in it are processed.
+That is, \n is converted to a single newline character, \r is converted to a carriage return, and so forth.
 
 ###### Arguments
 

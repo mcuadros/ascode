@@ -2,7 +2,8 @@
 title: 'path/filepath'
 ---
 
-filepath implements utility routines for manipulating filename paths in a way compatible with the target operating system-defined file path
+filepath implements utility routines for manipulating filename paths in a
+way compatible with the target operating system-defined file path
 
 ## Index
 
@@ -25,7 +26,9 @@ filepath implements utility routines for manipulating filename paths in a way co
 ```go
 filepath.abs(path) string
 ```
-returns an absolute representation of path. If the path is not absolute it will be joined with the current working directory to turn it into an absolute path.
+returns an absolute representation of path. If the path is not
+absolute it will be joined with the current working directory to turn
+it into an absolute path.
 
 ###### Arguments
 
@@ -39,7 +42,10 @@ returns an absolute representation of path. If the path is not absolute it will 
 ```go
 filepath.base(path) string
 ```
-returns the last element of path. Trailing path separators are removed before extracting the last element. If the path is empty, `base` returns ".". If the path consists entirely of separators, `base` returns a single separator.
+returns the last element of path. Trailing path separators are
+removed before extracting the last element. If the path is empty,
+`base` returns ".". If the path consists entirely of separators,
+`base` returns a single separator.
 
 ###### Arguments
 
@@ -53,7 +59,8 @@ returns the last element of path. Trailing path separators are removed before ex
 ```go
 filepath.clean(path) string
 ```
-returns the shortest path name equivalent to path by purely lexical processing.
+returns the shortest path name equivalent to path by purely lexical
+processing.
 
 ###### Arguments
 
@@ -67,7 +74,12 @@ returns the shortest path name equivalent to path by purely lexical processing.
 ```go
 filepath.dir(path) string
 ```
-returns all but the last element of path, typically the path's directory. After dropping the final element, `dir` calls `clean` on the path and trailing slashes are removed. If the path is empty, `dir` returns ".". If the path consists entirely of separators, `dir` returns a single separator. The returned path does not end in a separator unless it is the root directory.
+returns all but the last element of path, typically the path's
+directory. After dropping the final element, `dir` calls `clean` on the
+path and trailing slashes are removed. If the path is empty, `dir`
+returns ".". If the path consists entirely of separators, `dir`
+returns a single separator. The returned path does not end in a
+separator unless it is the root directory.
 
 ###### Arguments
 
@@ -81,7 +93,9 @@ returns all but the last element of path, typically the path's directory. After 
 ```go
 filepath.ext(path) string
 ```
-returns the file name extension used by path. The extension is the suffix beginning at the final dot in the final element of path; it is empty if there is no dot.
+returns the file name extension used by path. The extension is the
+suffix beginning at the final dot in the final element of path; it
+is empty if there is no dot.
 
 ###### Arguments
 
@@ -95,7 +109,8 @@ returns the file name extension used by path. The extension is the suffix beginn
 ```go
 filepath.glob(pattern) list
 ```
-returns the names of all files matching pattern or None if there is no matching file.
+returns the names of all files matching pattern or None if there is
+no matching file.
 
 ###### Arguments
 
@@ -123,7 +138,10 @@ reports whether the path is absolute.
 ```go
 filepath.join(elements) string
 ```
-joins any number of path elements into a single path, adding a `filepath.separator` if necessary. Join calls Clean on the result; in particular, all empty strings are ignored. On Windows, the result is a UNC path if and only if the first path element is a UNC path.
+joins any number of path elements into a single path, adding a
+`filepath.separator` if necessary. Join calls Clean on the result;
+in particular, all empty strings are ignored. On Windows, the result
+is a UNC path if and only if the first path element is a UNC path.
 
 ###### Arguments
 
@@ -137,7 +155,13 @@ joins any number of path elements into a single path, adding a `filepath.separat
 ```go
 filepath.rel(basepath, targpath) string
 ```
-returns a relative path that is lexically equivalent to targpath when joined to basepath with an intervening separator. That is, `filepath.join(basepath, filepath.rel(basepath, targpath))` is equivalent to targpath itself. On success, the returned path will always be relative to basepath, even if basepath and targpath share no elements. An error is returned if targpath can't be made relative to basepath or if knowing the current working directory would be necessary to compute it. Rel calls Clean on the result.
+returns a relative path that is lexically equivalent to targpath when
+joined to basepath with an intervening separator. That is, `filepath.join(basepath, filepath.rel(basepath, targpath))`
+is equivalent to targpath itself. On success, the returned path will
+always be relative to basepath, even if basepath and targpath share
+no elements. An error is returned if targpath can't be made relative
+to basepath or if knowing the current working directory would be
+necessary to compute it. Rel calls Clean on the result.
 
 ###### Arguments
 

@@ -23,8 +23,8 @@ assert.contains(resources, "instance")
 
 # types
 assert.eq(type(p), "Provider")
-assert.eq(type(p.resource), "ResourceCollectionGroup")
-assert.eq(type(p.resource.instance), "ResourceCollection")
+assert.eq(type(p.resource), "ResourceCollectionGroup<resource>")
+assert.eq(type(p.resource.instance), "ResourceCollection<resource>")
 assert.eq(type(p.resource.instance()), "Resource<resource>")
 assert.eq(type(p.data.ami().filter()), "Resource<nested>")
 

@@ -3,7 +3,7 @@ load("assert.star", "assert")
 p = tf.provider("aws", "2.13.0")
 d = p.data.ami()
 
-assert.eq(type(d.filter), "ResourceCollection")
+assert.eq(type(d.filter), "ResourceCollection<nested>")
 
 bar = d.filter(name="bar", values=["qux"])
 

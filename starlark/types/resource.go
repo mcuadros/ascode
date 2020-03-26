@@ -137,6 +137,23 @@ func unpackResourceArgs(
 //         usually provides resources to manage a single cloud or on-premises
 //         infrastructure platform.
 //
+//         Following the schema of HCL Terraform resources each type of
+//         arguments and blocks are transformed in native AsCode elements:
+//
+//         * [Blocks](https://www.terraform.io/docs/glossary.html#block) defined
+//           as a list of Resources are transformed into: `ResourceCollection<nested>`,
+//           if the `Block` is a list capped to one item, its represented as
+//           `Resource<nested>`.
+//
+//         * [Arguments](https://www.terraform.io/docs/glossary.html#argument)
+//           are transformed as basic scalar types.
+//
+//         * [Attributes](https://www.terraform.io/docs/glossary.html#attribute)
+//           aka computed arguments are transformed in `Attributes`
+//
+//         examples:
+//           resource.star
+//
 //         fields:
 //           __provider__ Provider
 //             Provider of this resource if any.
@@ -153,7 +170,7 @@ func unpackResourceArgs(
 //           <argument> <scalar>/Computed
 //             Arguments defined by the resource schema, thus can be of any
 //             scalar type or Computed values.
-//           <block> Resource
+//           <block> Resource/ResourceCollection
 //             Blocks defined by the resource schema, thus are nested resources,
 //             containing other arguments and/or blocks.
 //
