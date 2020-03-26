@@ -66,11 +66,10 @@ func MakeBackend(
 //   outline: types
 //     types:
 //       Backend
-//         A [backend](https://www.terraform.io/docs/backends/index.html) in
-//         Terraform determines how state is loaded and how an operation such
-//         as apply is executed. The backend can be set as a `tf.backend` or
-//         be used standalone to read the same from this or other Terraform
-//         configuration.
+//         The part of Terraform's core that determines how Terraform stores
+//         state and performs operations (like plan, apply, import, etc.).
+//         Terraform has multiple [backends](https://www.terraform.io/docs/backends/index.html)
+//         to choose from, which can be configured in a variety of ways.
 //
 //         fields:
 //           __kind__ string
@@ -209,10 +208,11 @@ func (b *Backend) Type() string {
 //   outline: types
 //     types:
 //       State
-//         State about your managed infrastructure and configuration. This
-//         [state](https://www.terraform.io/docs/state/index.html) is used by
-//         Terraform to map real world resources to your configuration, keep
-//         track of metadata, and to improve performance for large infrastructures.
+//         Terraform's cached information about your managed infrastructure
+//         and configuration. This [state](https://www.terraform.io/docs/state/index.html)
+//         is used to persistently map the same real world resources to your
+//         configuration from run-to-run, keep track of metadata, and improve
+//         performance for large infrastructures.
 //
 //         State implements a Dict, where the first level are the providers
 //         containing the keys `data` with the data sources and `resources` with
@@ -220,7 +220,7 @@ func (b *Backend) Type() string {
 //
 //         examples:
 //           backend_local.star
-//             An example of how print a resume of providers and resources
+//             An example of how to print a resume of providers and resources
 //             count from the state.
 //
 //         fields:

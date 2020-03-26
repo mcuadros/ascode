@@ -63,10 +63,10 @@ func MakeProvider(
 //   outline: types
 //     types:
 //       Provider
-//         Terraform is used to create, manage, and update infrastructure
-//         resources such as physical machines, VMs, network switches,
-//         containers, and more. Almost any infrastructure type can be
-//         represented as a resource in Terraform.
+//         A plugin for Terraform that makes a collection of related resources
+//         available. A provider plugin is responsible for understanding API
+//         interactions with some kind of service and exposing resources based
+//         on that API.
 //
 //         examples:
 //           provider.star
@@ -81,8 +81,8 @@ func MakeProvider(
 //           __type__ string
 //             Type of the resource. Eg.: `aws_instance`
 //           __name__ string
-//             Local name of the provider, if none was provided to the constructor
-//             the name is auto-generated following the partern `id_%s`.  At
+//             Local name of the provider, if none was provided to the constructor,
+//             the name is auto-generated following the pattern `id_%s`.  At
 //             Terraform is called [`alias`](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances)
 //           __dict__ Dict
 //             A dictionary containing all set arguments and blocks of the provider.
@@ -234,10 +234,10 @@ func (p *Provider) CompareSameType(op syntax.Token, yv starlark.Value, depth int
 //           __kind__ string
 //             Kind of the resources (`data` or `resource`).
 //           <resource-name> ResourceCollection
-//             It returns a ResourceCollection if the resource name is valid for
+//             Returns a ResourceCollection if the resource name is valid for
 //             the schema of the provider. The resource name should be provided
 //             without the provider prefix, `aws_instance` becomes
-//             just `instance`.
+//             just an `instance`.
 //
 type ResourceCollectionGroup struct {
 	provider    *Provider

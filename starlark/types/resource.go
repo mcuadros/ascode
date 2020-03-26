@@ -159,7 +159,7 @@ func unpackResourceArgs(
 //
 //         methods:
 //           depends_on(resource)
-//             Explicitly declares a dependency with another resource. Use the
+//             Explicitly declares a dependency on another resource. Use the
 //             [depends_on](https://www.terraform.io/docs/configuration/resources.html#depends_on-explicit-resource-dependencies)
 //             meta-argument to handle hidden resource dependencies that
 //             Terraform can't automatically infer.

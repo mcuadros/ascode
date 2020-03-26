@@ -13,12 +13,12 @@ import (
 //   outline: types
 //     functions:
 //       evaluate(filename, predeclared=None) dict
-//         Evaluates a Starlark file and returns it's global context. Kwargs may
+//         Evaluates a Starlark file and returns its global context. Kwargs may
 //         be used to set predeclared.
 //         params:
 //           filename string
 //             Name of the file to execute.
-//           predeclared? dict
+//           predeclared dict
 //             Defines the predeclared context for the execution. Execution does
 //             not modify this dictionary
 //

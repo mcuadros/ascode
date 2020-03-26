@@ -13,8 +13,8 @@ import (
 //   outline: types
 //     types:
 //       Terraform
-//         Terraform holds all the configuration defined by an script. A global
-//         variable called `tf` holds the unique instance of Terraform.
+//         Terraform holds all the configuration defined by a script. A global
+//         variable called `tf` contains a unique instance of Terraform.
 //
 //         examples:
 //           tf_overview.star

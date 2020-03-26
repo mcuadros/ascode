@@ -19,9 +19,9 @@ type sString = starlark.String
 //         Attribute is a reference to an argument of a Resource. Used mainly
 //         for Computed arguments of Resources.
 //
-//         Attribute behaves as type of the argument represented, this means
-//         that their can be assigned to other resource arguments of the same
-//         type. And, if the type is a list are indexables.
+//         Attribute behaves as the type of the argument represented, this means
+//         that them can be assigned to other resource arguments of the same
+//         type. And, if the type is a list are indexable.
 //
 //         examples:
 //           attribute.star
