@@ -31,6 +31,7 @@ type LoadModuleFunc func() (starlark.StringDict, error)
 
 type Runtime struct {
 	Terraform   *types.Terraform
+	pm          *terraform.PluginManager
 	predeclared starlark.StringDict
 	modules     map[string]LoadModuleFunc
 	moduleCache map[string]*moduleCache
@@ -43,6 +44,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 
 	return &Runtime{
 		Terraform:   tf,
+		pm:          pm,
 		moduleCache: make(map[string]*moduleCache),
 		modules: map[string]LoadModuleFunc{
 			filepath.ModuleName: filepath.LoadModule,
@@ -58,8 +60,8 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 		},
 		predeclared: starlark.StringDict{
 			"tf":          tf,
-			"provisioner": types.BuiltinProvisioner(pm),
-			"backend":     types.BuiltinBackend(pm),
+			"provisioner": types.BuiltinProvisioner(),
+			"backend":     types.BuiltinBackend(),
 			"hcl":         types.BuiltinHCL(),
 			"fn":          types.BuiltinFunctionComputed(),
 			"evaluate":    types.BuiltinEvaluate(),
@@ -75,6 +77,7 @@ func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
 
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
 	thread.SetLocal("base_path", r.path)
+	thread.SetLocal(types.PluginManagerLocal, r.pm)
 
 	return starlark.ExecFile(thread, filename, nil, r.predeclared)
 }
