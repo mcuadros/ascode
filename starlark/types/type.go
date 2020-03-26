@@ -46,7 +46,7 @@ func NewTypeFromStarlark(typ string) (*Type, error) {
 		t.cty = cty.List(cty.NilType)
 	case "dict", "Resource":
 		t.cty = cty.Map(cty.NilType)
-	case "Computed":
+	case "Attribute":
 		t.cty = cty.String
 	default:
 		return nil, fmt.Errorf("unexpected %q type", typ)
@@ -108,7 +108,7 @@ func (t *Type) Cty() cty.Type {
 	return t.cty
 }
 
-// Validate validates a value againts the type.
+// Validate validates a value against the type.
 func (t *Type) Validate(v starlark.Value) error {
 	switch v.(type) {
 	case starlark.String:
@@ -123,12 +123,12 @@ func (t *Type) Validate(v starlark.Value) error {
 		if t.cty == cty.Bool {
 			return nil
 		}
-	case *Computed:
-		if t.cty == v.(*Computed).t {
+	case *Attribute:
+		if t.cty == v.(*Attribute).t {
 			return nil
 		}
 
-		vt := v.(*Computed).InnerType().Starlark()
+		vt := v.(*Attribute).InnerType().Starlark()
 		return fmt.Errorf("expected %s, got %s", t.typ, vt)
 	case *starlark.List:
 		if t.cty.IsListType() || t.cty.IsSetType() {

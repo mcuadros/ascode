@@ -68,6 +68,7 @@ var _ starlark.HasAttrs = &ResourceCollection{}
 var _ starlark.Callable = &ResourceCollection{}
 var _ starlark.Comparable = &ResourceCollection{}
 
+// NewResourceCollection returns a new ResourceCollection for the given values.
 func NewResourceCollection(
 	typ string, k Kind, block *configschema.Block, provider *Provider, parent *Resource,
 ) *ResourceCollection {
@@ -271,6 +272,7 @@ var _ starlark.HasAttrs = &ProviderCollection{}
 var _ starlark.Callable = &ProviderCollection{}
 var _ starlark.Comparable = &ProviderCollection{}
 
+// NewProviderCollection returns a new ProviderCollection.
 func NewProviderCollection(pm *terraform.PluginManager) *ProviderCollection {
 	return &ProviderCollection{
 		pm:   pm,

@@ -11,6 +11,7 @@ import (
 	"go.starlark.net/starlark"
 )
 
+// HCLCompatible defines if the struct is suitable of by encoded in HCL.
 type HCLCompatible interface {
 	ToHCL(b *hclwrite.Body)
 }
@@ -44,6 +45,7 @@ func BuiltinHCL() starlark.Value {
 	})
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (s *Terraform) ToHCL(b *hclwrite.Body) {
 	if s.b != nil {
 		s.b.ToHCL(b)
@@ -52,6 +54,7 @@ func (s *Terraform) ToHCL(b *hclwrite.Body) {
 	s.p.ToHCL(b)
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (s *Dict) ToHCL(b *hclwrite.Body) {
 	for _, v := range s.Keys() {
 		p, _, _ := s.Get(v)
@@ -64,6 +67,7 @@ func (s *Dict) ToHCL(b *hclwrite.Body) {
 	}
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (s *Provider) ToHCL(b *hclwrite.Body) {
 	block := b.AppendNewBlock("provider", []string{s.typ})
 
@@ -76,11 +80,13 @@ func (s *Provider) ToHCL(b *hclwrite.Body) {
 	b.AppendNewline()
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (s *Provisioner) ToHCL(b *hclwrite.Body) {
 	block := b.AppendNewBlock("provisioner", []string{s.typ})
 	s.Resource.doToHCLAttributes(block.Body())
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (s *Backend) ToHCL(b *hclwrite.Body) {
 	parent := b.AppendNewBlock("terraform", nil)
 
@@ -89,6 +95,7 @@ func (s *Backend) ToHCL(b *hclwrite.Body) {
 	b.AppendNewline()
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (t *ResourceCollectionGroup) ToHCL(b *hclwrite.Body) {
 	names := make(sort.StringSlice, len(t.collections))
 	var i int
@@ -103,12 +110,14 @@ func (t *ResourceCollectionGroup) ToHCL(b *hclwrite.Body) {
 	}
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (c *ResourceCollection) ToHCL(b *hclwrite.Body) {
 	for i := 0; i < c.Len(); i++ {
 		c.Index(i).(*Resource).ToHCL(b)
 	}
 }
 
+// ToHCL honors the HCLCompatible interface.
 func (r *Resource) ToHCL(b *hclwrite.Body) {
 	if len(b.Blocks()) != 0 || len(b.Attributes()) != 0 {
 		b.AppendNewline()
@@ -142,7 +151,7 @@ func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 			return nil
 		}
 
-		if c, ok := v.v.(*Computed); ok {
+		if c, ok := v.v.(*Attribute); ok {
 			body.SetAttributeTraversal(v.Name, hcl.Traversal{
 				hcl.TraverseRoot{Name: c.String()},
 			})
@@ -168,7 +177,7 @@ func (r *Resource) doToHCLAttributes(body *hclwrite.Body) {
 }
 
 func (r *Resource) doToHCLDependencies(body *hclwrite.Body) {
-	if len(r.dependenies) == 0 {
+	if len(r.dependencies) == 0 {
 		return
 	}
 
@@ -184,8 +193,8 @@ func (r *Resource) doToHCLDependencies(body *hclwrite.Body) {
 		Type: hclsyntax.TokenOBrack, Bytes: []byte{'['},
 	})
 
-	l := len(r.dependenies)
-	for i, dep := range r.dependenies {
+	l := len(r.dependencies)
+	for i, dep := range r.dependencies {
 		name := fmt.Sprintf("%s.%s", dep.typ, dep.Name())
 		toks = append(toks, &hclwrite.Token{
 			Type: hclsyntax.TokenIdent, Bytes: []byte(name),

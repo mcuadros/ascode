@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	// PluginManagerLocal is the key of the terraform.PluginManager in the thread.
 	PluginManagerLocal = "plugin_manager"
 )
 
@@ -206,15 +207,15 @@ func (p *Provider) AttrNames() []string {
 }
 
 // CompareSameType honors starlark.Comparable interface.
-func (x *Provider) CompareSameType(op syntax.Token, y_ starlark.Value, depth int) (bool, error) {
-	y := y_.(*Provider)
+func (p *Provider) CompareSameType(op syntax.Token, yv starlark.Value, depth int) (bool, error) {
+	y := yv.(*Provider)
 	switch op {
 	case syntax.EQL:
-		return x == y, nil
+		return p == y, nil
 	case syntax.NEQ:
-		return x != y, nil
+		return p != y, nil
 	default:
-		return false, fmt.Errorf("%s %s %s not implemented", x.Type(), op, y.Type())
+		return false, fmt.Errorf("%s %s %s not implemented", p.Type(), op, y.Type())
 	}
 }
 

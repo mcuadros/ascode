@@ -41,6 +41,7 @@ func (k Kind) IsProviderRelated() bool {
 	return false
 }
 
+// Resource Kind constants.
 const (
 	ProviderKind    Kind = "provider"
 	ProvisionerKind Kind = "provisioner"
@@ -188,7 +189,7 @@ type Resource struct {
 
 	provider     *Provider
 	parent       *Resource
-	dependenies  []*Resource
+	dependencies []*Resource
 	provisioners []*Provisioner
 }
 
@@ -329,7 +330,7 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
 	if attr.Computed {
 		if !r.values.Has(name) {
-			return NewComputed(r, attr.Type, name), nil
+			return NewAttribute(r, attr.Type, name), nil
 		}
 	}
 
@@ -468,7 +469,7 @@ func (r *Resource) dependsOn(_ *starlark.Thread, _ *starlark.Builtin, args starl
 		resources[i] = resource
 	}
 
-	r.dependenies = append(r.dependenies, resources...)
+	r.dependencies = append(r.dependencies, resources...)
 	return starlark.None, nil
 }
 
@@ -488,30 +489,30 @@ func (r *Resource) addProvisioner(_ *starlark.Thread, _ *starlark.Builtin, args 
 }
 
 // CompareSameType honors starlark.Comparable interface.
-func (x *Resource) CompareSameType(op syntax.Token, y_ starlark.Value, depth int) (bool, error) {
-	y := y_.(*Resource)
+func (r *Resource) CompareSameType(op syntax.Token, yv starlark.Value, depth int) (bool, error) {
+	y := yv.(*Resource)
 	switch op {
 	case syntax.EQL:
-		ok, err := x.doCompareSameType(y, depth)
+		ok, err := r.doCompareSameType(y, depth)
 		return ok, err
 	case syntax.NEQ:
-		ok, err := x.doCompareSameType(y, depth)
+		ok, err := r.doCompareSameType(y, depth)
 		return !ok, err
 	default:
-		return false, fmt.Errorf("%s %s %s not implemented", x.Type(), op, y.Type())
+		return false, fmt.Errorf("%s %s %s not implemented", r.Type(), op, y.Type())
 	}
 }
 
-func (x *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
-	if x.typ != y.typ {
+func (r *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
+	if r.typ != y.typ {
 		return false, nil
 	}
 
-	if x.values.Len() != y.values.Len() {
+	if r.values.Len() != y.values.Len() {
 		return false, nil
 	}
 
-	for _, xval := range x.values.List() {
+	for _, xval := range r.values.List() {
 		yval := y.values.Get(xval.Name)
 		if yval == nil {
 			return false, nil

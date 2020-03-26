@@ -78,8 +78,8 @@ func (v *Value) Cty() cty.Value {
 		}
 
 		return cty.MapVal(values)
-	case "Computed":
-		return cty.StringVal(v.v.(*Computed).GoString())
+	case "Attribute":
+		return cty.StringVal(v.v.(*Attribute).GoString())
 	default:
 		return cty.StringVal(fmt.Sprintf("unhandled: %s", v.t.typ))
 	}
@@ -264,10 +264,12 @@ func (a Values) Cty(schema *configschema.Block) cty.Value {
 	return cty.ObjectVal(values)
 }
 
+// Dict is a starlark.Dict HCLCompatible.
 type Dict struct {
 	*starlark.Dict
 }
 
+// NewDict returns a new empty Dict.
 func NewDict() *Dict {
 	return &Dict{starlark.NewDict(0)}
 }

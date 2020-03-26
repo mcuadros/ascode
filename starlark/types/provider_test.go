@@ -72,7 +72,7 @@ func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, str
 		"provisioner": BuiltinProvisioner(),
 		"backend":     BuiltinBackend(),
 		"hcl":         BuiltinHCL(),
-		"fn":          BuiltinFunctionComputed(),
+		"fn":          BuiltinFunctionAttribute(),
 		"evaluate":    BuiltinEvaluate(),
 		"tf":          NewTerraform(pm),
 	}

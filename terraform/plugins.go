@@ -14,7 +14,7 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-// PluginManager is a wrapper arround the terraform tools to download and execute
+// PluginManager is a wrapper around the terraform tools to download and execute
 // terraform plugins, like providers and provisioners.
 type PluginManager struct {
 	Path string
@@ -28,7 +28,7 @@ func (m *PluginManager) Provider(provider, version string, forceLocal bool) (*pl
 	meta, ok := m.getLocal("provider", provider, version)
 	if !ok && !forceLocal {
 		var err error
-		meta, ok, err = m.getProviderRemote(provider, version)
+		meta, _, err = m.getProviderRemote(provider, version)
 		if err != nil {
 			return nil, discovery.PluginMeta{}, err
 		}

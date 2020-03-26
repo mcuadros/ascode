@@ -31,7 +31,7 @@ assert.eq(qux.name, None)
 assert.fails(lambda: qux.foo, "Resource<data> has no .foo field or method")
 
 # attr id
-assert.eq(type(qux.id), "Computed<string>")
+assert.eq(type(qux.id), "Attribute<string>")
 assert.eq(str(qux.id), '"${data.ignition_user.id_2.id}"')
 aws = tf.provider("aws", "2.13.0")
 
