@@ -11,9 +11,12 @@ assert.eq(os.getenv(key), value)
 
 content = "hello world\n"
 
+home = os.getenv("HOME")
+os.chdir(home)
+assert.eq(os.getwd(), home)
+
 temp = os.temp_dir()
 os.chdir(temp)
-assert.eq(os.getwd(), temp)
 
 assert.eq(os.write_file("plain.txt", content), None)
 assert.eq(os.read_file("plain.txt"), content)

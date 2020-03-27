@@ -71,4 +71,4 @@ example.ami = "ami-2757f631"
 example.instance_type = "t2.micro"
 example.depends_on(bucket)
 
-assert.eq(hcl(tf), os.read_file("fixtures/aws.tf"))
+assert.eq(hcl(tf).replace("\r", ""), os.read_file("fixtures/aws.tf").replace("\r", ""))

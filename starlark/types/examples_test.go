@@ -18,7 +18,8 @@ func TestExamples(t *testing.T) {
 		stdos.Chdir(pwd)
 	}()
 
-	stdos.Chdir(filepath.Join(pwd, "testdata/examples"))
+	err := stdos.Chdir(filepath.Join(pwd, "testdata", "examples"))
+	assert.NoError(t, err)
 
 	tests, err := filepath.Glob("*.star")
 	assert.NoError(t, err)

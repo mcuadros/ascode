@@ -1,6 +1,7 @@
 package filepath
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/qri-io/starlib/testdata"
@@ -10,6 +11,11 @@ import (
 )
 
 func TestFile(t *testing.T) {
+	if filepath.Separator != '/' {
+		// TODO(mcuadros): do proper testing on windows.
+		t.Skip("skiping filepath test for Windows")
+	}
+
 	resolve.AllowFloat = true
 	thread := &starlark.Thread{Load: testdata.NewLoader(LoadModule, ModuleName)}
 	starlarktest.SetReporter(thread, t)
