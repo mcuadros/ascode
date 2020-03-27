@@ -1,11 +1,11 @@
-# AsCode - The Real Infrastructure as Code
+![alt text][logo]
 
-**AsCode** is a tool for define infrastructure as code using the [Starlark](https://github.com/google/starlark-go/blob/master/doc/spec.md) language on top of [Terraform](https://github.com/hashicorp/terraform). It allows to describe your infrastructure using an expressive language in Terraform without writing a single line of [HCL](https://www.terraform.io/docs/configuration/syntax.html), meanwhile, you have the complete ecosystem of [providers](https://www.terraform.io/docs/providers/index.html)
+
+**AsCode** is a tool to define infrastructure as code using the [Starlark](https://github.com/google/starlark-go/blob/master/doc/spec.md) language on top of [Terraform](https://github.com/hashicorp/terraform). It allows to describe your infrastructure using an expressive language in Terraform without writing a single line of HCL, meanwhile, you have the complete ecosystem of [providers](https://www.terraform.io/docs/providers/index.html) 
 
 ### Why?
 
-Terraform is a great tool, with support for almost everything you can imagine, making it the industry leader. Terraform is based on HCL, a JSON-alike declarative language, with a very limited control flow functionalities. IMHO, to really unleash the power of the IaC, a powerful, expressive language should be used, where basic elements like loops or functions are first class citizens.
-
+Terraform is a great tool, with support for almost everything you can imagine, making it the industry leader. Terraform is based on HCL, a JSON-alike declarative language, with minimal control flow functionality. IMHO, to unleash the power of the IaC, a powerful, expressive language should be used, where basic elements like loops or functions are first-class citizens.
 
 ### What is Starlark?
 
@@ -90,3 +90,5 @@ The recommended way to install *ascode* it's download the binary from the [relea
 ## License
 
 GPL-3.0, see [LICENSE](LICENSE)
+
+[logo]: https://rawcdn.githack.com/mcuadros/hugo-ascode-theme/58eb37db93a6566800f44a0b488547c5078cc050/static/images/logo.svg
