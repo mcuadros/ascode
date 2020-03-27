@@ -69,7 +69,7 @@ func LoadAssertModule() (starlark.StringDict, error) {
 		}
 		filename := DataFile("starlark/test", "assert.star")
 		thread := new(starlark.Thread)
-		assert, assertErr = starlark.ExecFile(thread, filename, nil, predeclared)
+		assert, assertErr = starlark.ExecFile(thread, filename, assertStarFile, predeclared)
 	})
 	return assert, assertErr
 }
