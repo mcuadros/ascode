@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -42,6 +43,10 @@ func (m *PluginManager) Provider(provider, version string, forceLocal bool) (*pl
 // try to locate it at the local Path, if not try to execute it from the
 // built-in plugins in the terraform binary.
 func (m *PluginManager) Provisioner(provisioner string) (*plugin.Client, discovery.PluginMeta, error) {
+	if !IsTerraformBinaryAvailable() {
+		return nil, discovery.PluginMeta{}, ErrTerraformNotAvailable
+	}
+
 	meta, ok := m.getLocal("provisioner", provisioner, "")
 	if ok {
 		return client(meta), meta, nil
@@ -120,4 +125,18 @@ func (m *PluginManager) getLocal(kind, provider, version string) (discovery.Plug
 	}
 
 	return set.Newest(), true
+}
+
+// ErrTerraformNotAvailable error used when `terraform` binary in not in the
+// path and we try to use a provisioner.
+var ErrTerraformNotAvailable = fmt.Errorf("provisioner error: executable file 'terraform' not found in $PATH")
+
+// IsTerraformBinaryAvailable determines if Terraform binary is available in
+// the path of the system. Terraform binary is a requirement for executing
+// provisioner plugins, since they are built-in on the Terrafrom binary. :(
+//
+// https://github.com/hashicorp/terraform/issues/20896#issuecomment-479054649
+func IsTerraformBinaryAvailable() bool {
+	_, err := exec.LookPath("terraform")
+	return err == nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	stdos "os"
 	"testing"
 
 	"github.com/mcuadros/ascode/starlark/module/os"
@@ -33,6 +34,10 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProvisioner(t *testing.T) {
+	if stdos.Getenv("ALLOW_PROVISIONER_SKIP") != "" && !terraform.IsTerraformBinaryAvailable() {
+		t.Skip("terraform binary now available in $PATH")
+	}
+
 	doTest(t, "testdata/provisioner.star")
 }
 

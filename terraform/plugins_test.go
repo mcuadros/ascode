@@ -3,6 +3,7 @@ package terraform
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -51,6 +52,10 @@ func TestPluginManager_ProviderDefault(t *testing.T) {
 }
 
 func TestPluginManager_ProvisionerDefault(t *testing.T) {
+	if os.Getenv("ALLOW_PROVISIONER_SKIP") != "" && !IsTerraformBinaryAvailable() {
+		t.Skip("terraform binary now available in $PATH")
+	}
+
 	path, err := ioutil.TempDir("", "provisioner")
 	assert.NoError(t, err)
 

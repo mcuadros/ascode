@@ -18,5 +18,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Allow skip provisioner tests
+      uses: allenevans/set-env@v1.0.0
+      if: matrix.os != 'ubuntu-latest'
+      with:
+        ALLOW_PROVISIONER_SKIP: 1
+        
     - name: Test
       run: go test ./...
