@@ -2,7 +2,7 @@ package cmd
 
 const (
 	REPLCmdShortDescription = "Run as interactive shell."
-	REPLCmdLongDescription  = RunCmdShortDescription + "\n\n" +
+	REPLCmdLongDescription  = REPLCmdShortDescription + "\n\n" +
 		"The REPL shell provides the same capabilities as the regular `run`\n" +
 		"command."
 )

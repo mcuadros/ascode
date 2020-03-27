@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/jessevdk/go-flags"
@@ -13,13 +12,13 @@ var build string
 
 func main() {
 	parser := flags.NewNamedParser("ascode", flags.Default)
-	parser.LongDescription = "AsCode - The real infrastructure as code."
+	parser.LongDescription = "AsCode - Terraform Alternative Syntax."
 	parser.AddCommand("run", cmd.RunCmdShortDescription, cmd.RunCmdLongDescription, &cmd.RunCmd{})
 	parser.AddCommand("repl", cmd.REPLCmdShortDescription, cmd.REPLCmdLongDescription, &cmd.REPLCmd{})
+	parser.AddCommand("version", cmd.VersionCmdShortDescription, cmd.VersionCmdLongDescription, &cmd.VersionCmd{})
 
 	if _, err := parser.Parse(); err != nil {
 		if flagsErr, ok := err.(*flags.Error); ok && flagsErr.Type == flags.ErrHelp {
-			fmt.Printf("Build information\n  commit: %s\n  date:%s\n", version, build)
 			os.Exit(0)
 		}
 
