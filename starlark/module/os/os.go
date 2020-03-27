@@ -25,6 +25,7 @@ const (
 	RemoveFuncName    = "remove"
 	RemoveAllFuncName = "remove_all"
 	RenameFuncName    = "rename"
+	TempDirFuncName   = "temp_dir"
 )
 
 var (
@@ -55,6 +56,7 @@ func LoadModule() (starlark.StringDict, error) {
 					RemoveFuncName:    starlark.NewBuiltin(MkdirFuncName, Remove),
 					RemoveAllFuncName: starlark.NewBuiltin(MkdirFuncName, RemoveAll),
 					RenameFuncName:    starlark.NewBuiltin(RenameFuncName, Rename),
+					TempDirFuncName:   starlark.NewBuiltin(TempDirFuncName, TempDir),
 				},
 			},
 		}
@@ -322,4 +324,14 @@ func Rename(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, k
 	}
 
 	return starlark.None, os.Rename(oldpath, newpath)
+}
+
+// TempDir returns the default directory to use for temporary files.
+//
+//   outline: os
+//     functions:
+//       temp_dir()
+//         returns the default directory to use for temporary files.
+func TempDir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	return starlark.String(os.TempDir()), nil
 }
