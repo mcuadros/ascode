@@ -12,7 +12,7 @@ jobs:
       with:
         image: mcuadros/ascode
         registry: docker.io
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: mcuadros
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Tag image
@@ -21,5 +21,5 @@ jobs:
         image: mcuadros/ascode
         registry: docker.io
         tag: latest
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: mcuadros
         password: ${{ secrets.DOCKER_PASSWORD }}

@@ -4,7 +4,7 @@ def print_provider_info(p):
     print("  Defines Resources: %d" % len(dir(p.resource)))
     print("  Configuration: %s" % p.__dict__)
 
-provider = tf.provider("google")
+provider = tf.provider("google", "3.13.0")
 provider.project = "acme-app"
 provider.region = "us-central1"
 

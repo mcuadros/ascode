@@ -20,8 +20,9 @@ os.remove("foo")
 
 assert.ne(os.getwd(), "")
 
-os.chdir("/tmp")
-assert.eq(os.getwd(), "/tmp")
+home = os.getenv("HOME")
+os.chdir(home)
+assert.eq(os.getwd(), home)
 
 os.mkdir_all("foo/bar", 0o755)
 
