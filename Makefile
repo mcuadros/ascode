@@ -1,7 +1,8 @@
 # Documentation
 OUTLINE_CMD ?= outline
 DOCUMENTATION_PATH ?= _documentation
-DOCUMENTATION_RUNTIME_PATH ?= $(DOCUMENTATION_PATH)/reference
+DOCUMENTATION_REFERENCE_PATH ?= $(DOCUMENTATION_PATH)/reference
+DOCUMENTATION_REFERENCE_TEMPLATE ?= $(DOCUMENTATION_REFERENCE_PATH)/reference.md.tmpl
 EXAMPLES_PATH ?= starlark/types/testdata/examples
 
 RUNTIME_MODULES = \
@@ -24,14 +25,17 @@ GO_LDFLAGS_PACKAGES = \
 
 
 # Rules
-.PHONY: $(RUNTIME_MODULES) $(COMMANDS) documentation
+.PHONY: documentation
 
 documentation: $(RUNTIME_MODULES)
 $(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH)
-	$(OUTLINE_CMD) package -t _scripts/template.md -d $(EXAMPLES_PATH) $@ \
-		> $(DOCUMENTATION_RUNTIME_PATH)/`basename $@`.md
+	$(OUTLINE_CMD) package \
+		-t $(DOCUMENTATION_REFERENCE_TEMPLATE) \
+		-d $(EXAMPLES_PATH) \
+		$@ \
+		> $(DOCUMENTATION_REFERENCE_PATH)/`basename $@`.md
 
-$(DOCUMENTATION_RUNTIME_PATH):
+$(DOCUMENTATION_REFERENCE_PATH):
 	mkdir -p $@
 
 goldflags:

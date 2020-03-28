@@ -1,0 +1,5 @@
+# Ignore
+*.md
+
+# Allow
+!_index.md
