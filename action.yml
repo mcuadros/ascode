@@ -1,5 +1,5 @@
 name: 'ascode-action'
-description: 'AsCode - The Real Infrastructure as Code'
+description: 'AsCode - Terraform Alternative Syntax'
 inputs:
   file:  
     description: 'starlark file to execute'
