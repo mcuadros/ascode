@@ -37,6 +37,7 @@ GO_LDFLAGS_CMD = go run _scripts/goldflags.go
 GO_LDFLAGS_PACKAGE = cmd
 GO_LDFLAGS_PACKAGES = \
  	starlarkVersion=go.starlark.net \
+	starlibVersion=github.com/qri-io/starlib \
 	terraformVersion=github.com/hashicorp/terraform
 
 # Site

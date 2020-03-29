@@ -14,18 +14,18 @@ const (
 	// in starlark's load() function, eg: load('io/ioutil', 'json')
 	ModuleName = "os"
 
-	GetwdFuncName     = "getwd"
-	ChdirFuncName     = "chdir"
-	GetenvFuncName    = "getenv"
-	SetenvFuncName    = "setenv"
-	WriteFileFuncName = "write_file"
-	ReadFileFuncName  = "read_file"
-	MkdirFuncName     = "mkdir"
-	MkdirAllFuncName  = "mkdir_all"
-	RemoveFuncName    = "remove"
-	RemoveAllFuncName = "remove_all"
-	RenameFuncName    = "rename"
-	TempDirFuncName   = "temp_dir"
+	getwdFuncName     = "getwd"
+	chdirFuncName     = "chdir"
+	getenvFuncName    = "getenv"
+	setenvFuncName    = "setenv"
+	writeFileFuncName = "write_file"
+	readFileFuncName  = "read_file"
+	mkdirFuncName     = "mkdir"
+	mkdirAllFuncName  = "mkdir_all"
+	removeFuncName    = "remove"
+	removeAllFuncName = "remove_all"
+	renameFuncName    = "rename"
+	tempDirFuncName   = "temp_dir"
 )
 
 var (
@@ -45,18 +45,18 @@ func LoadModule() (starlark.StringDict, error) {
 			"os": &starlarkstruct.Module{
 				Name: "os",
 				Members: starlark.StringDict{
-					ChdirFuncName:     starlark.NewBuiltin(ChdirFuncName, Chdir),
-					GetwdFuncName:     starlark.NewBuiltin(GetwdFuncName, Getwd),
-					SetenvFuncName:    starlark.NewBuiltin(SetenvFuncName, Setenv),
-					GetenvFuncName:    starlark.NewBuiltin(GetenvFuncName, Getenv),
-					WriteFileFuncName: starlark.NewBuiltin(WriteFileFuncName, WriteFile),
-					ReadFileFuncName:  starlark.NewBuiltin(ReadFileFuncName, ReadFile),
-					MkdirFuncName:     starlark.NewBuiltin(MkdirFuncName, Mkdir),
-					MkdirAllFuncName:  starlark.NewBuiltin(MkdirAllFuncName, MkdirAll),
-					RemoveFuncName:    starlark.NewBuiltin(MkdirFuncName, Remove),
-					RemoveAllFuncName: starlark.NewBuiltin(MkdirFuncName, RemoveAll),
-					RenameFuncName:    starlark.NewBuiltin(RenameFuncName, Rename),
-					TempDirFuncName:   starlark.NewBuiltin(TempDirFuncName, TempDir),
+					chdirFuncName:     starlark.NewBuiltin(chdirFuncName, Chdir),
+					getwdFuncName:     starlark.NewBuiltin(getwdFuncName, Getwd),
+					setenvFuncName:    starlark.NewBuiltin(setenvFuncName, Setenv),
+					getenvFuncName:    starlark.NewBuiltin(getenvFuncName, Getenv),
+					writeFileFuncName: starlark.NewBuiltin(writeFileFuncName, WriteFile),
+					readFileFuncName:  starlark.NewBuiltin(readFileFuncName, ReadFile),
+					mkdirFuncName:     starlark.NewBuiltin(mkdirFuncName, Mkdir),
+					mkdirAllFuncName:  starlark.NewBuiltin(mkdirAllFuncName, MkdirAll),
+					removeFuncName:    starlark.NewBuiltin(mkdirFuncName, Remove),
+					removeAllFuncName: starlark.NewBuiltin(mkdirFuncName, RemoveAll),
+					renameFuncName:    starlark.NewBuiltin(renameFuncName, Rename),
+					tempDirFuncName:   starlark.NewBuiltin(tempDirFuncName, TempDir),
 				},
 			},
 		}
@@ -77,7 +77,7 @@ func LoadModule() (starlark.StringDict, error) {
 func Chdir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var dir string
 
-	err := starlark.UnpackArgs(ChdirFuncName, args, kwargs, "dir", &dir)
+	err := starlark.UnpackArgs(chdirFuncName, args, kwargs, "dir", &dir)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func Setenv(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, k
 		value string
 	)
 
-	err := starlark.UnpackArgs(SetenvFuncName, args, kwargs, "key", &key, "value", &value)
+	err := starlark.UnpackArgs(setenvFuncName, args, kwargs, "key", &key, "value", &value)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func Getenv(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, k
 		def string
 	)
 
-	err := starlark.UnpackArgs(GetenvFuncName, args, kwargs, "key", &key, "default?", &def)
+	err := starlark.UnpackArgs(getenvFuncName, args, kwargs, "key", &key, "default?", &def)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func WriteFile(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple
 		perms    = 0644
 	)
 
-	err := starlark.UnpackArgs(WriteFileFuncName, args, kwargs, "filename", &filename, "content", &content, "perms?", &perms)
+	err := starlark.UnpackArgs(writeFileFuncName, args, kwargs, "filename", &filename, "content", &content, "perms?", &perms)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func WriteFile(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple
 func ReadFile(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var filename string
 
-	err := starlark.UnpackArgs(ReadFileFuncName, args, kwargs, "filename", &filename)
+	err := starlark.UnpackArgs(readFileFuncName, args, kwargs, "filename", &filename)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func Mkdir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kw
 		perms = 0777
 	)
 
-	err := starlark.UnpackArgs(MkdirFuncName, args, kwargs, "name", &name, "perms?", &perms)
+	err := starlark.UnpackArgs(mkdirFuncName, args, kwargs, "name", &name, "perms?", &perms)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +250,7 @@ func MkdirAll(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple,
 		perms = 0777
 	)
 
-	err := starlark.UnpackArgs(MkdirAllFuncName, args, kwargs, "path", &path, "perms?", &perms)
+	err := starlark.UnpackArgs(mkdirAllFuncName, args, kwargs, "path", &path, "perms?", &perms)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func MkdirAll(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple,
 func Remove(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var name string
 
-	err := starlark.UnpackArgs(RemoveFuncName, args, kwargs, "name", &name)
+	err := starlark.UnpackArgs(removeFuncName, args, kwargs, "name", &name)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +291,7 @@ func Remove(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, k
 func RemoveAll(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(RemoveAllFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(removeAllFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +318,7 @@ func Rename(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, k
 		newpath string
 	)
 
-	err := starlark.UnpackArgs(RenameFuncName, args, kwargs, "oldpath", &oldpath, "newpath", &newpath)
+	err := starlark.UnpackArgs(renameFuncName, args, kwargs, "oldpath", &oldpath, "newpath", &newpath)
 	if err != nil {
 		return nil, err
 	}

@@ -6,9 +6,11 @@ import (
 	"os"
 
 	"github.com/hashicorp/hcl2/hclwrite"
+	"github.com/jessevdk/go-flags"
 	"go.starlark.net/starlark"
 )
 
+// Command descriptions used in the flags.Parser.AddCommand.
 const (
 	RunCmdShortDescription = "Run parses, resolves, and executes a Starlark file."
 	RunCmdLongDescription  = RunCmdShortDescription + "\n\n" +
@@ -20,6 +22,7 @@ const (
 		"and plan commands.\n"
 )
 
+// RunCmd implements the command `run`.
 type RunCmd struct {
 	commonCmd
 
@@ -30,6 +33,7 @@ type RunCmd struct {
 	} `positional-args:"true" required:"1"`
 }
 
+// Execute honors the flags.Commander interface.
 func (c *RunCmd) Execute(args []string) error {
 	c.init()
 
@@ -65,3 +69,5 @@ func (c *RunCmd) dumpToHCL(ctx starlark.StringDict) error {
 
 	return ioutil.WriteFile(c.ToHCL, f.Bytes(), 0644)
 }
+
+var _ flags.Commander = &RunCmd{}

@@ -22,9 +22,8 @@ const (
 	// in starlark's load() function, eg: load('docker', 'docker')
 	ModuleName = "docker"
 
-	ImageFuncName = "image"
-
-	latestTag = "lastest"
+	imageFuncName = "image"
+	latestTag     = "lastest"
 )
 
 var (
@@ -44,7 +43,7 @@ func LoadModule() (starlark.StringDict, error) {
 			"docker": &starlarkstruct.Module{
 				Name: "docker",
 				Members: starlark.StringDict{
-					ImageFuncName: starlark.NewBuiltin(ImageFuncName, Image),
+					imageFuncName: starlark.NewBuiltin(imageFuncName, Image),
 				},
 			},
 		}
@@ -104,7 +103,7 @@ func Image(
 ) (starlark.Value, error) {
 
 	var image, constraint string
-	err := starlark.UnpackArgs(ImageFuncName, args, kwargs, "image", &image, "constraint", &constraint)
+	err := starlark.UnpackArgs(imageFuncName, args, kwargs, "image", &image, "constraint", &constraint)
 	if err != nil {
 		return nil, err
 	}

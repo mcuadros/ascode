@@ -46,6 +46,7 @@ var _ starlark.Indexable = &Attribute{}
 var _ starlark.Comparable = &Attribute{}
 
 // NewAttribute returns a new Attribute for a given value or block of a Resource.
+// The path is calculated traversing the parents of the given Resource.
 func NewAttribute(r *Resource, t cty.Type, name string) *Attribute {
 	var parts []string
 	var path string
@@ -80,6 +81,7 @@ func NewAttribute(r *Resource, t cty.Type, name string) *Attribute {
 	return NewAttributeWithPath(r, t, name, path+"."+name)
 }
 
+// NewAttributeWithPath returns a new Attribute for a given value or block of a Resource.
 func NewAttributeWithPath(r *Resource, t cty.Type, name, path string) *Attribute {
 	return &Attribute{
 		r:       r,
@@ -95,6 +97,7 @@ func (c *Attribute) Type() string {
 	return fmt.Sprintf("Attribute<%s>", MustTypeFromCty(c.t).Starlark())
 }
 
+// InnerType returns the inner Type represented by this Attribute.
 func (c *Attribute) InnerType() *Type {
 	t, _ := NewTypeFromCty(c.t)
 	return t

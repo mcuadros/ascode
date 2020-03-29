@@ -1,4 +1,4 @@
-package filepath 
+package filepath
 
 import (
 	"path/filepath"
@@ -13,16 +13,16 @@ const (
 	// in starlark's load() function, eg: load('io/ioutil', 'json')
 	ModuleName = "path/filepath"
 
-	SeparatorVarName = "separator"
-	AbsFuncName      = "abs"
-	BaseFuncName     = "base"
-	CleanFuncName    = "clean"
-	DirFuncName      = "dir"
-	ExtFuncName      = "ext"
-	GlobFuncName     = "glob"
-	IsAbsFuncName    = "is_abs"
-	JoinFuncName     = "join"
-	RelFuncName      = "rel"
+	separatorVarName = "separator"
+	absFuncName      = "abs"
+	baseFuncName     = "base"
+	cleanFuncName    = "clean"
+	dirFuncName      = "dir"
+	extFuncName      = "ext"
+	globFuncName     = "glob"
+	isAbsFuncName    = "is_abs"
+	joinFuncName     = "join"
+	relFuncName      = "rel"
 )
 
 var (
@@ -43,16 +43,16 @@ func LoadModule() (starlark.StringDict, error) {
 			"filepath": &starlarkstruct.Module{
 				Name: "filepath",
 				Members: starlark.StringDict{
-					SeparatorVarName: starlark.String(string(filepath.Separator)),
-					GlobFuncName:     starlark.NewBuiltin(GlobFuncName, Glob),
-					AbsFuncName:      starlark.NewBuiltin(AbsFuncName, Abs),
-					BaseFuncName:     starlark.NewBuiltin(BaseFuncName, Base),
-					CleanFuncName:    starlark.NewBuiltin(CleanFuncName, Clean),
-					DirFuncName:      starlark.NewBuiltin(DirFuncName, Dir),
-					ExtFuncName:      starlark.NewBuiltin(ExtFuncName, Ext),
-					IsAbsFuncName:    starlark.NewBuiltin(IsAbsFuncName, IsAbs),
-					JoinFuncName:     starlark.NewBuiltin(JoinFuncName, Join),
-					RelFuncName:      starlark.NewBuiltin(RelFuncName, Rel),
+					separatorVarName: starlark.String(string(filepath.Separator)),
+					globFuncName:     starlark.NewBuiltin(globFuncName, Glob),
+					absFuncName:      starlark.NewBuiltin(absFuncName, Abs),
+					baseFuncName:     starlark.NewBuiltin(baseFuncName, Base),
+					cleanFuncName:    starlark.NewBuiltin(cleanFuncName, Clean),
+					dirFuncName:      starlark.NewBuiltin(dirFuncName, Dir),
+					extFuncName:      starlark.NewBuiltin(extFuncName, Ext),
+					isAbsFuncName:    starlark.NewBuiltin(isAbsFuncName, IsAbs),
+					joinFuncName:     starlark.NewBuiltin(joinFuncName, Join),
+					relFuncName:      starlark.NewBuiltin(relFuncName, Rel),
 				},
 			},
 		}
@@ -75,7 +75,7 @@ func LoadModule() (starlark.StringDict, error) {
 func Glob(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var pattern string
 
-	err := starlark.UnpackArgs(GlobFuncName, args, kwargs, "pattern", &pattern)
+	err := starlark.UnpackArgs(globFuncName, args, kwargs, "pattern", &pattern)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func Glob(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwa
 func Abs(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(AbsFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(absFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func Abs(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwar
 func Base(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(BaseFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(baseFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func Base(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwa
 func Clean(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(CleanFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(cleanFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func Clean(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kw
 func Dir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(DirFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(dirFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func Dir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwar
 func Ext(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(ExtFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(extFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +229,7 @@ func Ext(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwar
 func IsAbs(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var path string
 
-	err := starlark.UnpackArgs(IsAbsFuncName, args, kwargs, "path", &path)
+	err := starlark.UnpackArgs(isAbsFuncName, args, kwargs, "path", &path)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func IsAbs(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kw
 func Join(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var elements *starlark.List
 
-	err := starlark.UnpackArgs(JoinFuncName, args, kwargs, "elements", &elements)
+	err := starlark.UnpackArgs(joinFuncName, args, kwargs, "elements", &elements)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +287,7 @@ func Join(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwa
 func Rel(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	var basepath, targpath string
 
-	err := starlark.UnpackArgs(RelFuncName, args, kwargs, "basepath", &basepath, "targpath", &targpath)
+	err := starlark.UnpackArgs(relFuncName, args, kwargs, "basepath", &basepath, "targpath", &targpath)
 	if err != nil {
 		return nil, err
 	}

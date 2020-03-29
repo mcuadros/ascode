@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package starlarktest defines utilities for testing Starlark programs.
+// Package test defines utilities for testing Starlark programs.
 //
 // Clients can call LoadAssertModule to load a module that defines
 // several functions useful for testing.  See assert.star for its
@@ -61,7 +61,7 @@ var (
 func LoadAssertModule() (starlark.StringDict, error) {
 	once.Do(func() {
 		predeclared := starlark.StringDict{
-			"error":   starlark.NewBuiltin("error", error_),
+			"error":   starlark.NewBuiltin("error", errorFn),
 			"catch":   starlark.NewBuiltin("catch", catch),
 			"matches": starlark.NewBuiltin("matches", matches),
 			"module":  starlark.NewBuiltin("module", starlarkstruct.MakeModule),
@@ -101,7 +101,7 @@ func matches(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, 
 }
 
 // error(x) reports an error to the Go test framework.
-func error_(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+func errorFn(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	if len(args) != 1 {
 		return nil, fmt.Errorf("error: got %d arguments, want 1", len(args))
 	}
