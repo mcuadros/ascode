@@ -16,6 +16,8 @@ RUNTIME_MODULES = \
 	github.com/qri-io/starlib/encoding/json \
 	github.com/qri-io/starlib/encoding/yaml \
 	github.com/qri-io/starlib/re \
+	github.com/qri-io/starlib/time \
+	github.com/qri-io/starlib/math \
 	github.com/qri-io/starlib/http
 
 QUERY_GO_MOD_CMD = go run _scripts/query-go-mod.go

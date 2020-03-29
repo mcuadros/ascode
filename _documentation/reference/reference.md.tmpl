@@ -11,7 +11,7 @@
 
 {{ template "functionName" . }}
 ```go
-{{if ne .Receiver "types" -}}{{.Receiver}}.{{- end }}{{ .Signature }}
+{{if ne .Receiver "" -}}{{.Receiver}}.{{- end }}{{ .Signature }}
 ```
 
 {{- if ne .Description "" }}

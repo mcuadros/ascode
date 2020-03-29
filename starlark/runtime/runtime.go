@@ -14,7 +14,9 @@ import (
 	"github.com/qri-io/starlib/encoding/json"
 	"github.com/qri-io/starlib/encoding/yaml"
 	"github.com/qri-io/starlib/http"
+	"github.com/qri-io/starlib/math"
 	"github.com/qri-io/starlib/re"
+	"github.com/qri-io/starlib/time"
 	"go.starlark.net/repl"
 	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
@@ -25,10 +27,17 @@ func init() {
 	resolve.AllowRecursion = true
 	resolve.AllowFloat = true
 	resolve.AllowGlobalReassign = true
+	resolve.AllowLambda = true
+	resolve.AllowNestedDef = true
+	resolve.AllowSet = true
 }
 
+// LoadModuleFunc is a concurrency-safe and idempotent function that returns
+// the module when is called from the `load` funcion.
 type LoadModuleFunc func() (starlark.StringDict, error)
 
+// Runtime represents the AsCode runtime, it defines the available modules,
+// the predeclared globals and handles how the `load` function behaves.
 type Runtime struct {
 	Terraform   *types.Terraform
 	pm          *terraform.PluginManager
@@ -39,6 +48,7 @@ type Runtime struct {
 	path string
 }
 
+// NewRuntime returns a new Runtime for the given terraform.PluginManager.
 func NewRuntime(pm *terraform.PluginManager) *Runtime {
 	tf := types.NewTerraform(pm)
 
@@ -55,7 +65,9 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"encoding/base64": base64.LoadModule,
 			"encoding/csv":    csv.LoadModule,
 			"encoding/yaml":   yaml.LoadModule,
+			"math":            math.LoadModule,
 			"re":              re.LoadModule,
+			"time":            time.LoadModule,
 			"http":            http.LoadModule,
 		},
 		predeclared: starlark.StringDict{
@@ -71,23 +83,28 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 	}
 }
 
+// ExecFile parses, resolves, and executes a Starlark file.
 func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
 	filename, _ = osfilepath.Abs(filename)
 	r.path, _ = osfilepath.Split(filename)
 
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
-	thread.SetLocal("base_path", r.path)
-	thread.SetLocal(types.PluginManagerLocal, r.pm)
+	r.setLocals(thread)
 
 	return starlark.ExecFile(thread, filename, nil, r.predeclared)
 }
 
+// REPL executes a read, eval, print loop.
 func (r *Runtime) REPL() {
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
-	thread.SetLocal("base_path", r.path)
-	thread.SetLocal(types.PluginManagerLocal, r.pm)
+	r.setLocals(thread)
 
 	repl.REPL(thread, r.predeclared)
+}
+
+func (r *Runtime) setLocals(t *starlark.Thread) {
+	t.SetLocal("base_path", r.path)
+	t.SetLocal(types.PluginManagerLocal, r.pm)
 }
 
 func (r *Runtime) load(t *starlark.Thread, module string) (starlark.StringDict, error) {
