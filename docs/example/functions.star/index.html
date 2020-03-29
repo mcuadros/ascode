@@ -1,0 +1,109 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Using functions - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=https://ascode.run/images/favicon.png><link rel=stylesheet href=/css/style.min.df49831c6872564dff31a5f0978a9571f2c8110b513d4b3b1fc8ead41dcdc9f0.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=https://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=https://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=/docs/example/>Examples</a></h4><ul><li><a class=active href=/docs/example/functions.star/>Using functions</a></li><li><a href=/docs/example/runtime.star/>Runtime Modules</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>Using functions</h1><div class=content><p>This example illustrates how with the usage through the usage of functions,
+we can simplify and improve the readability of our infrastructure declaration.</p><p>Instantiates a new AWS provider, <code>aws</code> will be available in the context of
+the functions.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>,</span> <span class=n>region</span><span class=o>=</span><span class=s2>&#34;us-west-2&#34;</span><span class=p>)</span>
+</code></pre></div><p>Every instance requires an <code>ami</code> data source; this data source contains a
+very specif configuration like the ID of the owner or a name pattern. So
+we define a dictionary with the different values we want to use.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>ami_names_owners</span> <span class=o>=</span> <span class=p>{</span>
+    <span class=s2>&#34;ubuntu&#34;</span><span class=p>:</span> <span class=p>[</span><span class=s2>&#34;ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*&#34;</span><span class=p>,</span> <span class=s2>&#34;099720109477&#34;</span><span class=p>],</span>
+    <span class=s2>&#34;ecs&#34;</span><span class=p>:</span> <span class=p>[</span><span class=s2>&#34;*amazon-ecs-optimized&#34;</span><span class=p>,</span> <span class=s2>&#34;591542846629&#34;</span><span class=p>],</span>
+<span class=p>}</span>
+</code></pre></div><p><code>get_ami</code> returns the ami for the given <code>distro</code>. It searches in the
+<code>ResouceCollection</code> of the <code>ami</code> data source, if finds the <code>ami</code> it simply
+returns it; if not creates a new one using the data from the <code>ami_names_owners</code>
+dictionary.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>get_ami</span><span class=p>(</span><span class=n>distro</span><span class=p>):</span>
+    <span class=n>amis</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>ami</span><span class=o>.</span><span class=n>search</span><span class=p>(</span><span class=n>distro</span><span class=p>)</span>
+    <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>amis</span><span class=p>)</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>:</span>
+        <span class=k>return</span> <span class=n>amis</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+
+    <span class=n>data</span> <span class=o>=</span> <span class=n>ami_names_owners</span><span class=p>[</span><span class=n>distro</span><span class=p>]</span>
+
+    <span class=n>ami</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>ami</span><span class=p>(</span><span class=n>distro</span><span class=p>)</span>
+    <span class=n>ami</span><span class=o>.</span><span class=n>most_recent</span> <span class=o>=</span> <span class=bp>True</span>
+    <span class=n>ami</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span><span class=n>name</span><span class=o>=</span><span class=s2>&#34;name&#34;</span><span class=p>,</span> <span class=n>values</span><span class=o>=</span><span class=p>[</span><span class=n>data</span><span class=p>[</span><span class=mi>0</span><span class=p>]])</span>
+    <span class=n>ami</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span><span class=n>name</span><span class=o>=</span><span class=s2>&#34;virtualization-type&#34;</span><span class=p>,</span> <span class=n>values</span><span class=o>=</span><span class=p>[</span><span class=s2>&#34;hvm&#34;</span><span class=p>])</span>
+    <span class=n>ami</span><span class=o>.</span><span class=n>owners</span> <span class=o>=</span> <span class=p>[</span><span class=n>data</span><span class=p>[</span><span class=mi>1</span><span class=p>]]</span>
+
+    <span class=k>return</span> <span class=n>ami</span>
+</code></pre></div><p><code>new_instance</code> instantiates a new <code>instance</code> for the given name, distro and
+type, the type has a default value <code>t2.micro</code>. The <code>distro</code> value is resolved
+to an <code>ami</code> resource using the previously defined function <code>get_ami</code>.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>new_instance</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>distro</span><span class=p>,</span> <span class=nb>type</span><span class=o>=</span><span class=s2>&#34;t2.micro&#34;</span><span class=p>):</span>
+    <span class=n>instance</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=n>name</span><span class=p>)</span>
+    <span class=n>instance</span><span class=o>.</span><span class=n>instance_type</span> <span class=o>=</span> <span class=nb>type</span>
+    <span class=n>instance</span><span class=o>.</span><span class=n>ami</span> <span class=o>=</span> <span class=n>get_ami</span><span class=p>(</span><span class=n>distro</span><span class=p>)</span><span class=o>.</span><span class=n>id</span>
+</code></pre></div><p>Now using a basic <code>for</code> loop we can instantiate 5 different web servers,
+where the even machines are using ubuntu and the odd ones ecs.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>5</span><span class=p>):</span>
+    <span class=n>distro</span> <span class=o>=</span> <span class=s2>&#34;ubuntu&#34;</span>
+    <span class=k>if</span> <span class=n>i</span> <span class=o>%</span> <span class=mi>2</span><span class=p>:</span> 
+        <span class=n>distro</span> <span class=o>=</span> <span class=s2>&#34;ecs&#34;</span>
+
+    <span class=n>new_instance</span><span class=p>(</span><span class=s2>&#34;web_</span><span class=si>%d</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>i</span><span class=p>,</span> <span class=n>distro</span><span class=p>)</span>
+</code></pre></div><h3 id=output>Output</h3><p>If we execute this script with the flag <code>--print-hcl</code> the result shuld be
+something like this:</p><div class=highlight><pre class=chroma><code class=language-hcl data-lang=hcl><span class=k>provider</span> <span class=s2>&#34;aws&#34;</span> {
+<span class=n>  alias</span>   <span class=o>=</span> <span class=s2>&#34;id_01E4KEA5ZAA1PYERQ8KM5D04GC&#34;</span>
+<span class=n>  version</span> <span class=o>=</span> <span class=s2>&#34;2.13.0&#34;</span>
+<span class=n>  region</span>  <span class=o>=</span> <span class=s2>&#34;us-west-2&#34;</span>
+}
+
+<span class=k>data</span> <span class=s2>&#34;aws_ami&#34; &#34;ubuntu&#34;</span> {
+<span class=n>  provider</span>    <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  most_recent</span> <span class=o>=</span> <span class=kt>true</span>
+<span class=n>  owners</span>      <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;099720109477&#34;</span><span class=p>]</span>
+
+  <span class=k>filter</span> {
+<span class=n>    name</span>   <span class=o>=</span> <span class=s2>&#34;name&#34;</span>
+<span class=n>    values</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*&#34;</span><span class=p>]</span>
+  }
+
+  <span class=k>filter</span> {
+<span class=n>    name</span>   <span class=o>=</span> <span class=s2>&#34;virtualization-type&#34;</span>
+<span class=n>    values</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;hvm&#34;</span><span class=p>]</span>
+  }
+}
+
+<span class=k>data</span> <span class=s2>&#34;aws_ami&#34; &#34;ecs&#34;</span> {
+<span class=n>  provider</span>    <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  most_recent</span> <span class=o>=</span> <span class=kt>true</span>
+<span class=n>  owners</span>      <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;591542846629&#34;</span><span class=p>]</span>
+
+  <span class=k>filter</span> {
+<span class=n>    name</span>   <span class=o>=</span> <span class=s2>&#34;name&#34;</span>
+<span class=n>    values</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;*amazon-ecs-optimized&#34;</span><span class=p>]</span>
+  }
+
+  <span class=k>filter</span> {
+<span class=n>    name</span>   <span class=o>=</span> <span class=s2>&#34;virtualization-type&#34;</span>
+<span class=n>    values</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;hvm&#34;</span><span class=p>]</span>
+  }
+}
+
+<span class=k>resource</span> <span class=s2>&#34;aws_instance&#34; &#34;web_0&#34;</span> {
+<span class=n>  provider</span>      <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  ami</span>           <span class=o>=</span> <span class=s2>&#34;${data.aws_ami.ubuntu.id}&#34;</span>
+<span class=n>  instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+}
+
+<span class=k>resource</span> <span class=s2>&#34;aws_instance&#34; &#34;web_1&#34;</span> {
+<span class=n>  provider</span>      <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  ami</span>           <span class=o>=</span> <span class=s2>&#34;${data.aws_ami.ecs.id}&#34;</span>
+<span class=n>  instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+}
+
+<span class=k>resource</span> <span class=s2>&#34;aws_instance&#34; &#34;web_2&#34;</span> {
+<span class=n>  provider</span>      <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  ami</span>           <span class=o>=</span> <span class=s2>&#34;${data.aws_ami.ubuntu.id}&#34;</span>
+<span class=n>  instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+}
+
+<span class=k>resource</span> <span class=s2>&#34;aws_instance&#34; &#34;web_3&#34;</span> {
+<span class=n>  provider</span>      <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  ami</span>           <span class=o>=</span> <span class=s2>&#34;${data.aws_ami.ecs.id}&#34;</span>
+<span class=n>  instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+}
+
+<span class=k>resource</span> <span class=s2>&#34;aws_instance&#34; &#34;web_4&#34;</span> {
+<span class=n>  provider</span>      <span class=o>=</span> <span class=k>aws</span><span class=p>.</span><span class=k>id_01E4KEA5ZAA1PYERQ8KM5D04GC</span>
+<span class=n>  ami</span>           <span class=o>=</span> <span class=s2>&#34;${data.aws_ami.ubuntu.id}&#34;</span>
+<span class=n>  instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+}
+</code></pre></div></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>
