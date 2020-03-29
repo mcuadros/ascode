@@ -19,8 +19,8 @@ import (
 
 const (
 	// ModuleName defines the expected name for this Module when used
-	// in starlark's load() function, eg: load('experimental/docker', 'docker')
-	ModuleName = "experimental/docker"
+	// in starlark's load() function, eg: load('docker', 'docker')
+	ModuleName = "docker"
 
 	ImageFuncName = "image"
 
@@ -36,7 +36,8 @@ var (
 // It is concurrency-safe and idempotent.
 //
 //   outline: docker
-//     path: experimental/docker
+//     The docker modules allow you to manipulate docker image names.
+//     path: docker
 func LoadModule() (starlark.StringDict, error) {
 	once.Do(func() {
 		dockerModule = starlark.StringDict{
@@ -53,6 +54,30 @@ func LoadModule() (starlark.StringDict, error) {
 }
 
 type sString = starlark.String
+
+// image represents a docker container image.
+//
+//   outline: docker
+//     types:
+//       Image
+//         Represents a docker container image.
+//
+//         fields:
+//           name string
+//             Image name. Eg.: `docker.io/library/fedora`
+//           domain string
+//             Registry domain. Eg.: `docker.io`.
+//           path string
+//             Repository path. Eg.: `library/fedora`
+//
+//         methods:
+//           tags() list
+//             List of all the tags for this container image.
+//           version() string
+//             Return the highest tag matching the image constraint.
+//             params:
+//               full bool
+//                 If `true` returns the image name plus the tag. Eg.: `docker.io/library/fedora:29`
 type image struct {
 	tags       []string
 	ref        types.ImageReference
@@ -60,6 +85,20 @@ type image struct {
 	sString
 }
 
+// Image returns a starlak.Builtin function capable of instantiate
+// new Image instances.
+//
+//   outline: docker
+//     functions:
+//       image(image, constraint) Image
+//         Returns a new `Image` based on a given image and constraint.
+//
+//         params:
+//           image string
+//             Container image name. Eg.: `ubuntu` or `quay.io/prometheus/prometheus`.
+//           constraint string
+//             [Semver](https://github.com/Masterminds/semver/#checking-version-constraints) contraint. Eg.: `1.2.*`
+//
 func Image(
 	thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
 ) (starlark.Value, error) {
@@ -106,7 +145,7 @@ func (i *image) Attr(name string) (starlark.Value, error) {
 		name := i.ref.DockerReference()
 		return starlark.String(reference.Path(name)), nil
 	case "tags":
-		return i.getTags()
+		return starlark.NewBuiltin("tags", i.builtinVersionFunc), nil
 	case "version":
 		return starlark.NewBuiltin("version", i.builtinVersionFunc), nil
 	}
@@ -123,7 +162,7 @@ func (i *image) builtinVersionFunc(
 ) (starlark.Value, error) {
 
 	var full bool
-	starlark.UnpackArgs(ImageFuncName, args, kwargs, "full", &full)
+	starlark.UnpackArgs("version", args, kwargs, "full", &full)
 
 	v, err := i.getVersion()
 	if err != nil {
@@ -135,6 +174,12 @@ func (i *image) builtinVersionFunc(
 	}
 
 	return starlark.String(v), nil
+}
+
+func (i *image) builtinTagsFunc(
+	_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple,
+) (starlark.Value, error) {
+	return i.getTags()
 }
 
 func (i *image) getTags() (*starlark.List, error) {

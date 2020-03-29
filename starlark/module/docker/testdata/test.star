@@ -1,4 +1,4 @@
-load('experimental/docker', 'docker')
+load('docker', 'docker')
 load('assert.star', 'assert')
 
 attr = docker.image("mcuadros/ascode", "latest")
@@ -21,6 +21,7 @@ assert.eq(semver.version(True), "docker.io/library/fedora:29")
 prometheus = docker.image("quay.io/prometheus/prometheus", "1.8.x")
 assert.eq(prometheus.name, "quay.io/prometheus/prometheus")
 assert.eq(prometheus.version(), "v1.8.2")
+assert.eq(len(prometheus.tags()) > 0, True)
 
 tagNotFound = docker.image("fedora", "not-found")
 assert.fails(lambda: tagNotFound.version(), 'tag "not-found" not found in repository')

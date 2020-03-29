@@ -8,6 +8,7 @@ DOCUMENTATION_REFERENCE_TEMPLATE ?= $(DOCUMENTATION_REFERENCE_PATH)/reference.md
 DOCUMENTATION_INLINE_EXAMPLES_PATH ?= starlark/types/testdata/examples
 
 RUNTIME_MODULES = \
+	github.com/mcuadros/ascode/starlark/module/docker \
 	github.com/mcuadros/ascode/starlark/module/os \
 	github.com/mcuadros/ascode/starlark/types \
 	github.com/mcuadros/ascode/starlark/module/filepath \

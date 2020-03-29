@@ -27,7 +27,7 @@ ascode is amazing
 # ## Advanced Modules
 # Also, AsCode has some more specif modules, like the `docker` module. The 
 # docker modules allow you to manipulate docker image names.
-load("experimental/docker", "docker")
+load("docker", "docker")
 
 # A docker image tag can be defined using semver, instead of using the infamous
 # 'latest' tag, or fixing a particular version. This allows us to be up-to-date

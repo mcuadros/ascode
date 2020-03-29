@@ -4,7 +4,7 @@ import (
 	"fmt"
 	osfilepath "path/filepath"
 
-	"github.com/mcuadros/ascode/starlark/module/experimental/docker"
+	"github.com/mcuadros/ascode/starlark/module/docker"
 	"github.com/mcuadros/ascode/starlark/module/filepath"
 	"github.com/mcuadros/ascode/starlark/module/os"
 	"github.com/mcuadros/ascode/starlark/types"
