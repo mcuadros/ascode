@@ -1,0 +1,290 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>built-in - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=http://ascode.run/images/favicon.png><link rel=stylesheet href=/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=http://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=http://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=/docs/reference/types/>API Reference</a></h4><ul><li><a class=active href=/docs/reference/types/>built-in</a></li><li><a href=/docs/reference/base64/>encoding/base64</a></li><li><a href=/docs/reference/csv/>encoding/csv</a></li><li><a href=/docs/reference/json/>encoding/json</a></li><li><a href=/docs/reference/yaml/>encoding/yaml</a></li><li><a href=/docs/reference/http/>http</a></li><li><a href=/docs/reference/os/>os</a></li><li><a href=/docs/reference/filepath/>path/filepath</a></li><li><a href=/docs/reference/re/>re</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>built-in</h1><div class=content><h2 id=index>Index</h2><div class=toc><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#functions>Functions</a><ul><li><a href=#def-bbackendb>def <b>backend</b></a></li><li><a href=#def-bevaluateb>def <b>evaluate</b></a></li><li><a href=#def-bfnb>def <b>fn</b></a></li><li><a href=#def-bhclb>def <b>hcl</b></a></li><li><a href=#def-bprovisionerb>def <b>provisioner</b></a></li></ul></li><li><a href=#types>Types</a><ul><li><a href=#type-battributeb>type <b>Attribute</b></a></li><li><a href=#type-bbackendb>type <b>Backend</b></a></li><li><a href=#type-bproviderb>type <b>Provider</b></a></li><li><a href=#type-bprovidercollectionb>type <b>ProviderCollection</b></a></li><li><a href=#type-bprovisionerb>type <b>Provisioner</b></a></li><li><a href=#type-bresourceb>type <b>Resource</b></a></li><li><a href=#type-bresourcecollectionb>type <b>ResourceCollection</b></a></li><li><a href=#type-bresourcecollectiongroupb>type <b>ResourceCollectionGroup</b></a></li><li><a href=#type-bstateb>type <b>State</b></a></li><li><a href=#type-bterraformb>type <b>Terraform</b></a></li></ul></li></ul></nav></div><h2 id=overview>Overview</h2><h2 id=functions>Functions</h2><h3 id=def-bbackendb>def <b>backend</b></h3><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=p>.</span><span class=nf>backend</span><span class=p>(</span><span class=kd>type</span><span class=p>)</span> <span class=nx>Backend</span>
+</code></pre></div><p>Instantiates a new <a href=#backend><code>Backend</code></a></p><h6 id=arguments>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>type</code></td><td><code>string</code></td><td><a href=https://www.terraform.io/docs/backends/types/index.html>Backend type</a>.</td></tr></tbody></table><h3 id=def-bevaluateb>def <b>evaluate</b></h3><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=p>.</span><span class=nf>evaluate</span><span class=p>(</span><span class=nx>filename</span><span class=p>,</span> <span class=nx>predeclared</span><span class=p>=</span><span class=nx>None</span><span class=p>)</span> <span class=nx>dict</span>
+</code></pre></div><p>Evaluates a Starlark file and returns its global context. Kwargs may
+be used to set predeclared.</p><h6 id=arguments-1>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>filename</code></td><td><code>string</code></td><td>Name of the file to execute.</td></tr><tr><td><code>predeclared</code></td><td><code>dict</code></td><td>Defines the predeclared context for the execution. Execution doesnot modify this dictionary</td></tr></tbody></table><h3 id=def-bfnb>def <b>fn</b></h3><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=p>.</span><span class=nf>fn</span><span class=p>(</span><span class=nx>name</span><span class=p>,</span> <span class=nx>target</span><span class=p>)</span> <span class=nx>Attribute</span>
+</code></pre></div><p>Fn wraps an Attribute in a HCL function. Since the Attributes value
+are only available in the <code>apply</code> phase of Terraform, the only method
+to manipulate this values is using the Terraform
+<a href=https://www.terraform.io/docs/configuration/functions.html>HCL functions</a>.</p><h6 id=arguments-2>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>name</code></td><td><code>string</code></td><td>Name of the HCL function to be applied. Eg.: <code>base64encode</code></td></tr><tr><td><code>target</code></td><td><code>Attribute</code></td><td>Target Attribute of the HCL function.</td></tr></tbody></table><h3 id=def-bhclb>def <b>hcl</b></h3><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=p>.</span><span class=nf>hcl</span><span class=p>(</span><span class=nx>resource</span><span class=p>)</span> <span class=kt>string</span>
+</code></pre></div><p>Returns the HCL encoding of the given resource.</p><h6 id=arguments-3>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>resource</code></td><td><code>&lt;resource></code></td><td>resource to be encoded.</td></tr></tbody></table><h3 id=def-bprovisionerb>def <b>provisioner</b></h3><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=p>.</span><span class=nf>provisioner</span><span class=p>(</span><span class=kd>type</span><span class=p>)</span> <span class=nx>Provisioner</span>
+</code></pre></div><p>Instantiates a new Provisioner</p><h6 id=arguments-4>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>type</code></td><td><code>string</code></td><td>Provisioner type.</td></tr></tbody></table><h2 id=types>Types</h2><h3 id=type-battributeb>type <b>Attribute</b></h3><p>Attribute is a reference to an argument of a Resource. Used mainly
+for Computed arguments of Resources.</p><p>Attribute behaves as the type of the argument represented, this means
+that them can be assigned to other resource arguments of the same
+type. And, if the type is a list are indexable.</p><h6 id=properties>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__resource__</code></td><td><code>Resource</code></td><td>Resource of the attribute.</td></tr><tr><td><code>__type__</code></td><td><code>string</code></td><td>Type of the attribute. Eg.: <code>string</code></td></tr></tbody></table><h6 id=examples>Examples</h6><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=c1># When a Resource has an Attribute means that the value it&#39;s only available</span>
+<span class=c1># during the `apply` phase of Terraform. So in, AsCode an attribute behaves</span>
+<span class=c1># like a poor-man pointer.</span>
+
+<span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>)</span>
+
+<span class=n>ami</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>ami</span><span class=p>(</span><span class=s2>&#34;ubuntu&#34;</span><span class=p>)</span>
+
+<span class=n>instance</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=s2>&#34;foo&#34;</span><span class=p>)</span>
+<span class=n>instance</span><span class=o>.</span><span class=n>ami</span> <span class=o>=</span> <span class=n>ami</span><span class=o>.</span><span class=n>id</span>
+
+<span class=k>print</span><span class=p>(</span><span class=n>instance</span><span class=o>.</span><span class=n>ami</span><span class=p>)</span>
+<span class=c1># Output:</span>
+<span class=c1># &#34;${aws_ami.ubuntu.id}&#34;</span>
+</code></pre></div><h3 id=type-bbackendb>type <b>Backend</b></h3><p>The part of Terraform&rsquo;s core that determines how Terraform stores
+state and performs operations (like plan, apply, import, etc.).
+Terraform has multiple <a href=https://www.terraform.io/docs/backends/index.html>backends</a>
+to choose from, which can be configured in a variety of ways.</p><h6 id=properties-1>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__kind__</code></td><td><code>string</code></td><td>Kind of the backend. Fixed value <code>backend</code>.</td></tr><tr><td><code>__type__</code></td><td><code>string</code></td><td>Type of the backend. Eg.: <code>local</code>.</td></tr><tr><td><code>__dict__</code></td><td><code>Dict</code></td><td>A dictionary containing all the config values of the backend.</td></tr><tr><td><code>&lt;argument></code></td><td><code>&lt;scalar></code></td><td>Arguments defined by the backend schema, thus can be of anyscalar type.</td></tr></tbody></table><h6 id=methods>Methods</h6><h4 id=def-ibackendibstateb>def <i>Backend</i>.<b>state</b></h4><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>Backend</span><span class=p>.</span><span class=nf>state</span><span class=p>(</span><span class=nx>module</span><span class=p>=</span><span class=s>&#34;&#34;</span><span class=p>,</span> <span class=nx>workspace</span><span class=p>=</span><span class=s>&#34;default&#34;</span><span class=p>)</span> <span class=nx>State</span>
+</code></pre></div><p>Loads the latest state for a given module or workspace.</p><h6 id=arguments-5>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>module</code></td><td><code>string</code></td><td>name of the module, empty equals to root.</td></tr><tr><td><code>workspace</code></td><td><code>string</code></td><td>backend workspace</td></tr></tbody></table><h3 id=type-bproviderb>type <b>Provider</b></h3><p>A plugin for Terraform that makes a collection of related resources
+available. A provider plugin is responsible for understanding API
+interactions with some kind of service and exposing resources based
+on that API.</p><h6 id=properties-2>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__version__</code></td><td><code>string</code></td><td>Provider version</td></tr><tr><td><code>__kind__</code></td><td><code>string</code></td><td>Kind of the provider. Fixed value <code>provider</code></td></tr><tr><td><code>__type__</code></td><td><code>string</code></td><td>Type of the resource. Eg.: <code>aws_instance</code></td></tr><tr><td><code>__name__</code></td><td><code>string</code></td><td>Local name of the provider, if none was provided to the constructor,the name is auto-generated following the pattern <code>id_%s</code>. AtTerraform is called <a href=https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances><code>alias</code></a></td></tr><tr><td><code>__dict__</code></td><td><code>Dict</code></td><td>A dictionary containing all set arguments and blocks of the provider.</td></tr><tr><td><code>data</code></td><td><code>MapSchema</code></td><td>Data sources defined by the provider.</td></tr><tr><td><code>resource</code></td><td><code>MapSchema</code></td><td>Resources defined by the provider.</td></tr><tr><td><code>&lt;argument></code></td><td><code>&lt;scalar></code></td><td>Arguments defined by the provider schema, thus can be of anyscalar type.</td></tr><tr><td><code>&lt;block></code></td><td><code>Resource</code></td><td>Blocks defined by the provider schema, thus are nested resources,containing other arguments and/or blocks.</td></tr></tbody></table><h6 id=examples-1>Examples</h6><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>print_provider_info</span><span class=p>(</span><span class=n>p</span><span class=p>):</span>
+    <span class=k>print</span><span class=p>(</span><span class=s2>&#34;Provider </span><span class=si>%s</span><span class=s2>[</span><span class=si>%s</span><span class=s2>] (</span><span class=si>%s</span><span class=s2>)&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>__type__</span><span class=p>,</span> <span class=n>p</span><span class=o>.</span><span class=vm>__name__</span><span class=p>,</span> <span class=n>p</span><span class=o>.</span><span class=n>__version__</span><span class=p>))</span>
+    <span class=k>print</span><span class=p>(</span><span class=s2>&#34;  Defines Data Sources: </span><span class=si>%d</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=nb>len</span><span class=p>(</span><span class=nb>dir</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>data</span><span class=p>)))</span>
+    <span class=k>print</span><span class=p>(</span><span class=s2>&#34;  Defines Resources: </span><span class=si>%d</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=nb>len</span><span class=p>(</span><span class=nb>dir</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>resource</span><span class=p>)))</span>
+    <span class=k>print</span><span class=p>(</span><span class=s2>&#34;  Configuration: </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>p</span><span class=o>.</span><span class=vm>__dict__</span><span class=p>)</span>
+
+<span class=n>provider</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;google&#34;</span><span class=p>,</span> <span class=s2>&#34;3.13.0&#34;</span><span class=p>)</span>
+<span class=n>provider</span><span class=o>.</span><span class=n>project</span> <span class=o>=</span> <span class=s2>&#34;acme-app&#34;</span>
+<span class=n>provider</span><span class=o>.</span><span class=n>region</span> <span class=o>=</span> <span class=s2>&#34;us-central1&#34;</span>
+
+<span class=n>print_provider_info</span><span class=p>(</span><span class=n>provider</span><span class=p>)</span>
+<span class=c1># Output:</span>
+<span class=c1># Provider google[id_1] (3.13.0)</span>
+<span class=c1>#   Defines Data Sources: 60</span>
+<span class=c1>#   Defines Resources: 263</span>
+<span class=c1>#   Configuration: {&#34;project&#34;: &#34;acme-app&#34;, &#34;region&#34;: &#34;us-central1&#34;}</span>
+
+
+</code></pre></div><p>Resource instantiation from a Provider.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>helm</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;helm&#34;</span><span class=p>)</span>
+
+<span class=n>podinfo</span> <span class=o>=</span> <span class=n>helm</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>release</span><span class=p>(</span><span class=s2>&#34;podinfo&#34;</span><span class=p>)</span>
+<span class=n>podinfo</span><span class=o>.</span><span class=n>chart</span> <span class=o>=</span> <span class=s2>&#34;podinfo&#34;</span>
+<span class=n>podinfo</span><span class=o>.</span><span class=n>version</span> <span class=o>=</span> <span class=s2>&#34;3.1.8&#34;</span>
+
+<span class=k>print</span><span class=p>(</span><span class=n>hcl</span><span class=p>(</span><span class=n>podinfo</span><span class=p>))</span>
+<span class=c1># Output:</span>
+<span class=c1># resource &#34;helm_release&#34; &#34;podinfo&#34; {</span>
+<span class=c1>#   provider = helm.id_1</span>
+<span class=c1>#   chart    = &#34;podinfo&#34;</span>
+<span class=c1>#   version  = &#34;3.1.8&#34;</span>
+<span class=c1># }</span>
+
+</code></pre></div><h3 id=type-bprovidercollectionb>type <b>ProviderCollection</b></h3><p>ProviderCollection holds the providers in a nested dictionary,
+indexed by provider type and provider name. The values can be
+accessed by indexing or using the built-in method of <code>dict</code>.</p><h6 id=examples-2>Examples</h6><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>,</span> <span class=s2>&#34;2.13.0&#34;</span><span class=p>,</span> <span class=s2>&#34;qux&#34;</span><span class=p>)</span>
+<span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>,</span> <span class=s2>&#34;2.13.0&#34;</span><span class=p>,</span> <span class=s2>&#34;bar&#34;</span><span class=p>)</span>
+<span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;google&#34;</span><span class=p>)</span>
+
+<span class=c1># providers can be access by indexing</span>
+<span class=n>aws_names</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>[</span><span class=s2>&#34;aws&#34;</span><span class=p>]</span><span class=o>.</span><span class=n>keys</span><span class=p>()</span>
+<span class=k>print</span><span class=p>(</span><span class=s2>&#34;aws providers:&#34;</span><span class=p>,</span> <span class=nb>sorted</span><span class=p>(</span><span class=n>aws_names</span><span class=p>))</span>
+
+<span class=c1># or by the get method</span>
+<span class=n>google_names</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s2>&#34;google&#34;</span><span class=p>)</span><span class=o>.</span><span class=n>keys</span><span class=p>()</span>
+<span class=k>print</span><span class=p>(</span><span class=s2>&#34;google providers:&#34;</span><span class=p>,</span> <span class=n>google_names</span><span class=p>)</span>
+
+<span class=c1># Output:</span>
+<span class=c1># aws providers: [&#34;bar&#34;, &#34;qux&#34;]</span>
+<span class=c1># google providers: [&#34;id_1&#34;]</span>
+</code></pre></div><h6 id=methods-1>Methods</h6><h4 id=def-iprovidercollectionib__call__b>def <i>ProviderCollection</i>.<b>__call__</b></h4><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>ProviderCollection</span><span class=p>.</span><span class=nf>__call__</span><span class=p>(</span><span class=kd>type</span><span class=p>,</span> <span class=nx>version</span><span class=p>=</span><span class=s>&#34;&#34;</span><span class=p>,</span> <span class=nx>name</span><span class=p>=</span><span class=s>&#34;&#34;</span><span class=p>)</span> <span class=nx>Provider</span>
+</code></pre></div><p>Returns a new provider instance of the given type.</p><h6 id=arguments-6>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>type</code></td><td><code>string</code></td><td>Provider type. Eg.: <code>aws</code></td></tr><tr><td><code>version</code></td><td><code>string</code></td><td>Version <a href=https://www.terraform.io/docs/configuration/providers.html#provider-versions>value</a>, if <code>None</code> latest version available it&rsquo;s used.</td></tr><tr><td><code>name</code></td><td><code>string</code></td><td>Local name of the resource, if <code>None</code> is provided it&rsquo;sautogenerated.</td></tr></tbody></table><h6 id=examples-3>Examples</h6><p>Defining multiple providers and traversing <code>tf.providers</code></p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>,</span> <span class=s2>&#34;2.13.0&#34;</span><span class=p>,</span> <span class=s2>&#34;aliased&#34;</span><span class=p>)</span>
+<span class=n>helm</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;helm&#34;</span><span class=p>,</span> <span class=s2>&#34;1.0.0&#34;</span><span class=p>)</span>
+<span class=n>ignition</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;ignition&#34;</span><span class=p>)</span>
+
+<span class=k>print</span><span class=p>(</span><span class=s2>&#34;terraform =&#34;</span><span class=p>,</span> <span class=n>tf</span><span class=o>.</span><span class=n>version</span><span class=p>)</span>
+<span class=k>for</span> <span class=nb>type</span> <span class=ow>in</span> <span class=nb>sorted</span><span class=p>(</span><span class=nb>list</span><span class=p>(</span><span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>)):</span>
+    <span class=k>for</span> <span class=n>name</span> <span class=ow>in</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>[</span><span class=nb>type</span><span class=p>]:</span>
+        <span class=n>p</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>[</span><span class=nb>type</span><span class=p>][</span><span class=n>name</span><span class=p>]</span>
+        <span class=k>print</span><span class=p>(</span><span class=s2>&#34;   </span><span class=si>%s</span><span class=s2> (</span><span class=si>%s</span><span class=s2>) = </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=nb>type</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>p</span><span class=o>.</span><span class=n>__version__</span><span class=p>))</span>
+
+<span class=c1># Output:</span>
+<span class=c1># terraform = 0.12.23</span>
+<span class=c1>#    aws (aliased) = 2.13.0</span>
+<span class=c1>#    helm (id_1) = 1.0.0</span>
+<span class=c1>#    ignition (id_2) = 1.2.1</span>
+</code></pre></div><h3 id=type-bprovisionerb>type <b>Provisioner</b></h3><p>Provisioner represents a Terraform provider of a specif type. As
+written in the terraform documentation: &ldquo;<em>Provisioners are a Last Resort</em>&rdquo;</p><h6 id=properties-3>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__kind__</code></td><td><code>string</code></td><td>Kind of the provisioner. Fixed value <code>provisioner</code></td></tr><tr><td><code>__type__</code></td><td><code>string</code></td><td>Type of the resource. Eg.: `aws_instance |</td></tr><tr><td><code>&lt;argument></code></td><td><code>&lt;scalar></code></td><td>Arguments defined by the provisioner schema, thus can be of anyscalar type.</td></tr><tr><td><code>&lt;block></code></td><td><code>Resource</code></td><td>Blocks defined by the provisioner schema, thus are nested resources,containing other arguments and/or blocks.</td></tr></tbody></table><h3 id=type-bresourceb>type <b>Resource</b></h3><p><a href=https://www.terraform.io/docs/configuration/resources.html>Resources</a>
+are the most important element in the Terraform language. Each
+resource block describes one or more infrastructure objects, such as
+virtual networks, compute instances, or higher-level components such
+as DNS records.</p><p>Each resource is associated with a single resource type, which
+determines the kind of infrastructure object it manages and what
+arguments and other attributes the resource supports.</p><p>Each resource type in turn belongs to a provider, which is a plugin
+for Terraform that offers a collection of resource types. A provider
+usually provides resources to manage a single cloud or on-premises
+infrastructure platform.</p><p>Following the schema of HCL Terraform resources each type of
+arguments and blocks are transformed in native AsCode elements:</p><ul><li><p><a href=https://www.terraform.io/docs/glossary.html#block>Blocks</a> defined
+as a list of Resources are transformed into: <code>ResourceCollection&lt;nested></code>,
+if the <code>Block</code> is a list capped to one item, its represented as
+<code>Resource&lt;nested></code>.</p></li><li><p><a href=https://www.terraform.io/docs/glossary.html#argument>Arguments</a>
+are transformed as basic scalar types.</p></li><li><p><a href=https://www.terraform.io/docs/glossary.html#attribute>Attributes</a>
+aka computed arguments are transformed in <code>Attributes</code></p></li></ul><h6 id=properties-4>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__provider__</code></td><td><code>Provider</code></td><td>Provider of this resource if any.</td></tr><tr><td><code>__kind__</code></td><td><code>string</code></td><td>Kind of the resource. Eg.: <code>data</code></td></tr><tr><td><code>__type__</code></td><td><code>string</code></td><td>Type of the resource. Eg.: <code>aws_instance</code></td></tr><tr><td><code>__name__</code></td><td><code>string</code></td><td>Local name of the resource, if none was provided to the constructorthe name is auto-generated following the partern <code>id_%s</code>. Nested kindresources are unamed.</td></tr><tr><td><code>__dict__</code></td><td><code>Dict</code></td><td>A dictionary containing all set arguments and blocks of the resource.</td></tr><tr><td><code>&lt;argument></code></td><td><code>&lt;scalar>/Computed</code></td><td>Arguments defined by the resource schema, thus can be of anyscalar type or Computed values.</td></tr><tr><td><code>&lt;block></code></td><td><code>Resource/ResourceCollection</code></td><td>Blocks defined by the resource schema, thus are nested resources,containing other arguments and/or blocks.</td></tr></tbody></table><h6 id=examples-4>Examples</h6><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=c1># Create a new instance of the latest Ubuntu 14.04 on an</span>
+<span class=c1># t2.micro node with an AWS Tag naming it &#34;HelloWorld&#34;</span>
+
+<span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>)</span>
+<span class=n>aws</span><span class=o>.</span><span class=n>region</span> <span class=o>=</span> <span class=s2>&#34;us-west-2&#34;</span>
+
+<span class=n>ubuntu_filter</span> <span class=o>=</span> <span class=s2>&#34;ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*&#34;</span>
+<span class=n>canonical</span> <span class=o>=</span> <span class=s2>&#34;099720109477&#34;</span>
+
+<span class=n>ami</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>data</span><span class=o>.</span><span class=n>ami</span><span class=p>(</span><span class=s2>&#34;ubuntu&#34;</span><span class=p>)</span>
+<span class=n>ami</span><span class=o>.</span><span class=n>most_recent</span> <span class=o>=</span> <span class=bp>True</span>
+<span class=n>ami</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span><span class=n>name</span><span class=o>=</span><span class=s2>&#34;name&#34;</span><span class=p>,</span> <span class=n>values</span><span class=o>=</span><span class=p>[</span><span class=n>ubuntu_filter</span><span class=p>])</span>
+<span class=n>ami</span><span class=o>.</span><span class=n>filter</span><span class=p>(</span><span class=n>name</span><span class=o>=</span><span class=s2>&#34;virtualization-type&#34;</span><span class=p>,</span> <span class=n>values</span><span class=o>=</span><span class=p>[</span><span class=s2>&#34;hvm&#34;</span><span class=p>])</span>
+<span class=n>ami</span><span class=o>.</span><span class=n>owners</span> <span class=o>=</span> <span class=p>[</span><span class=n>canonical</span><span class=p>]</span>
+
+
+<span class=n>instance</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=s2>&#34;web&#34;</span><span class=p>)</span>
+<span class=n>instance</span><span class=o>.</span><span class=n>instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+<span class=n>instance</span><span class=o>.</span><span class=n>ami</span> <span class=o>=</span> <span class=n>ami</span><span class=o>.</span><span class=n>id</span>
+<span class=n>instance</span><span class=o>.</span><span class=n>tags</span> <span class=o>=</span> <span class=p>{</span>
+    <span class=s2>&#34;name&#34;</span><span class=p>:</span> <span class=s2>&#34;HelloWorld&#34;</span>
+<span class=p>}</span>
+
+<span class=k>print</span><span class=p>(</span><span class=n>hcl</span><span class=p>(</span><span class=n>tf</span><span class=p>))</span>
+<span class=c1># Output:</span>
+<span class=c1># provider &#34;aws&#34; {</span>
+<span class=c1>#   alias   = &#34;id_1&#34;</span>
+<span class=c1>#   version = &#34;2.54.0&#34;</span>
+<span class=c1>#   region  = &#34;us-west-2&#34;</span>
+<span class=c1># }</span>
+<span class=c1>#</span>
+<span class=c1># data &#34;aws_ami&#34; &#34;ubuntu&#34; {</span>
+<span class=c1>#   provider    = aws.id_1</span>
+<span class=c1>#   most_recent = true</span>
+<span class=c1>#   owners      = [&#34;099720109477&#34;]</span>
+<span class=c1># </span>
+<span class=c1>#   filter {</span>
+<span class=c1>#     name   = &#34;name&#34;</span>
+<span class=c1>#     values = [&#34;ubuntu/images/*/ubuntu-xenial-16.04-amd64-server-*&#34;]</span>
+<span class=c1>#   }</span>
+<span class=c1># </span>
+<span class=c1>#   filter {</span>
+<span class=c1>#     name   = &#34;virtualization-type&#34;</span>
+<span class=c1>#     values = [&#34;hvm&#34;]</span>
+<span class=c1>#   }</span>
+<span class=c1># }</span>
+<span class=c1># </span>
+<span class=c1># resource &#34;aws_instance&#34; &#34;web&#34; {</span>
+<span class=c1>#   provider      = aws.id_1</span>
+<span class=c1>#   ami           = &#34;${data.aws_ami.ubuntu.id}&#34;</span>
+<span class=c1>#   instance_type = &#34;t2.micro&#34;</span>
+<span class=c1>#   tags          = { name = &#34;HelloWorld&#34; }</span>
+<span class=c1># }</span>
+
+</code></pre></div><h6 id=methods-2>Methods</h6><h4 id=def-iresourceibdepends_onb>def <i>Resource</i>.<b>depends_on</b></h4><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>Resource</span><span class=p>.</span><span class=nf>depends_on</span><span class=p>(</span><span class=nx>resource</span><span class=p>)</span>
+</code></pre></div><p>Explicitly declares a dependency on another resource. Use the
+<a href=https://www.terraform.io/docs/configuration/resources.html#depends_on-explicit-resource-dependencies>depends_on</a>
+meta-argument to handle hidden resource dependencies that
+Terraform can&rsquo;t automatically infer.
+(Only in resources of kind &ldquo;resource&rdquo;)</p><h6 id=arguments-7>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>resource</code></td><td><code>Resource</code></td><td>depended data or resource kind.</td></tr></tbody></table><h4 id=def-iresourceibadd_provisionerb>def <i>Resource</i>.<b>add_provisioner</b></h4><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>Resource</span><span class=p>.</span><span class=nf>add_provisioner</span><span class=p>(</span><span class=nx>provisioner</span><span class=p>)</span>
+</code></pre></div><p>Create-time actions like these can be described using resource
+provisioners. A provisioner is another type of plugin supported
+by Terraform, and each provisioner takes a different kind of
+action in the context of a resource being created.
+Provisioning steps should be used sparingly, since they represent
+non-declarative actions taken during the creation of a resource
+and so Terraform is not able to model changes to them as it can
+for the declarative portions of the Terraform language.
+(Only in resources of kind &ldquo;resource&rdquo;)</p><h6 id=arguments-8>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>provisioner</code></td><td><code>Provisioner</code></td><td>provisioner resource to be executed.</td></tr></tbody></table><h3 id=type-bresourcecollectionb>type <b>ResourceCollection</b></h3><p>ResourceCollection stores and instantiates resources for a specific
+pair of provider and resource. The resources can be accessed by
+indexing or using the built-in method of <code>dict</code>.</p><h6 id=properties-5>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__provider__</code></td><td><code>Provider</code></td><td>Provider of this resource collection.</td></tr><tr><td><code>__kind__</code></td><td><code>string</code></td><td>Kind of the resource collection. Eg.: <code>data</code></td></tr><tr><td><code>__type__</code></td><td><code>string</code></td><td>Type of the resource collection. Eg.: <code>aws_instance</code></td></tr></tbody></table><h6 id=methods-3>Methods</h6><h4 id=def-iresourcecollectionib__call__b>def <i>ResourceCollection</i>.<b>__call__</b></h4><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>ResourceCollection</span><span class=p>.</span><span class=nf>__call__</span><span class=p>(</span><span class=nx>name</span><span class=p>=</span><span class=s>&#34;&#34;</span><span class=p>,</span> <span class=nx>values</span><span class=p>={})</span> <span class=nx>Resource</span>
+</code></pre></div><p>Returns a new resourced with the given name and values.</p><h6 id=arguments-9>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>name</code></td><td><code>string</code></td><td>Local name of the resource, if <code>None</code> is provided it&rsquo;sautogenerated.</td></tr><tr><td><code>values</code></td><td><code>dict</code></td><td>List of arguments and nested blocks to be set in the newresource, these values can also be defined using <code>kwargs</code>.</td></tr></tbody></table><h6 id=examples-5>Examples</h6><p>Resource instantiation using values, dicts or kwargs.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>)</span>
+
+<span class=c1># Resources can be defined in different ways...</span>
+
+<span class=c1># you can set the resource attributes...</span>
+<span class=n>v</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>()</span>
+<span class=n>v</span><span class=o>.</span><span class=n>instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+<span class=n>v</span><span class=o>.</span><span class=n>tags</span> <span class=o>=</span> <span class=p>{</span><span class=s2>&#34;name&#34;</span><span class=p>:</span> <span class=s2>&#34;HelloWorld&#34;</span><span class=p>}</span>
+
+<span class=c1># or using a dict in the constructor...</span>
+<span class=n>d</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>({</span>
+    <span class=s2>&#34;instance_type&#34;</span><span class=p>:</span> <span class=s2>&#34;t2.micro&#34;</span><span class=p>,</span>
+    <span class=s2>&#34;tags&#34;</span><span class=p>:</span> <span class=p>{</span><span class=s2>&#34;name&#34;</span><span class=p>:</span> <span class=s2>&#34;HelloWorld&#34;</span><span class=p>},</span>
+<span class=p>})</span>
+
+<span class=c1># or even using kwargs</span>
+<span class=n>k</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=n>instance_type</span><span class=o>=</span><span class=s2>&#34;t2.micro&#34;</span><span class=p>,</span> <span class=n>tags</span><span class=o>=</span><span class=p>{</span><span class=s2>&#34;name&#34;</span><span class=p>:</span> <span class=s2>&#34;HelloWorld&#34;</span><span class=p>})</span>
+
+<span class=c1># and all the resources are equivalent:</span>
+<span class=k>print</span><span class=p>(</span><span class=n>v</span><span class=o>.</span><span class=vm>__dict__</span><span class=p>)</span>
+<span class=k>print</span><span class=p>(</span><span class=n>d</span><span class=o>.</span><span class=vm>__dict__</span><span class=p>)</span>
+<span class=k>print</span><span class=p>(</span><span class=n>k</span><span class=o>.</span><span class=vm>__dict__</span><span class=p>)</span>
+
+<span class=c1># Output:</span>
+<span class=c1># {&#34;instance_type&#34;: &#34;t2.micro&#34;, &#34;tags&#34;: {&#34;name&#34;: &#34;HelloWorld&#34;}}</span>
+<span class=c1># {&#34;instance_type&#34;: &#34;t2.micro&#34;, &#34;tags&#34;: {&#34;name&#34;: &#34;HelloWorld&#34;}}</span>
+<span class=c1># {&#34;instance_type&#34;: &#34;t2.micro&#34;, &#34;tags&#34;: {&#34;name&#34;: &#34;HelloWorld&#34;}}</span>
+
+</code></pre></div><h4 id=def-iresourcecollectionibsearchb>def <i>ResourceCollection</i>.<b>search</b></h4><div class=highlight><pre class=chroma><code class=language-go data-lang=go><span class=nx>ResourceCollection</span><span class=p>.</span><span class=nf>search</span><span class=p>(</span><span class=nx>key</span><span class=p>=</span><span class=s>&#34;id&#34;</span><span class=p>,</span> <span class=nx>value</span><span class=p>)</span> <span class=nx>list</span>
+</code></pre></div><p>Return all the Resources with the given value in the given key.</p><h6 id=arguments-10>Arguments</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>name</code></td><td><code>string</code></td><td>Key to search. The default value is <code>id</code>.</td></tr><tr><td><code>value</code></td><td><code>&lt;any></code></td><td>Value to match in the given key.</td></tr></tbody></table><h6 id=examples-6>Examples</h6><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>)</span>
+<span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=s2>&#34;foo&#34;</span><span class=p>,</span> <span class=n>instance_type</span><span class=o>=</span><span class=s2>&#34;t2.micro&#34;</span><span class=p>)</span>
+<span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=s2>&#34;bar&#34;</span><span class=p>,</span> <span class=n>instance_type</span><span class=o>=</span><span class=s2>&#34;a1.medium&#34;</span><span class=p>)</span>
+<span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=s2>&#34;qux&#34;</span><span class=p>,</span> <span class=n>instance_type</span><span class=o>=</span><span class=s2>&#34;t2.micro&#34;</span><span class=p>)</span>
+
+<span class=n>r</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=o>.</span><span class=n>search</span><span class=p>(</span><span class=s2>&#34;bar&#34;</span><span class=p>)</span> 
+<span class=k>print</span><span class=p>(</span><span class=s2>&#34;Instance type of `bar`: </span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=n>r</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>.</span><span class=n>instance_type</span><span class=p>)</span>
+
+<span class=n>r</span> <span class=o>=</span> <span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=o>.</span><span class=n>search</span><span class=p>(</span><span class=s2>&#34;instance_type&#34;</span><span class=p>,</span> <span class=s2>&#34;t2.micro&#34;</span><span class=p>)</span>
+<span class=k>print</span><span class=p>(</span><span class=s2>&#34;Instances with &#39;t2.micro`: </span><span class=si>%d</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=nb>len</span><span class=p>(</span><span class=n>r</span><span class=p>))</span>
+
+<span class=c1># Output:</span>
+<span class=c1># Instance type of `bar`: a1.medium</span>
+<span class=c1># Instances with &#39;t2.micro`: 2</span>
+
+</code></pre></div><h3 id=type-bresourcecollectiongroupb>type <b>ResourceCollectionGroup</b></h3><p>ResourceCollectionGroup represents a group by kind (resource or data
+resource) of ResourceCollections for a given provider.</p><h6 id=properties-6>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>__provider__</code></td><td><code>Provider</code></td><td>Provider of this group.</td></tr><tr><td><code>__kind__</code></td><td><code>string</code></td><td>Kind of the resources (<code>data</code> or <code>resource</code>).</td></tr><tr><td><code>&lt;resource-name></code></td><td><code>ResourceCollection</code></td><td>Returns a ResourceCollection if the resource name is valid forthe schema of the provider. The resource name should be providedwithout the provider prefix, <code>aws_instance</code> becomesjust an <code>instance</code>.</td></tr></tbody></table><h3 id=type-bstateb>type <b>State</b></h3><p>Terraform&rsquo;s cached information about your managed infrastructure
+and configuration. This <a href=https://www.terraform.io/docs/state/index.html>state</a>
+is used to persistently map the same real world resources to your
+configuration from run-to-run, keep track of metadata, and improve
+performance for large infrastructures.</p><p>State implements a Dict, where the first level are the providers
+containing the keys <code>data</code> with the data sources and <code>resources</code> with
+the resources.</p><h6 id=properties-7>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>&lt;provider></code></td><td><code>AttrDict</code></td><td>provider and all the resources state.</td></tr></tbody></table><h6 id=examples-7>Examples</h6><p>An example of how to print a resume of providers and resources
+count from the state.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=c1># new instance of a local backend</span>
+<span class=c1># https://www.terraform.io/docs/backends/types/local.html</span>
+<span class=n>b</span> <span class=o>=</span> <span class=n>backend</span><span class=p>(</span><span class=s2>&#34;local&#34;</span><span class=p>)</span>
+<span class=n>b</span><span class=o>.</span><span class=n>path</span> <span class=o>=</span> <span class=s2>&#34;terraform.tfstate&#34;</span>
+
+<span class=c1># it reads the state</span>
+<span class=n>s</span> <span class=o>=</span> <span class=n>b</span><span class=o>.</span><span class=n>state</span><span class=p>()</span>
+
+<span class=k>for</span> <span class=n>provider</span> <span class=ow>in</span> <span class=nb>sorted</span><span class=p>(</span><span class=nb>list</span><span class=p>(</span><span class=n>s</span><span class=p>)):</span>
+    <span class=k>print</span><span class=p>(</span><span class=s2>&#34;</span><span class=si>%s</span><span class=s2>:&#34;</span> <span class=o>%</span> <span class=n>provider</span><span class=p>)</span>
+    <span class=k>for</span> <span class=n>resource</span> <span class=ow>in</span> <span class=nb>sorted</span><span class=p>(</span><span class=nb>list</span><span class=p>(</span><span class=n>s</span><span class=p>[</span><span class=n>provider</span><span class=p>][</span><span class=s2>&#34;resource&#34;</span><span class=p>])):</span>
+        <span class=n>count</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>s</span><span class=p>[</span><span class=n>provider</span><span class=p>][</span><span class=s2>&#34;resource&#34;</span><span class=p>][</span><span class=n>resource</span><span class=p>])</span>
+        <span class=k>print</span><span class=p>(</span><span class=s2>&#34;    </span><span class=si>%s</span><span class=s2> (</span><span class=si>%d</span><span class=s2>)&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=n>resource</span><span class=p>,</span> <span class=n>count</span><span class=p>))</span>
+
+<span class=c1># Output:</span>
+<span class=c1># google:</span>
+<span class=c1>#     container_cluster (1)</span>
+<span class=c1>#     container_node_pool (1)</span>
+<span class=c1># helm:</span>
+<span class=c1>#     release (5)</span>
+<span class=c1># kubernetes:</span>
+<span class=c1>#     cluster_role_binding (1)</span>
+<span class=c1>#     namespace (1)</span>
+<span class=c1>#     secret (1)</span>
+
+</code></pre></div><h3 id=type-bterraformb>type <b>Terraform</b></h3><p>Terraform holds all the configuration defined by a script. A global
+variable called <code>tf</code> contains a unique instance of Terraform.</p><h6 id=properties-8>Properties</h6><table><thead><tr><th>name</th><th>type</th><th>description</th></tr></thead><tbody><tr><td><code>version</code></td><td><code>string</code></td><td>Terraform version.</td></tr><tr><td><code>backend</code></td><td><code>Backend</code></td><td>Backend used to store the state, if None a <code>local</code> backend it&rsquo;sused.</td></tr><tr><td><code>provider</code></td><td><code>ProviderCollection</code></td><td>Dict with all the providers defined by provider type.</td></tr></tbody></table><h6 id=examples-8>Examples</h6><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>tf</span><span class=o>.</span><span class=n>backend</span> <span class=o>=</span> <span class=n>backend</span><span class=p>(</span><span class=s2>&#34;gcs&#34;</span><span class=p>,</span> <span class=n>bucket</span><span class=o>=</span><span class=s2>&#34;tf-state&#34;</span><span class=p>)</span>
+
+<span class=n>aws</span> <span class=o>=</span> <span class=n>tf</span><span class=o>.</span><span class=n>provider</span><span class=p>(</span><span class=s2>&#34;aws&#34;</span><span class=p>,</span> <span class=n>region</span><span class=o>=</span><span class=s2>&#34;us-west-2&#34;</span><span class=p>)</span>
+<span class=n>aws</span><span class=o>.</span><span class=n>resource</span><span class=o>.</span><span class=n>instance</span><span class=p>(</span><span class=s2>&#34;foo&#34;</span><span class=p>,</span> <span class=n>instance_type</span><span class=o>=</span><span class=s2>&#34;t2.micro&#34;</span><span class=p>)</span>
+
+<span class=k>print</span><span class=p>(</span><span class=n>hcl</span><span class=p>(</span><span class=n>tf</span><span class=p>))</span>
+
+<span class=c1># Output:</span>
+<span class=c1># terraform {</span>
+<span class=c1>#   backend &#34;gcs&#34; {</span>
+<span class=c1>#     bucket = &#34;tf-state&#34;</span>
+<span class=c1>#   }</span>
+<span class=c1># }</span>
+<span class=c1>#</span>
+<span class=c1># provider &#34;aws&#34; {</span>
+<span class=c1>#   alias   = &#34;id_1&#34;</span>
+<span class=c1>#   version = &#34;2.54.0&#34;</span>
+<span class=c1>#   region  = &#34;us-west-2&#34;</span>
+<span class=c1># }</span>
+<span class=c1># </span>
+<span class=c1># resource &#34;aws_instance&#34; &#34;foo&#34; {</span>
+<span class=c1>#   provider      = aws.id_1</span>
+<span class=c1>#   instance_type = &#34;t2.micro&#34;</span>
+<span class=c1># }</span>
+
+</code></pre></div></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>
