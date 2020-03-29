@@ -64,7 +64,7 @@ Entry    = Test &#39;:&#39; Test .
 <span class=p>{</span><span class=s2>&#34;one&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>}</span>
 <span class=p>{</span><span class=s2>&#34;one&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>,}</span>
 </code></pre></div><p>The key and value expressions are evaluated in left-to-right order.
-Evaluation fails if the same key is used multiple times.</p><p>Only <a href=#hashing>hashable</a> values may be used as the keys of a dictionary.
+Evaluation fails if the same key is used multiple times.</p><p>Only <a href=/docs/starlark/value-concepts/#hashing>hashable</a> values may be used as the keys of a dictionary.
 This includes all built-in types except dictionaries, sets, and lists;
 a tuple is hashable only if its elements are hashable.</p><h2 id=list-expressions>List expressions</h2><p>A list expression is a comma-separated list of element expressions,
 enclosed in square brackets, and it yields a new list object.
@@ -374,7 +374,7 @@ Applications may define additional types whose values may be called in the same 
 of two operations, <code>m = filename.endswith</code> and <code>m(".star")</code>.
 The first, a dot operation, yields a <em>bound method</em>, a function value
 that pairs a receiver value (the <code>filename</code> string) with a choice of
-method (<a href=#string%C2%B7endswith>string·endswith</a>).</p><p>Only built-in or application-defined types may have methods.</p><p>See <a href=#functions>Functions</a> for an explanation of function parameter passing.</p><h2 id=dot-expressions>Dot expressions</h2><p>A dot expression <code>x.f</code> selects the attribute <code>f</code> (a field or method)
+method (<a href=/docs/starlark/built-in-methods/#stringendswith>string·endswith</a>).</p><p>Only built-in or application-defined types may have methods.</p><p>See <a href=/docs/starlark/data-types/#functions>Functions</a> for an explanation of function parameter passing.</p><h2 id=dot-expressions>Dot expressions</h2><p>A dot expression <code>x.f</code> selects the attribute <code>f</code> (a field or method)
 of the value <code>x</code>.</p><p>Fields are possessed by none of the main Starlark <a href=#data-types>data types</a>,
 but some application-defined types have them.
 Methods belong to the built-in types <code>string</code>, <code>list</code>, <code>dict</code>, and
