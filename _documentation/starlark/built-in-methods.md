@@ -7,7 +7,7 @@ toc: true
 ## Overview
 
 This section lists the methods of built-in types.  Methods are selected
-using [dot expressions](#dot-expressions).
+using [dot expressions](/docs/starlark/expressions/#dot-expressions).
 For example, strings have a `count` method that counts
 occurrences of a substring; `"banana".count("a")` yields `3`.
 
@@ -193,7 +193,7 @@ The optional `start` and `end` parameters restrict the portion of
 list L that is inspected.  If provided and not `None`, they must be list
 indices of type `int`. If an index is negative, `len(L)` is effectively
 added to it, then if the index is outside the range `[0:len(L)]`, the
-nearest value within that range is used; see [Indexing](#indexing).
+nearest value within that range is used; see [Indexing](/docs/starlark/value-concepts/#indexing).
 
 `index` fails if `x` is not found in L, or if `start` or `end`
 is not a valid index (`int` or `None`).
@@ -328,7 +328,7 @@ See also: `string·codepoints`.
 `S.count(sub[, start[, end]])` returns the number of occcurences of
 `sub` within the string S, or, if the optional substring indices
 `start` and `end` are provided, within the designated substring of S.
-They are interpreted according to Starlark's [indexing conventions](#indexing).
+They are interpreted according to Starlark's [indexing conventions](/docs/starlark/value-concepts/#indexing).
 
 ```python
 "hello, world!".count("o")              # 2
@@ -359,7 +359,7 @@ occurrence of the substring `sub` within S.
 
 If either or both of `start` or `end` are specified,
 they specify a subrange of S to which the search should be restricted.
-They are interpreted according to Starlark's [indexing conventions](#indexing).
+They are interpreted according to Starlark's [indexing conventions](/docs/starlark/value-concepts/#indexing).
 
 If no occurrence is found, `found` returns -1.
 

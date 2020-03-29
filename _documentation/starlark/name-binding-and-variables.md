@@ -184,6 +184,6 @@ omission can be worked around by using a list of a single element.)
 
 A name appearing after a dot, such as `split` in
 `get_filename().split('/')`, is not resolved statically.
-The [dot expression](#dot-expressions) `.split` is a dynamic operation
+The [dot expression](/docs/starlark/expressions/#dot-expressions) `.split` is a dynamic operation
 on the value returned by `get_filename()`.
 

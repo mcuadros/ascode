@@ -6,7 +6,7 @@ weight: 2
 A Starlark program consists of one or more modules.
 Each module is defined by a single UTF-8-encoded text file.
 
-A complete grammar of Starlark can be found in [grammar.txt](../syntax/grammar.txt).
+A complete grammar of Starlark can be found in [grammar.txt](https://github.com/google/starlark-go/blob/master/syntax/grammar.txt).
 That grammar is presented piecemeal throughout this document
 in boxes such as this one, which explains the notation:
 

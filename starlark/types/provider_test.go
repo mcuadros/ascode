@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	stdos "os"
+	"path/filepath"
 	"testing"
 
 	"github.com/mcuadros/ascode/starlark/module/os"
@@ -64,11 +65,12 @@ func doTest(t *testing.T, filename string) {
 func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, string)) {
 	id = 0
 
+	dir, _ := filepath.Split(filename)
 	pm := &terraform.PluginManager{".providers"}
 
 	log.SetOutput(ioutil.Discard)
 	thread := &starlark.Thread{Load: load, Print: print}
-	thread.SetLocal("base_path", "testdata")
+	thread.SetLocal("base_path", dir)
 	thread.SetLocal(PluginManagerLocal, pm)
 
 	test.SetReporter(thread, t)

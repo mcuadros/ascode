@@ -15,6 +15,9 @@ import (
 //       evaluate(filename, predeclared=None) dict
 //         Evaluates a Starlark file and returns its global context. Kwargs may
 //         be used to set predeclared.
+//         examples:
+//           evaluable.star
+//           evaluate.star
 //         params:
 //           filename string
 //             Name of the file to execute.

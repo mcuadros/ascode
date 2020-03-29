@@ -6,7 +6,7 @@ toc: true
 
 ## Overview
 
-Starlark has eleven core [data types](#data-types).  An application
+Starlark has eleven core [data types](/docs/starlark/data-types/).  An application
 that embeds the Starlark intepreter may define additional types that
 behave like Starlark values.  All values, whether core or
 application-defined, implement a few basic behaviors:
@@ -112,7 +112,7 @@ Thus `("localhost", 80)` is hashable but `([127, 0, 0, 1], 80)` is not.
 Values of the types `function` and `builtin_function_or_method` are also hashable.
 Although functions are not necessarily immutable, as they may be
 closures that refer to mutable variables, instances of these types
-are compared by reference identity (see [Comparisons](#comparisons)),
+are compared by reference identity (see [Comparisons](/docs/starlark/expressions/#comparisons)),
 so their hash values are derived from their identity.
 
 

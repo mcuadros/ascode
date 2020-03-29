@@ -25,6 +25,10 @@ func TestExamples(t *testing.T) {
 	assert.NoError(t, err)
 
 	for _, test := range tests {
+		if test == "evaluable.star" {
+			continue
+		}
+
 		doTestExample(t, test)
 	}
 }

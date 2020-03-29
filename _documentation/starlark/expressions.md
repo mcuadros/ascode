@@ -138,7 +138,7 @@ Examples:
 The key and value expressions are evaluated in left-to-right order.
 Evaluation fails if the same key is used multiple times.
 
-Only [hashable](#hashing) values may be used as the keys of a dictionary.
+Only [hashable](/docs/starlark/value-concepts/#hashing) values may be used as the keys of a dictionary.
 This includes all built-in types except dictionaries, sets, and lists;
 a tuple is hashable only if its elements are hashable.
 
@@ -680,11 +680,11 @@ A method call such as `filename.endswith(".star")` is the composition
 of two operations, `m = filename.endswith` and `m(".star")`.
 The first, a dot operation, yields a _bound method_, a function value
 that pairs a receiver value (the `filename` string) with a choice of
-method ([string·endswith](#string·endswith)).
+method ([string·endswith](/docs/starlark/built-in-methods/#stringendswith)).
 
 Only built-in or application-defined types may have methods.
 
-See [Functions](#functions) for an explanation of function parameter passing.
+See [Functions](/docs/starlark/data-types/#functions) for an explanation of function parameter passing.
 
 ## Dot expressions
 

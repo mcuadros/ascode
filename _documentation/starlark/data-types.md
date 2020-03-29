@@ -39,7 +39,7 @@ expression `str(x)`, or to a Boolean truth value using the expression
 `bool(x)`.  Other operations apply only to certain types.  For
 example, the indexing operation `a[i]` works only with strings, lists,
 and tuples, and any application-defined types that are _indexable_.
-The [_value concepts_](#value-concepts) section explains the groupings of
+The [_value concepts_](/docs/starlark/value-concepts/) section explains the groupings of
 types by the operators they support.
 
 
@@ -48,14 +48,14 @@ types by the operators they support.
 `None` is a distinguished value used to indicate the absence of any other value.
 For example, the result of a call to a function that contains no return statement is `None`.
 
-`None` is equal only to itself.  Its [type](#type) is `"NoneType"`.
+`None` is equal only to itself.  Its [type](/docs/starlark/built-in-constants-and-functions/#type) is `"NoneType"`.
 The truth value of `None` is `False`.
 
 
 ## Booleans
 
 There are two Boolean values, `True` and `False`, representing the
-truth or falsehood of a predicate.  The [type](#type) of a Boolean is `"bool"`.
+truth or falsehood of a predicate.  The [type](/docs/starlark/built-in-constants-and-functions/#type) of a Boolean is `"bool"`.
 
 Boolean values are typically used as conditions in `if`-statements,
 although any Starlark value used as a condition is implicitly
@@ -79,7 +79,7 @@ else:
 
 ## Integers
 
-The Starlark integer type represents integers.  Its [type](#type) is `"int"`.
+The Starlark integer type represents integers.  Its [type](/docs/starlark/built-in-constants-and-functions/#type) is `"int"`.
 
 Integers may be positive or negative, and arbitrarily large.
 Integer arithmetic is exact.
@@ -129,7 +129,7 @@ The Java implementation currently supports only signed 32-bit integers.
 ## Floating-point numbers
 
 The Starlark floating-point data type represents an IEEE 754
-double-precision floating-point number.  Its [type](#type) is `"float"`.
+double-precision floating-point number.  Its [type](/docs/starlark/built-in-constants-and-functions/#type) is `"float"`.
 
 Arithmetic on floats using the `+`, `-`, `*`, `/`, `//`, and `%`
  operators follows the IEE 754 standard.
@@ -183,7 +183,7 @@ The Java implementation does not yet support floating-point numbers.
 ## Strings
 
 A string represents an immutable sequence of bytes.
-The [type](#type) of a string is `"string"`.
+The [type](/docs/starlark/built-in-constants-and-functions/#type) of a string is `"string"`.
 
 Strings can represent arbitrary binary data, including zero bytes, but
 most strings contain text, encoded by convention using UTF-8.
@@ -217,39 +217,39 @@ non-empty.
 
 Strings have several built-in methods:
 
-* [`capitalize`](#string·capitalize)
-* [`codepoint_ords`](#string·codepoint_ords)
-* [`codepoints`](#string·codepoints)
-* [`count`](#string·count)
-* [`elem_ords`](#string·elem_ords)
-* [`elems`](#string·elems)
-* [`endswith`](#string·endswith)
-* [`find`](#string·find)
-* [`format`](#string·format)
-* [`index`](#string·index)
-* [`isalnum`](#string·isalnum)
-* [`isalpha`](#string·isalpha)
-* [`isdigit`](#string·isdigit)
-* [`islower`](#string·islower)
-* [`isspace`](#string·isspace)
-* [`istitle`](#string·istitle)
-* [`isupper`](#string·isupper)
-* [`join`](#string·join)
-* [`lower`](#string·lower)
-* [`lstrip`](#string·lstrip)
-* [`partition`](#string·partition)
-* [`replace`](#string·replace)
-* [`rfind`](#string·rfind)
-* [`rindex`](#string·rindex)
-* [`rpartition`](#string·rpartition)
-* [`rsplit`](#string·rsplit)
-* [`rstrip`](#string·rstrip)
-* [`split`](#string·split)
-* [`splitlines`](#string·splitlines)
-* [`startswith`](#string·startswith)
-* [`strip`](#string·strip)
-* [`title`](#string·title)
-* [`upper`](#string·upper)
+* [`capitalize`](/docs/starlark/built-in-methods/#stringcapitalize)
+* [`codepoint_ords`](/docs/starlark/built-in-methods/#stringcodepoint_ords)
+* [`codepoints`](/docs/starlark/built-in-methods/#stringcodepoints)
+* [`count`](/docs/starlark/built-in-methods/#stringcount)
+* [`elem_ords`](/docs/starlark/built-in-methods/#stringelem_ords)
+* [`elems`](/docs/starlark/built-in-methods/#stringelems)
+* [`endswith`](/docs/starlark/built-in-methods/#stringendswith)
+* [`find`](/docs/starlark/built-in-methods/#stringfind)
+* [`format`](/docs/starlark/built-in-methods/#stringformat)
+* [`index`](/docs/starlark/built-in-methods/#stringindex)
+* [`isalnum`](/docs/starlark/built-in-methods/#stringisalnum)
+* [`isalpha`](/docs/starlark/built-in-methods/#stringisalpha)
+* [`isdigit`](/docs/starlark/built-in-methods/#stringisdigit)
+* [`islower`](/docs/starlark/built-in-methods/#stringislower)
+* [`isspace`](/docs/starlark/built-in-methods/#stringisspace)
+* [`istitle`](/docs/starlark/built-in-methods/#stringistitle)
+* [`isupper`](/docs/starlark/built-in-methods/#stringisupper)
+* [`join`](/docs/starlark/built-in-methods/#stringjoin)
+* [`lower`](/docs/starlark/built-in-methods/#stringlower)
+* [`lstrip`](/docs/starlark/built-in-methods/#stringlstrip)
+* [`partition`](/docs/starlark/built-in-methods/#stringpartition)
+* [`replace`](/docs/starlark/built-in-methods/#stringreplace)
+* [`rfind`](/docs/starlark/built-in-methods/#stringrfind)
+* [`rindex`](/docs/starlark/built-in-methods/#stringrindex)
+* [`rpartition`](/docs/starlark/built-in-methods/#stringrpartition)
+* [`rsplit`](/docs/starlark/built-in-methods/#stringrsplit)
+* [`rstrip`](/docs/starlark/built-in-methods/#stringrstrip)
+* [`split`](/docs/starlark/built-in-methods/#stringsplit)
+* [`splitlines`](/docs/starlark/built-in-methods/#stringsplitlines)
+* [`startswith`](/docs/starlark/built-in-methods/#stringstartswith)
+* [`strip`](/docs/starlark/built-in-methods/#stringstrip)
+* [`title`](/docs/starlark/built-in-methods/#stringtitle)
+* [`upper`](/docs/starlark/built-in-methods/#stringupper)
 
 <b>Implementation note:</b>
 The type of a string element varies across implementations.
@@ -316,13 +316,13 @@ result of some expression applied to each element of another sequence.
 
 A list value has these methods:
 
-* [`append`](#list·append)
-* [`clear`](#list·clear)
-* [`extend`](#list·extend)
-* [`index`](#list·index)
-* [`insert`](#list·insert)
-* [`pop`](#list·pop)
-* [`remove`](#list·remove)
+* [`append`](/docs/starlark/built-in-methods/#listappend)
+* [`clear`](/docs/starlark/built-in-methods/#listclear)
+* [`extend`](/docs/starlark/built-in-methods/#listextend)
+* [`index`](/docs/starlark/built-in-methods/#listindex)
+* [`insert`](/docs/starlark/built-in-methods/#listinsert)
+* [`pop`](/docs/starlark/built-in-methods/#listpop)
+* [`remove`](/docs/starlark/built-in-methods/#listremove)
 
 ## Tuples
 
@@ -470,15 +470,15 @@ two dictionaries with `<`.
 
 A dictionary value has these methods:
 
-* [`clear`](#dict·clear)
-* [`get`](#dict·get)
-* [`items`](#dict·items)
-* [`keys`](#dict·keys)
-* [`pop`](#dict·pop)
-* [`popitem`](#dict·popitem)
-* [`setdefault`](#dict·setdefault)
-* [`update`](#dict·update)
-* [`values`](#dict·values)
+* [`clear`](/docs/starlark/built-in-methods/#dictclear)
+* [`get`](/docs/starlark/built-in-methods/#dictget)
+* [`items`](/docs/starlark/built-in-methods/#dictitems)
+* [`keys`](/docs/starlark/built-in-methods/#dictkeys)
+* [`pop`](/docs/starlark/built-in-methods/#dictpop)
+* [`popitem`](/docs/starlark/built-in-methods/#dictpopitem)
+* [`setdefault`](/docs/starlark/built-in-methods/#dictsetdefault)
+* [`update`](/docs/starlark/built-in-methods/#dictupdate)
+* [`values`](/docs/starlark/built-in-methods/#dictvalues)
 
 ## Sets
 
@@ -729,7 +729,7 @@ Turing complete unless the `-recursion` flag is specified.
 A built-in function is a function or method implemented in Go by the interpreter
 or the application into which the interpreter is embedded.
 
-The [type](#type) of a built-in function is `"builtin_function_or_method"`.
+The [type](/docs/starlark/built-in-constants-and-functions/#type) of a built-in function is `"builtin_function_or_method"`.
 <b>Implementation note:</b>
 The Java implementation of `type(x)` returns `"function"` for all
 functions, whether built in or defined in Starlark,
@@ -737,8 +737,7 @@ even though applications distinguish these two types.
 
 A built-in function value used in a Boolean context is always considered true.
 
-Many built-in functions are predeclared in the environment
-(see [Name Resolution](#name-resolution)).
+Many built-in functions are predeclared in the environment.
 Some built-in functions such as `len` are _universal_, that is,
 available to all Starlark programs.
 The host application may predeclare additional built-in functions

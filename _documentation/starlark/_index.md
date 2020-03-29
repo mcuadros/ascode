@@ -9,15 +9,15 @@ application, and this application may define additional
 domain-specific functions and data types beyond those provided by the
 core language.  For example, Starlark is embedded within (and was
 originally developed for) the [Bazel build tool](https://bazel.build),
-and [Bazel's build language](https://docs.bazel.build/versions/master/starlark/language.html) is based on Starlark.
+and [Bazel's build language](https://docs.bazel.build/versions/2.0.0/skylark/language.html) is based on Starlark.
 
 This document describes the Go implementation of Starlark
 at go.starlark.net/starlark.
 The language it defines is similar but not identical to
-[the Java-based implementation](https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/starlark/Starlark.java)
+[the Java-based implementation](https://github.com/bazelbuild/starlark)
 used by Bazel.
 We identify places where their behaviors differ, and an
-[appendix](#dialect-differences) provides a summary of those
+[appendix](/docs/starlark/dialect-differences/) provides a summary of those
 differences.
 We plan to converge both implementations on a single specification.
 
