@@ -5,7 +5,7 @@ OUTLINE_CMD ?= outline
 DOCUMENTATION_PATH ?= $(BASE_PATH)/_documentation
 DOCUMENTATION_REFERENCE_PATH ?= $(DOCUMENTATION_PATH)/reference
 DOCUMENTATION_REFERENCE_TEMPLATE ?= $(DOCUMENTATION_REFERENCE_PATH)/reference.md.tmpl
-EXAMPLES_PATH ?= starlark/types/testdata/examples
+DOCUMENTATION_INLINE_EXAMPLES_PATH ?= starlark/types/testdata/examples
 
 RUNTIME_MODULES = \
 	github.com/mcuadros/ascode/starlark/module/os \
@@ -25,6 +25,12 @@ STARLIB_PKG ?= github.com/qri-io/starlib
 STARLIB_COMMIT ?= $(shell $(QUERY_GO_MOD_CMD) . $(STARLIB_PKG))
 STARLIB_PKG_LOCATION = $(GOPATH)/src/$(STARLIB_PKG)
 
+# Examples
+EXAMPLE_TO_MD_CMD = go run _scripts/example-to-md.go
+EXAMPLES = functions.star runtime.star
+EXAMPLES_PATH = $(BASE_PATH)/_examples
+DOCUMENTATION_EXAMPLES_PATH = $(DOCUMENTATION_PATH)/example
+
 # Build Info 
 GO_LDFLAGS_CMD = go run _scripts/goldflags.go
 GO_LDFLAGS_PACKAGE = cmd
@@ -39,7 +45,8 @@ HUGO_SITE_TEMPLATE_PATH ?= $(HUGO_SITE_PATH)/themes/hugo-ascode-theme
 HUGO_THEME_URL ?= https://github.com/mcuadros/hugo-ascode-theme
 HUGO_PARAMS_VERSION ?= dev
 export HUGO_PARAMS_VERSION
- 
+
+
 # Rules
 .PHONY: documentation clean hugo-server
 
@@ -47,7 +54,7 @@ documentation: $(RUNTIME_MODULES)
 $(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH) $(STARLIB_PKG_LOCATION)
 	$(OUTLINE_CMD) package \
 		-t $(DOCUMENTATION_REFERENCE_TEMPLATE) \
-		-d $(EXAMPLES_PATH) \
+		-d $(DOCUMENTATION_INLINE_EXAMPLES_PATH) \
 		$@ \
 		> $(DOCUMENTATION_REFERENCE_PATH)/`basename $@`.md
 
@@ -60,13 +67,20 @@ $(STARLIB_PKG_LOCATION):
 	git checkout $(STARLIB_COMMIT); \
 	cd $(BASE_PATH);
 
+examples: $(EXAMPLES)
+
+$(EXAMPLES):
+	$(EXAMPLE_TO_MD_CMD) \
+		$(EXAMPLES_PATH)/$@ $(shell ls -1 $(DOCUMENTATION_EXAMPLES_PATH) | wc -l) \
+		> $(DOCUMENTATION_EXAMPLES_PATH)/$@.md
+
 goldflags:
 	@$(GO_LDFLAGS_CMD) $(GO_LDFLAGS_PACKAGE) . $(GO_LDFLAGS_PACKAGES)
 
-hugo-build: $(HUGO_SITE_PATH) documentation
+hugo-build: $(HUGO_SITE_PATH) documentation examples
 	hugo --minify --source $(HUGO_SITE_PATH) --config $(DOCUMENTATION_PATH)/config.toml
 
-hugo-server: $(HUGO_SITE_PATH) documentation
+hugo-server: $(HUGO_SITE_PATH) documentation examples
 	hugo server --source $(HUGO_SITE_PATH) --config $(DOCUMENTATION_PATH)/config.toml
 
 $(HUGO_SITE_PATH): $(HUGO_SITE_TEMPLATE_PATH)
