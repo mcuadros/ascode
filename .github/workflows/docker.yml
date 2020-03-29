@@ -1,8 +1,5 @@
 name: Docker Push
 on:
-  push:
-    branches:
-      - master
   release:
     types:
       - created

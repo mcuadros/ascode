@@ -40,17 +40,20 @@ GO_LDFLAGS_PACKAGES = \
 	starlibVersion=github.com/qri-io/starlib \
 	terraformVersion=github.com/hashicorp/terraform
 
+GITHUB_REF ?= $(shell cat .git/HEAD | cut -d \  -f 2)
+GIT_REF = $(GITHUB_REF)
+GIT_REF_SHORT = $(shell echo $(GIT_REF) | cut -d / -f 3)
+
 # Site
 HUGO_SITE_PATH ?= $(BASE_PATH)/_site
 HUGO_SITE_CONTENT_PATH ?= $(HUGO_SITE_PATH)/content
 HUGO_SITE_TEMPLATE_PATH ?= $(HUGO_SITE_PATH)/themes/hugo-ascode-theme
 HUGO_THEME_URL ?= https://github.com/mcuadros/hugo-ascode-theme
-HUGO_PARAMS_VERSION ?= dev
+HUGO_PARAMS_VERSION ?= $(GIT_REF_SHORT)
 export HUGO_PARAMS_VERSION
 
-
 # Rules
-.PHONY: documentation clean hugo-server
+.PHONY: documentation clean hugo-server hugo-build goldflags examples
 
 documentation: $(RUNTIME_MODULES)
 $(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH) $(STARLIB_PKG_LOCATION)
