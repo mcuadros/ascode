@@ -1,2 +1,91 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Getting Started - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=https://ascode.run/images/favicon.png><link rel=stylesheet href=/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=https://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=https://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
-<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=/docs/>Documentation</a></h4><ul><li><a href=/docs/install/>Quick Install</a></li><li><a class=active href=/docs/getting-started/>Getting Started</a></li><li><a href=/docs/starlark/>Language definition</a></li><li><a href=/docs/reference/>API Reference</a></li><li><a href=/docs/github-action/>GitHub Action</a></li><li><a href=/docs/_home/></a></li></ul></div></div></div><div class="col-12 col-md-9"><h1 class=title>Getting Started</h1><div class=content><p>TODO</p></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Getting Started - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=https://ascode.run/images/favicon.png><link rel=stylesheet href=/css/style.min.df49831c6872564dff31a5f0978a9571f2c8110b513d4b3b1fc8ead41dcdc9f0.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=https://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=https://ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=/><span>Home</span></a></li><li class=menu-item-docs><a href=/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=/docs/>Documentation</a></h4><ul><li><a href=/docs/install/>Quick Install</a></li><li><a class=active href=/docs/getting-started/>Getting Started</a></li><li><a href=/docs/starlark/>Language definition</a></li><li><a href=/docs/reference/>API Reference</a></li><li><a href=/docs/github-action/>GitHub Action</a></li><li><a href=/docs/_home/></a></li></ul></div></div></div><div class="col-12 col-md-9"><h1 class=title>Getting Started</h1><div class=content><p>This page explains the basics of using AsCode to define your infrastructure in Terraform. It assumes that you have already <a href=/docs/install>installed</a> the Ascode.</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt; ascode --help
+Usage:
+  ascode <span class=o>[</span>OPTIONS<span class=o>]</span> &lt;repl <span class=p>|</span> run <span class=p>|</span> version&gt;
+
+AsCode - Terraform Alternative Syntax.
+
+Help Options:
+  -h, --help  Show this <span class=nb>help</span> message
+
+Available commands:
+  repl     Run as interactive shell.
+  run      Run parses, resolves, and executes a Starlark file.
+  version  Version prints information about this binary.
+</code></pre></div><h2 id=the-repl-command>The <code>repl</code> command</h2><p>The <code>repl</code> command provides a handy <code>REPL</code> interface for debugging and tinkering with AsCode.</p><p>For example you can explore the API of a resource printing the list of arguments:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt; ascode repl
+&gt;&gt;&gt; print<span class=o>(</span>dir<span class=o>(</span>helm.resource<span class=o>))</span>
+<span class=o>[</span><span class=s2>&#34;__kind__&#34;</span>, <span class=s2>&#34;__provider__&#34;</span>, <span class=s2>&#34;release&#34;</span>, <span class=s2>&#34;repository&#34;</span><span class=o>]</span>
+</code></pre></div><p>Or to validate how a resource will be rendered:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt; ascode repl
+&gt;&gt;&gt; <span class=nv>aws</span> <span class=o>=</span> tf.provider<span class=o>(</span><span class=s2>&#34;aws&#34;</span><span class=o>)</span>
+&gt;&gt;&gt; <span class=nv>web</span> <span class=o>=</span> aws.resource.instance<span class=o>(</span><span class=s2>&#34;web&#34;</span>, <span class=nv>instance_type</span><span class=o>=</span><span class=s2>&#34;t2.micro&#34;</span><span class=o>)</span>
+&gt;&gt;&gt; print<span class=o>(</span>hcl<span class=o>(</span>web<span class=o>))</span>
+resource <span class=s2>&#34;aws_instance&#34;</span> <span class=s2>&#34;web&#34;</span> <span class=o>{</span>
+  <span class=nv>provider</span>      <span class=o>=</span> aws.id_01E4JV722PS2WPKK7WQ2NMZY6D
+  <span class=nv>instance_type</span> <span class=o>=</span> <span class=s2>&#34;t2.micro&#34;</span>
+<span class=o>}</span>
+</code></pre></div><h2 id=the-run-command>The <code>run</code> command</h2><p>The <code>run</code> command executes a valid Starlack program. Using the <code>--print-hcl</code> and <code>--to-hcl</code>, an HCL encoded version of the <code>tf</code> object will be printed or saved to a given file, respectively.</p><p>This is the first step to deploy any infrastructure d defined with AsCode, using <code>run</code> and generating a valid <code>.tf</code> file, we can use the standard Terraform tooling to deploy our infrastructure using <code>terraform init</code>, <code>terraform plan</code> and <code>terraform apply</code>.</p><p>To learn about writing Starlark programs, please refer to the <a href=/docs/starlark/>Language definition</a> and the <a href=/docs/reference/>API Reference</a> sections of this documentation.</p><h3 id=basic-example>Basic Example</h3><p>The goal of the example is create, in DigitalOcean, one <code>s-1vcpu-1gb</code> instance called <code>web</code> in the <code>nyc2</code> region:</p><blockquote><p>For running this example, you need <code>terraform</code> correctly installed on your system.</p></blockquote><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt; mkdir example<span class=p>;</span> <span class=nb>cd</span> example
+&gt; <span class=nb>echo</span> <span class=s1>&#39;do = tf.provider(&#34;digitalocean&#34;)&#39;</span> &gt; main.star
+&gt; <span class=nb>echo</span> <span class=s1>&#39;web = do.resource.droplet(&#34;web&#34;, name=&#34;web&#34;, size=&#34;s-1vcpu-1gb&#34;)&#39;</span> &gt;&gt; main.star
+&gt; <span class=nb>echo</span> <span class=s1>&#39;web.region = &#34;nyc2&#34;&#39;</span> &gt;&gt; main.star
+&gt; <span class=nb>echo</span> <span class=s1>&#39;web.image  = &#34;ubuntu-18-04-x64&#34;&#39;</span> &gt;&gt; main.star
+</code></pre></div><p>Now we are ready to run our Starlark program and generate a valid <code>HCL</code> file:</p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt; ascode run main.star --to-hcl main.tf
+&gt; cat main.tf
+provider <span class=s2>&#34;digitalocean&#34;</span> <span class=o>{</span>
+  <span class=nb>alias</span>   <span class=o>=</span> <span class=s2>&#34;id_01E4JXQD8HKW7XEQ7R5S8SP8AQ&#34;</span>
+  <span class=nv>version</span> <span class=o>=</span> <span class=s2>&#34;1.15.1&#34;</span>
+<span class=o>}</span>
+
+resource <span class=s2>&#34;digitalocean_droplet&#34;</span> <span class=s2>&#34;web&#34;</span> <span class=o>{</span>
+  <span class=nv>provider</span> <span class=o>=</span> digitalocean.id_01E4JXQD8HKW7XEQ7R5S8SP8AQ
+  <span class=nv>image</span>    <span class=o>=</span> <span class=s2>&#34;ubuntu-18-04-x64&#34;</span>
+  <span class=nv>name</span>     <span class=o>=</span> <span class=s2>&#34;web&#34;</span>
+  <span class=nv>region</span>   <span class=o>=</span> <span class=s2>&#34;nyc2&#34;</span>
+  <span class=nv>size</span>     <span class=o>=</span> <span class=s2>&#34;s-1vcpu-1gb&#34;</span>
+<span class=o>}</span>
+
+
+</code></pre></div><p>And now as it&rsquo;s common in terraform we can run <code>init</code>, <code>plan</code> or/and <code>apply</code></p><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>&gt; terraform init
+...
+&gt; terraform plan
+Terraform will perform the following actions:
+
+  <span class=c1># digitalocean_droplet.web will be created</span>
+  + resource <span class=s2>&#34;digitalocean_droplet&#34;</span> <span class=s2>&#34;web&#34;</span> <span class=o>{</span>
+      + <span class=nv>backups</span>              <span class=o>=</span> <span class=nb>false</span>
+      + <span class=nv>disk</span>                 <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>id</span>                   <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>image</span>                <span class=o>=</span> <span class=s2>&#34;ubuntu-18-04-x64&#34;</span>
+      + <span class=nv>ipv4_address</span>         <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>ipv4_address_private</span> <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>ipv6</span>                 <span class=o>=</span> <span class=nb>false</span>
+      + <span class=nv>ipv6_address</span>         <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>ipv6_address_private</span> <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>locked</span>               <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>memory</span>               <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>monitoring</span>           <span class=o>=</span> <span class=nb>false</span>
+      + <span class=nv>name</span>                 <span class=o>=</span> <span class=s2>&#34;web&#34;</span>
+      + <span class=nv>price_hourly</span>         <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>price_monthly</span>        <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>private_networking</span>   <span class=o>=</span> <span class=nb>false</span>
+      + <span class=nv>region</span>               <span class=o>=</span> <span class=s2>&#34;nyc2&#34;</span>
+      + <span class=nv>resize_disk</span>          <span class=o>=</span> <span class=nb>true</span>
+      + <span class=nv>size</span>                 <span class=o>=</span> <span class=s2>&#34;s-1vcpu-1gb&#34;</span>
+      + <span class=nv>status</span>               <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>urn</span>                  <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>vcpus</span>                <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+      + <span class=nv>volume_ids</span>           <span class=o>=</span> <span class=o>(</span>known after apply<span class=o>)</span>
+    <span class=o>}</span>
+
+Plan: <span class=m>1</span> to add, <span class=m>0</span> to change, <span class=m>0</span> to destroy.
+
+&gt; terraform apply
+...
+</code></pre></div><h2 id=the-version-command>The <code>version</code> command</h2><p>The <code>version</code> command prints a report about the versions of the different
+dependencies, and AsCode itself used to compile the binary.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>&gt; ascode version
+Go Version: go1.14.1
+AsCode Version: v0.0.1
+AsCode Commit: 6a682e4
+AsCode Build Date: 2020-03-29T12:43:52+02:00
+Terraform Version: v0.12.23
+Starlark Version: v0.0.0-20200306205701-8dd3e2ee1dd5
+</code></pre></div></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>
