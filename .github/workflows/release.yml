@@ -1,0 +1,28 @@
+name: Release
+on:
+  release:
+    types:
+      - created
+  
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        goos: [linux, windows, darwin]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set GO_LDFLAGS
+      run: |
+        echo ::set-env name=GO_LDFLAGS::$(make goldflags)
+
+    - name: Release binaries
+      uses: mcuadros/go-release-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: amd64
+        ldflags: ${{ env.GO_LDFLAGS }} 
