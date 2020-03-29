@@ -1,6 +1,6 @@
 tf.backend = backend("gcs", bucket="tf-state")
 
-aws = tf.provider("aws", region="us-west-2")
+aws = tf.provider("aws", "2.54.0", region="us-west-2")
 aws.resource.instance("foo", instance_type="t2.micro")
 
 print(hcl(tf))

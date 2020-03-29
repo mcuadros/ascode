@@ -13,21 +13,15 @@ assert.eq(image.domain, "docker.io")
 assert.eq(image.path, "library/fedora")
 assert.eq(image.version(), "latest")
 
-full = docker.image("fedora", "24")
-assert.eq(full.name, "docker.io/library/fedora")
-assert.eq(full.version(True), "docker.io/library/fedora:24")
-
 semver = docker.image("fedora", ">=22 <30")
 assert.eq(semver.name, "docker.io/library/fedora")
 assert.eq(semver.version(), "29")
+assert.eq(semver.version(True), "docker.io/library/fedora:29")
 
-golang = docker.image("golang", "1.2.x")
-assert.eq(golang.name, "docker.io/library/golang")
-assert.eq(golang.version(), "1.2.2")
+prometheus = docker.image("quay.io/prometheus/prometheus", "1.8.x")
+assert.eq(prometheus.name, "quay.io/prometheus/prometheus")
+assert.eq(prometheus.version(), "v1.8.2")
 
 tagNotFound = docker.image("fedora", "not-found")
-assert.eq(tagNotFound.name, "docker.io/library/fedora")
-
-def tagNotExistant(): tagNotFound.version()
-assert.fails(tagNotExistant,'tag "not-found" not found in repository')
+assert.fails(lambda: tagNotFound.version(), 'tag "not-found" not found in repository')
 

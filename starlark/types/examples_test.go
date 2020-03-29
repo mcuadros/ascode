@@ -42,7 +42,7 @@ func doTestExample(t *testing.T, filename string) {
 	doTestPrint(t, filename, printer)
 	expected := strings.TrimSpace(getExpectedFromExample(t, filename))
 
-	assert.Equal(t, strings.TrimSpace(output), expected)
+	assert.Equalf(t, strings.TrimSpace(output), expected, filename)
 }
 
 func getExpectedFromExample(t *testing.T, filename string) string {
