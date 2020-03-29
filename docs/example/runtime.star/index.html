@@ -13,7 +13,7 @@ strings, like in this case to <code>base64</code> or to make HTTP requests.</p><
 <span class=k>print</span><span class=p>(</span><span class=n>msg</span><span class=o>.</span><span class=n>body</span><span class=p>())</span>
 </code></pre></div><h3 id=output>Output</h3><div class=highlight><pre class=chroma><code class=language-sh data-lang=sh>ascode is amazing
 </code></pre></div><h2 id=advanced-modules>Advanced Modules</h2><p>Also, AsCode has some more specif modules, like the <code>docker</code> module. The
-docker modules allow you to manipulate docker image names.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>load</span><span class=p>(</span><span class=s2>&#34;experimental/docker&#34;</span><span class=p>,</span> <span class=s2>&#34;docker&#34;</span><span class=p>)</span>
+docker modules allow you to manipulate docker image names.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>load</span><span class=p>(</span><span class=s2>&#34;docker&#34;</span><span class=p>,</span> <span class=s2>&#34;docker&#34;</span><span class=p>)</span>
 </code></pre></div><p>A docker image tag can be defined using semver, instead of using the infamous
 &lsquo;latest&rsquo; tag, or fixing a particular version. This allows us to be up-to-date
 without breaking our deployment.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>golang</span> <span class=o>=</span> <span class=n>docker</span><span class=o>.</span><span class=n>image</span><span class=p>(</span><span class=s2>&#34;golang&#34;</span><span class=p>,</span> <span class=s2>&#34;1.13.x&#34;</span><span class=p>)</span>
