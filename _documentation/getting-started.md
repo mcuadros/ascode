@@ -3,7 +3,7 @@ title: 'Getting Started'
 weight: 2
 ---
 
-This page explains the basics of using AsCode to define your infrastructure in Terraform. It assumes that you have already [installed](/docs/install) Ascode.
+This page explains the basics of using AsCode to define your infrastructure in Terraform. It assumes that you have already [installed](/docs/install) AsCode.
 
 ```sh
 > ascode --help
@@ -23,9 +23,9 @@ Available commands:
 
 ## The `repl` command
 
-The `repl` command provides a handy `REPL` interface for debugging and tinkering with AsCode. 
+The `repl` command provides a handy `REPL` interface for debugging and tinkering with AsCode.
 
-For example you can explore the API of a resource  printing the list of arguments:
+For example you can explore the API of a resource printing the list of arguments:
 
 ```sh
 > ascode repl
@@ -49,16 +49,16 @@ resource "aws_instance" "web" {
 
 The `run` command executes a valid Starlack program. Using the `--print-hcl` and `--to-hcl`, an HCL encoded version of the `tf` object will be printed or saved to a given file, respectively.
 
-This is the first step to deploy any infrastructure d defined with AsCode, using `run` and generating a valid `.tf` file, we can use the standard Terraform tooling to deploy our infrastructure using `terraform init`, `terraform plan` and `terraform apply`.
+This is the first step to deploy any infrastructure defined with AsCode, using `run` and generating a valid `.tf` file, we can use the standard Terraform tooling to deploy our infrastructure using `terraform init`, `terraform plan` and `terraform apply`.
 
 To learn about writing Starlark programs, please refer to the [Language definition](/docs/starlark/) and the [API Reference](/docs/reference/) sections of this documentation.
 
 
 ### Basic Example
 
-The goal of the example is create, in DigitalOcean, one `s-1vcpu-1gb` instance called `web` in the `nyc2` region:
+The goal of the example is to create, in DigitalOcean, one `s-1vcpu-1gb` instance called `web` in the `nyc2` region:
 
-> For running this example, you need `terraform` correctly installed on your system.
+> To run this example, you need `terraform` correctly installed on your system.
 
 ```sh
 > mkdir example; cd example
@@ -89,7 +89,7 @@ resource "digitalocean_droplet" "web" {
 
 ```
 
-And now as it's common in terraform we can run `init`, `plan` or/and `apply`
+And now as it's usual in terraform we can run `init`, `plan` or/and `apply`
 
 ```sh
 > terraform init

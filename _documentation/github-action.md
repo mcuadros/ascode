@@ -3,13 +3,13 @@ title: 'GitHub Action'
 weight: 40
 ---
 
-AsCode Github Action allows to execute AsCode `run` command in response to a GitHub event such as updating a pull request or pushing a new commit on a specific branch. 
+AsCode Github Action allows to execute AsCode `run` command in response to a GitHub event such as updating a pull request or pushing a new commit to a specific branch.
 
 This used in combination with the [Terraform GitHub Actions](https://www.terraform.io/docs/github-actions/getting-started.html) allows to execute the different terraform commands `init`, `plan` and `apply` inside of a [GitHub Workflow](https://help.github.com/en/actions/configuring-and-managing-workflows).
 
 ## Parameters
 
-| Parameter | **Mandatory**/**Optional** | Description | 
+| Parameter | **Mandatory**/**Optional** | Description |
 | --------- | -------- | ----------- |
 | file | **Mandatory** | Starlark file to execute. Default value: `main.star` |
 | hcl | **Mandatory** | HCL output file. Default value: `generated.tf` |
@@ -31,14 +31,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
         TF_VERSION: latest
-        TF_WORKING_DIR: . 
+        TF_WORKING_DIR: .
     steps:
       - name: 'Checkout'
         uses: actions/checkout@master
 
       - name: 'AsCode Run'
         uses: mcuadros/ascode@gh-action
-     
+
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@master
         with:
