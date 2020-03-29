@@ -8,10 +8,20 @@ on:
       - created
 jobs:
   gh-pages:
+    env: 
+      GOPATH: ${{ github.workspace }}
+      WORKING_PATH: ${{ github.workspace }}/src/github.com/${{ github.repository }} 
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        path: ${{env.WORKING_PATH}}
+
+    - name: Install Go
+      uses: actions/setup-go@v2-beta
+      with:
+        go-version: 1.14.x
 
     - name: Setup Hugo
       uses: peaceiris/actions-hugo@v2
@@ -19,11 +29,16 @@ jobs:
         hugo-version: '0.68.2'
         extended: true
 
+    - name: Setup Outline
+      run: go get github.com/mcuadros/outline 
+
     - name: Hugo Build
       run: make hugo-build
+      working-directory: ${{env.WORKING_PATH}}
 
     - name: Push to gh-pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./_site/public
+        publish_dir: src/github.com/${{ github.repository }}/_site/public
+        cname: ascode.run

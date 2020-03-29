@@ -84,6 +84,9 @@ func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
 
 func (r *Runtime) REPL() {
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
+	thread.SetLocal("base_path", r.path)
+	thread.SetLocal(types.PluginManagerLocal, r.pm)
+
 	repl.REPL(thread, r.predeclared)
 }
 

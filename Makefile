@@ -18,6 +18,11 @@ RUNTIME_MODULES = \
 	github.com/qri-io/starlib/re \
 	github.com/qri-io/starlib/http
 
+QUERY_GO_MOD_CMD = go run _scripts/query-go-mod.go
+STARLIB_PKG ?= github.com/qri-io/starlib
+STARLIB_COMMIT ?= $(shell $(QUERY_GO_MOD_CMD) . $(STARLIB_PKG))
+STARLIB_PKG_LOCATION = $(GOPATH)/src/$(STARLIB_PKG)
+
 # Build Info 
 GO_LDFLAGS_CMD = go run _scripts/goldflags.go
 GO_LDFLAGS_PACKAGE = cmd
@@ -37,7 +42,7 @@ export HUGO_PARAMS_VERSION
 .PHONY: documentation clean hugo-server
 
 documentation: $(RUNTIME_MODULES)
-$(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH)
+$(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH) $(STARLIB_PKG_LOCATION)
 	$(OUTLINE_CMD) package \
 		-t $(DOCUMENTATION_REFERENCE_TEMPLATE) \
 		-d $(EXAMPLES_PATH) \
@@ -47,13 +52,19 @@ $(RUNTIME_MODULES): $(DOCUMENTATION_RUNTIME_PATH)
 $(DOCUMENTATION_REFERENCE_PATH):
 	mkdir -p $@
 
+$(STARLIB_PKG_LOCATION):
+	git clone https://$(STARLIB_PKG) $@; \
+	cd $@; \
+	git checkout $(STARLIB_COMMIT); \
+	cd $(BASE_PATH);
+
 goldflags:
 	@$(GO_LDFLAGS_CMD) $(GO_LDFLAGS_PACKAGE) . $(GO_LDFLAGS_PACKAGES)
 
-hugo-build: $(HUGO_SITE_PATH)
+hugo-build: $(HUGO_SITE_PATH) documentation
 	hugo --minify --source $(HUGO_SITE_PATH) --config $(DOCUMENTATION_PATH)/config.toml
 
-hugo-server: $(HUGO_SITE_PATH)
+hugo-server: $(HUGO_SITE_PATH) documentation
 	hugo server --source $(HUGO_SITE_PATH) --config $(DOCUMENTATION_PATH)/config.toml
 
 $(HUGO_SITE_PATH): $(HUGO_SITE_TEMPLATE_PATH)
@@ -62,6 +73,7 @@ $(HUGO_SITE_PATH): $(HUGO_SITE_TEMPLATE_PATH)
 	mkdir -p $(HUGO_SITE_TEMPLATE_PATH)
 	ln -s $(DOCUMENTATION_PATH) $(HUGO_SITE_CONTENT_PATH)/docs
 	ln -s $(DOCUMENTATION_PATH)/_home.md $(HUGO_SITE_CONTENT_PATH)/_index.md
+
 
 $(HUGO_SITE_TEMPLATE_PATH):
 	git clone $(HUGO_THEME_URL) $(HUGO_SITE_TEMPLATE_PATH)

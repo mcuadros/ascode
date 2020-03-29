@@ -1,4 +1,4 @@
-baseURL = "ascode.run"
+baseURL = "https://ascode.run"
 languageCode = "en-us"
 title = "AsCode - Terraform Alternative Syntax"
 theme = "hugo-ascode-theme"
