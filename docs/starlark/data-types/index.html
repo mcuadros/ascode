@@ -1,0 +1,361 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Data types - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=ascode.run/images/favicon.png><link rel=stylesheet href=/ascode.run/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=ascode.run/docs/starlark/data-types/>Language definition</a></h4><ul><li><a href=ascode.run/docs/starlark/lexical-elements/>Lexical elements</a></li><li><a class=active href=ascode.run/docs/starlark/data-types/>Data types</a></li><li><a href=ascode.run/docs/starlark/name-binding-and-variables/>Name binding and variables</a></li><li><a href=ascode.run/docs/starlark/value-concepts/>Value concepts</a></li><li><a href=ascode.run/docs/starlark/expressions/>Expressions</a></li><li><a href=ascode.run/docs/starlark/statements/>Statements</a></li><li><a href=ascode.run/docs/starlark/module-execution/>Module execution</a></li><li><a href=ascode.run/docs/starlark/built-in-constants-and-functions/>Built-in constants and functions</a></li><li><a href=ascode.run/docs/starlark/built-in-methods/>Built-in methods</a></li><li><a href=ascode.run/docs/starlark/dialect-differences/>Dialect differences</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=ascode.run/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>Data types</h1><div class=content><h2 id=index>Index</h2><div class=toc><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#none>None</a></li><li><a href=#booleans>Booleans</a></li><li><a href=#integers>Integers</a></li><li><a href=#floating-point-numbers>Floating-point numbers</a></li><li><a href=#strings>Strings</a></li><li><a href=#lists>Lists</a></li><li><a href=#tuples>Tuples</a></li><li><a href=#dictionaries>Dictionaries</a></li><li><a href=#sets>Sets</a></li><li><a href=#functions>Functions</a></li><li><a href=#built-in-functions>Built-in functions</a></li></ul></nav></div><h2 id=overview>Overview</h2><p>These are the main data types built in to the interpreter:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>NoneType</span>                     <span class=c1># the type of None</span>
+<span class=nb>bool</span>                         <span class=c1># True or False</span>
+<span class=nb>int</span>                          <span class=c1># a signed integer of arbitrary magnitude</span>
+<span class=nb>float</span>                        <span class=c1># an IEEE 754 double-precision floating point number</span>
+<span class=n>string</span>                       <span class=c1># a byte string</span>
+<span class=nb>list</span>                         <span class=c1># a modifiable sequence of values</span>
+<span class=nb>tuple</span>                        <span class=c1># an unmodifiable sequence of values</span>
+<span class=nb>dict</span>                         <span class=c1># a mapping from values to values</span>
+<span class=nb>set</span>                          <span class=c1># a set of values</span>
+<span class=n>function</span>                     <span class=c1># a function implemented in Starlark</span>
+<span class=n>builtin_function_or_method</span>   <span class=c1># a function or method implemented by the interpreter or host application</span>
+</code></pre></div><p>Some functions, such as the iteration methods of <code>string</code>, or the
+<code>range</code> function, return instances of special-purpose types that don&rsquo;t
+appear in this list.
+Additional data types may be defined by the host application into
+which the interpreter is embedded, and those data types may
+participate in basic operations of the language such as arithmetic,
+comparison, indexing, and function calls.</p><p>Some operations can be applied to any Starlark value. For example,
+every value has a type string that can be obtained with the expression
+<code>type(x)</code>, and any value may be converted to a string using the
+expression <code>str(x)</code>, or to a Boolean truth value using the expression
+<code>bool(x)</code>. Other operations apply only to certain types. For
+example, the indexing operation <code>a[i]</code> works only with strings, lists,
+and tuples, and any application-defined types that are <em>indexable</em>.
+The <a href=#value-concepts><em>value concepts</em></a> section explains the groupings of
+types by the operators they support.</p><h2 id=none>None</h2><p><code>None</code> is a distinguished value used to indicate the absence of any other value.
+For example, the result of a call to a function that contains no return statement is <code>None</code>.</p><p><code>None</code> is equal only to itself. Its <a href=#type>type</a> is <code>"NoneType"</code>.
+The truth value of <code>None</code> is <code>False</code>.</p><h2 id=booleans>Booleans</h2><p>There are two Boolean values, <code>True</code> and <code>False</code>, representing the
+truth or falsehood of a predicate. The <a href=#type>type</a> of a Boolean is <code>"bool"</code>.</p><p>Boolean values are typically used as conditions in <code>if</code>-statements,
+although any Starlark value used as a condition is implicitly
+interpreted as a Boolean.
+For example, the values <code>None</code>, <code>0</code>, <code>0.0</code>, and the empty sequences
+<code>""</code>, <code>()</code>, <code>[]</code>, and <code>{}</code> have a truth value of <code>False</code>, whereas non-zero
+numbers and non-empty sequences have a truth value of <code>True</code>.
+Application-defined types determine their own truth value.
+Any value may be explicitly converted to a Boolean using the built-in <code>bool</code>
+function.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=mi>1</span> <span class=o>+</span> <span class=mi>1</span> <span class=o>==</span> <span class=mi>2</span>                              <span class=c1># True</span>
+<span class=mi>2</span> <span class=o>+</span> <span class=mi>2</span> <span class=o>==</span> <span class=mi>5</span>                              <span class=c1># False</span>
+
+<span class=k>if</span> <span class=mi>1</span> <span class=o>+</span> <span class=mi>1</span><span class=p>:</span>
+        <span class=k>print</span><span class=p>(</span><span class=s2>&#34;True&#34;</span><span class=p>)</span>
+<span class=k>else</span><span class=p>:</span>
+        <span class=k>print</span><span class=p>(</span><span class=s2>&#34;False&#34;</span><span class=p>)</span>
+</code></pre></div><h2 id=integers>Integers</h2><p>The Starlark integer type represents integers. Its <a href=#type>type</a> is <code>"int"</code>.</p><p>Integers may be positive or negative, and arbitrarily large.
+Integer arithmetic is exact.
+Integers are totally ordered; comparisons follow mathematical
+tradition.</p><p>The <code>+</code> and <code>-</code> operators perform addition and subtraction, respectively.
+The <code>*</code> operator performs multiplication.</p><p>The <code>//</code> and <code>%</code> operations on integers compute floored division and
+remainder of floored division, respectively.
+If the signs of the operands differ, the sign of the remainder <code>x % y</code>
+matches that of the dividend, <code>x</code>.
+For all finite x and y (y ≠ 0), <code>(x // y) * y + (x % y) == x</code>.
+The <code>/</code> operator implements real division, and
+yields a <code>float</code> result even when its operands are both of type <code>int</code>.</p><p>Integers, including negative values, may be interpreted as bit vectors.
+The <code>|</code>, <code>&</code>, and <code>^</code> operators implement bitwise OR, AND, and XOR,
+respectively. The unary <code>~</code> operator yields the bitwise inversion of its
+integer argument. The <code>&lt;&lt;</code> and <code>>></code> operators shift the first argument
+to the left or right by the number of bits given by the second argument.</p><p>Any bool, number, or string may be interpreted as an integer by using
+the <code>int</code> built-in function.</p><p>An integer used in a Boolean context is considered true if it is
+non-zero.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=mi>100</span> <span class=o>//</span> <span class=mi>5</span> <span class=o>*</span> <span class=mi>9</span> <span class=o>+</span> <span class=mi>32</span>               <span class=c1># 212</span>
+<span class=mi>3</span> <span class=o>//</span> <span class=mi>2</span>                          <span class=c1># 1</span>
+<span class=mi>3</span> <span class=o>/</span> <span class=mi>2</span>                           <span class=c1># 1.5</span>
+<span class=mi>111111111</span> <span class=o>*</span> <span class=mi>111111111</span>           <span class=c1># 12345678987654321</span>
+<span class=s2>&#34;0x</span><span class=si>%x</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=mh>0x1234</span> <span class=o>&amp;</span> <span class=mh>0xf00f</span><span class=p>)</span>      <span class=c1># &#34;0x1004&#34;</span>
+<span class=nb>int</span><span class=p>(</span><span class=s2>&#34;ffff&#34;</span><span class=p>,</span> <span class=mi>16</span><span class=p>)</span>                 <span class=c1># 65535, 0xffff</span>
+</code></pre></div><p><b>Implementation note:</b>
+In the Go implementation of Starlark, integer representation and
+arithmetic is exact, motivated by the need for lossless manipulation
+of protocol messages which may contain signed and unsigned 64-bit
+integers.
+The Java implementation currently supports only signed 32-bit integers.</p><h2 id=floating-point-numbers>Floating-point numbers</h2><p>The Starlark floating-point data type represents an IEEE 754
+double-precision floating-point number. Its <a href=#type>type</a> is <code>"float"</code>.</p><p>Arithmetic on floats using the <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>//</code>, and <code>%</code>
+operators follows the IEE 754 standard.
+However, computing the division or remainder of division by zero is a dynamic error.</p><p>An arithmetic operation applied to a mixture of <code>float</code> and <code>int</code>
+operands works as if the <code>int</code> operand is first converted to a
+<code>float</code>. For example, <code>3.141 + 1</code> is equivalent to <code>3.141 + float(1)</code>.
+There are two floating-point division operators:
+<code>x / y</code> yields the floating-point quotient of <code>x</code> and <code>y</code>,
+whereas <code>x // y</code> yields <code>floor(x / y)</code>, that is, the largest
+integer value not greater than <code>x / y</code>.
+Although the resulting number is integral, it is represented as a
+<code>float</code> if either operand is a <code>float</code>.</p><p>The infinite float values <code>+Inf</code> and <code>-Inf</code> represent numbers
+greater/less than all finite float values.</p><p>The non-finite <code>NaN</code> value represents the result of dubious operations
+such as <code>Inf/Inf</code>. A NaN value compares neither less than, nor
+greater than, nor equal to any value, including itself.</p><p>All floats other than NaN are totally ordered, so they may be compared
+using operators such as <code>==</code> and <code>&lt;</code>.</p><p>Any bool, number, or string may be interpreted as a floating-point
+number by using the <code>float</code> built-in function.</p><p>A float used in a Boolean context is considered true if it is
+non-zero.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=mf>1.23e45</span> <span class=o>*</span> <span class=mf>1.23e45</span>                               <span class=c1># 1.5129e+90</span>
+<span class=mf>1.111111111111111</span> <span class=o>*</span> <span class=mf>1.111111111111111</span>           <span class=c1># 1.23457</span>
+<span class=mf>3.0</span> <span class=o>/</span> <span class=mi>2</span>                                         <span class=c1># 1.5</span>
+<span class=mi>3</span> <span class=o>/</span> <span class=mf>2.0</span>                                         <span class=c1># 1.5</span>
+<span class=nb>float</span><span class=p>(</span><span class=mi>3</span><span class=p>)</span> <span class=o>/</span> <span class=mi>2</span>                                    <span class=c1># 1.5</span>
+<span class=mf>3.0</span> <span class=o>//</span> <span class=mf>2.0</span>                                      <span class=c1># 1</span>
+</code></pre></div><p><b>Implementation note:</b>
+The Go implementation of Starlark supports floating-point numbers as an
+optional feature, motivated by the need for lossless manipulation of
+protocol messages.
+The <code>-float</code> flag enables support for floating-point literals,
+the <code>float</code> built-in function, and the real division operator <code>/</code>.
+The Java implementation does not yet support floating-point numbers.</p><h2 id=strings>Strings</h2><p>A string represents an immutable sequence of bytes.
+The <a href=#type>type</a> of a string is <code>"string"</code>.</p><p>Strings can represent arbitrary binary data, including zero bytes, but
+most strings contain text, encoded by convention using UTF-8.</p><p>The built-in <code>len</code> function returns the number of bytes in a string.</p><p>Strings may be concatenated with the <code>+</code> operator.</p><p>The substring expression <code>s[i:j]</code> returns the substring of <code>s</code> from
+index <code>i</code> up to index <code>j</code>. The index expression <code>s[i]</code> returns the
+1-byte substring <code>s[i:i+1]</code>.</p><p>Strings are hashable, and thus may be used as keys in a dictionary.</p><p>Strings are totally ordered lexicographically, so strings may be
+compared using operators such as <code>==</code> and <code>&lt;</code>.</p><p>Strings are <em>not</em> iterable sequences, so they cannot be used as the operand of
+a <code>for</code>-loop, list comprehension, or any other operation than requires
+an iterable sequence.
+To obtain a view of a string as an iterable sequence of numeric byte
+values, 1-byte substrings, numeric Unicode code points, or 1-code
+point substrings, you must explicitly call one of its four methods:
+<code>elems</code>, <code>elem_ords</code>, <code>codepoints</code>, or <code>codepoint_ords</code>.</p><p>Any value may formatted as a string using the <code>str</code> or <code>repr</code> built-in
+functions, the <code>str % tuple</code> operator, or the <code>str.format</code> method.</p><p>A string used in a Boolean context is considered true if it is
+non-empty.</p><p>Strings have several built-in methods:</p><ul><li><a href=#string%C2%B7capitalize><code>capitalize</code></a></li><li><a href=#string%C2%B7codepoint_ords><code>codepoint_ords</code></a></li><li><a href=#string%C2%B7codepoints><code>codepoints</code></a></li><li><a href=#string%C2%B7count><code>count</code></a></li><li><a href=#string%C2%B7elem_ords><code>elem_ords</code></a></li><li><a href=#string%C2%B7elems><code>elems</code></a></li><li><a href=#string%C2%B7endswith><code>endswith</code></a></li><li><a href=#string%C2%B7find><code>find</code></a></li><li><a href=#string%C2%B7format><code>format</code></a></li><li><a href=#string%C2%B7index><code>index</code></a></li><li><a href=#string%C2%B7isalnum><code>isalnum</code></a></li><li><a href=#string%C2%B7isalpha><code>isalpha</code></a></li><li><a href=#string%C2%B7isdigit><code>isdigit</code></a></li><li><a href=#string%C2%B7islower><code>islower</code></a></li><li><a href=#string%C2%B7isspace><code>isspace</code></a></li><li><a href=#string%C2%B7istitle><code>istitle</code></a></li><li><a href=#string%C2%B7isupper><code>isupper</code></a></li><li><a href=#string%C2%B7join><code>join</code></a></li><li><a href=#string%C2%B7lower><code>lower</code></a></li><li><a href=#string%C2%B7lstrip><code>lstrip</code></a></li><li><a href=#string%C2%B7partition><code>partition</code></a></li><li><a href=#string%C2%B7replace><code>replace</code></a></li><li><a href=#string%C2%B7rfind><code>rfind</code></a></li><li><a href=#string%C2%B7rindex><code>rindex</code></a></li><li><a href=#string%C2%B7rpartition><code>rpartition</code></a></li><li><a href=#string%C2%B7rsplit><code>rsplit</code></a></li><li><a href=#string%C2%B7rstrip><code>rstrip</code></a></li><li><a href=#string%C2%B7split><code>split</code></a></li><li><a href=#string%C2%B7splitlines><code>splitlines</code></a></li><li><a href=#string%C2%B7startswith><code>startswith</code></a></li><li><a href=#string%C2%B7strip><code>strip</code></a></li><li><a href=#string%C2%B7title><code>title</code></a></li><li><a href=#string%C2%B7upper><code>upper</code></a></li></ul><p><b>Implementation note:</b>
+The type of a string element varies across implementations.
+There is agreement that byte strings, with text conventionally encoded
+using UTF-8, is the ideal choice, but the Java implementation treats
+strings as sequences of UTF-16 codes and changing it appears
+intractible; see Google Issue b/36360490.</p><p><b>Implementation note:</b>
+The Java implementation does not consistently treat strings as
+iterable; see <code>testdata/string.star</code> in the test suite and Google Issue
+b/34385336 for further details.</p><h2 id=lists>Lists</h2><p>A list is a mutable sequence of values.
+The <a href=#type>type</a> of a list is <code>"list"</code>.</p><p>Lists are indexable sequences: the elements of a list may be iterated
+over by <code>for</code>-loops, list comprehensions, and various built-in
+functions.</p><p>List may be constructed using bracketed list notation:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[]</span>              <span class=c1># an empty list</span>
+<span class=p>[</span><span class=mi>1</span><span class=p>]</span>             <span class=c1># a 1-element list</span>
+<span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>]</span>          <span class=c1># a 2-element list</span>
+</code></pre></div><p>Lists can also be constructed from any iterable sequence by using the
+built-in <code>list</code> function.</p><p>The built-in <code>len</code> function applied to a list returns the number of elements.
+The index expression <code>list[i]</code> returns the element at index i,
+and the slice expression <code>list[i:j]</code> returns a new list consisting of
+the elements at indices from i to j.</p><p>List elements may be added using the <code>append</code> or <code>extend</code> methods,
+removed using the <code>remove</code> method, or reordered by assignments such as
+<code>list[i] = list[j]</code>.</p><p>The concatenation operation <code>x + y</code> yields a new list containing all
+the elements of the two lists x and y.</p><p>For most types, <code>x += y</code> is equivalent to <code>x = x + y</code>, except that it
+evaluates <code>x</code> only once, that is, it allocates a new list to hold
+the concatenation of <code>x</code> and <code>y</code>.
+However, if <code>x</code> refers to a list, the statement does not allocate a
+new list but instead mutates the original list in place, similar to
+<code>x.extend(y)</code>.</p><p>Lists are not hashable, so may not be used in the keys of a dictionary.</p><p>A list used in a Boolean context is considered true if it is
+non-empty.</p><p>A <a href=#comprehensions><em>list comprehension</em></a> creates a new list whose elements are the
+result of some expression applied to each element of another sequence.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>]]</span>      <span class=c1># [1, 4, 9, 16]</span>
+</code></pre></div><p>A list value has these methods:</p><ul><li><a href=#list%C2%B7append><code>append</code></a></li><li><a href=#list%C2%B7clear><code>clear</code></a></li><li><a href=#list%C2%B7extend><code>extend</code></a></li><li><a href=#list%C2%B7index><code>index</code></a></li><li><a href=#list%C2%B7insert><code>insert</code></a></li><li><a href=#list%C2%B7pop><code>pop</code></a></li><li><a href=#list%C2%B7remove><code>remove</code></a></li></ul><h2 id=tuples>Tuples</h2><p>A tuple is an immutable sequence of values.
+The <a href=#type>type</a> of a tuple is <code>"tuple"</code>.</p><p>Tuples are constructed using parenthesized list notation:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>()</span>                      <span class=c1># the empty tuple</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,)</span>                    <span class=c1># a 1-tuple</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>                  <span class=c1># a 2-tuple (&#34;pair&#34;)</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>               <span class=c1># a 3-tuple</span>
+</code></pre></div><p>Observe that for the 1-tuple, the trailing comma is necessary to
+distinguish it from the parenthesized expression <code>(1)</code>.
+1-tuples are seldom used.</p><p>Starlark, unlike Python, does not permit a trailing comma to appear in
+an unparenthesized tuple expression:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>k</span><span class=p>,</span> <span class=n>v</span><span class=p>,</span> <span class=ow>in</span> <span class=nb>dict</span><span class=o>.</span><span class=n>items</span><span class=p>():</span> <span class=k>pass</span>                 <span class=c1># syntax error at &#39;in&#39;</span>
+<span class=n>_</span> <span class=o>=</span> <span class=p>[(</span><span class=n>v</span><span class=p>,</span> <span class=n>k</span><span class=p>)</span> <span class=k>for</span> <span class=n>k</span><span class=p>,</span> <span class=n>v</span><span class=p>,</span> <span class=ow>in</span> <span class=nb>dict</span><span class=o>.</span><span class=n>items</span><span class=p>()]</span>          <span class=c1># syntax error at &#39;in&#39;</span>
+<span class=n>f</span> <span class=o>=</span> <span class=k>lambda</span> <span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=p>:</span> <span class=bp>None</span>                         <span class=c1># syntax error at &#39;:&#39;</span>
+
+<span class=nb>sorted</span><span class=p>(</span><span class=mi>3</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>1</span><span class=p>,)</span>                             <span class=c1># ok</span>
+<span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=p>]</span>                                     <span class=c1># ok</span>
+<span class=p>{</span><span class=mi>1</span><span class=p>:</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>:</span><span class=mi>4</span><span class=p>,</span> <span class=p>}</span>                                   <span class=c1># ok</span>
+</code></pre></div><p>Any iterable sequence may be converted to a tuple by using the
+built-in <code>tuple</code> function.</p><p>Like lists, tuples are indexed sequences, so they may be indexed and
+sliced. The index expression <code>tuple[i]</code> returns the tuple element at
+index i, and the slice expression <code>tuple[i:j]</code> returns a sub-sequence
+of a tuple.</p><p>Tuples are iterable sequences, so they may be used as the operand of a
+<code>for</code>-loop, a list comprehension, or various built-in functions.</p><p>Unlike lists, tuples cannot be modified.
+However, the mutable elements of a tuple may be modified.</p><p>Tuples are hashable (assuming their elements are hashable),
+so they may be used as keys of a dictionary.</p><p>Tuples may be concatenated using the <code>+</code> operator.</p><p>A tuple used in a Boolean context is considered true if it is
+non-empty.</p><h2 id=dictionaries>Dictionaries</h2><p>A dictionary is a mutable mapping from keys to values.
+The <a href=#type>type</a> of a dictionary is <code>"dict"</code>.</p><p>Dictionaries provide constant-time operations to insert an element, to
+look up the value for a key, or to remove an element. Dictionaries
+are implemented using hash tables, so keys must be hashable. Hashable
+values include <code>None</code>, Booleans, numbers, and strings, and tuples
+composed from hashable values. Most mutable values, such as lists,
+dictionaries, and sets, are not hashable, even when frozen.
+Attempting to use a non-hashable value as a key in a dictionary
+results in a dynamic error.</p><p>A <a href=#dictionary-expressions>dictionary expression</a> specifies a
+dictionary as a set of key/value pairs enclosed in braces:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>coins</span> <span class=o>=</span> <span class=p>{</span>
+  <span class=s2>&#34;penny&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+  <span class=s2>&#34;nickel&#34;</span><span class=p>:</span> <span class=mi>5</span><span class=p>,</span>
+  <span class=s2>&#34;dime&#34;</span><span class=p>:</span> <span class=mi>10</span><span class=p>,</span>
+  <span class=s2>&#34;quarter&#34;</span><span class=p>:</span> <span class=mi>25</span><span class=p>,</span>
+<span class=p>}</span>
+</code></pre></div><p>The expression <code>d[k]</code>, where <code>d</code> is a dictionary and <code>k</code> is a key,
+retrieves the value associated with the key. If the dictionary
+contains no such item, the operation fails:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>coins</span><span class=p>[</span><span class=s2>&#34;penny&#34;</span><span class=p>]</span>          <span class=c1># 1</span>
+<span class=n>coins</span><span class=p>[</span><span class=s2>&#34;dime&#34;</span><span class=p>]</span>           <span class=c1># 10</span>
+<span class=n>coins</span><span class=p>[</span><span class=s2>&#34;silver dollar&#34;</span><span class=p>]</span>  <span class=c1># error: key not found</span>
+</code></pre></div><p>The number of items in a dictionary <code>d</code> is given by <code>len(d)</code>.
+A key/value item may be added to a dictionary, or updated if the key
+is already present, by using <code>d[k]</code> on the left side of an assignment:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=nb>len</span><span class=p>(</span><span class=n>coins</span><span class=p>)</span>				<span class=c1># 4</span>
+<span class=n>coins</span><span class=p>[</span><span class=s2>&#34;shilling&#34;</span><span class=p>]</span> <span class=o>=</span> <span class=mi>20</span>
+<span class=nb>len</span><span class=p>(</span><span class=n>coins</span><span class=p>)</span>				<span class=c1># 5, item was inserted</span>
+<span class=n>coins</span><span class=p>[</span><span class=s2>&#34;shilling&#34;</span><span class=p>]</span> <span class=o>=</span> <span class=mi>5</span>
+<span class=nb>len</span><span class=p>(</span><span class=n>coins</span><span class=p>)</span>				<span class=c1># 5, existing item was updated</span>
+</code></pre></div><p>A dictionary can also be constructed using a <a href=#comprehension>dictionary
+comprehension</a>, which evaluates a pair of expressions,
+the <em>key</em> and the <em>value</em>, for every element of another iterable such
+as a list. This example builds a mapping from each word to its length
+in bytes:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>words</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;able&#34;</span><span class=p>,</span> <span class=s2>&#34;baker&#34;</span><span class=p>,</span> <span class=s2>&#34;charlie&#34;</span><span class=p>]</span>
+<span class=p>{</span><span class=n>x</span><span class=p>:</span> <span class=nb>len</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=n>words</span><span class=p>}</span>	<span class=c1># {&#34;charlie&#34;: 7, &#34;baker&#34;: 5, &#34;able&#34;: 4}</span>
+</code></pre></div><p>Dictionaries are iterable sequences, so they may be used as the
+operand of a <code>for</code>-loop, a list comprehension, or various built-in
+functions.
+Iteration yields the dictionary&rsquo;s keys in the order in which they were
+inserted; updating the value associated with an existing key does not
+affect the iteration order.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>=</span> <span class=nb>dict</span><span class=p>([(</span><span class=s2>&#34;a&#34;</span><span class=p>,</span> <span class=mi>1</span><span class=p>),</span> <span class=p>(</span><span class=s2>&#34;b&#34;</span><span class=p>,</span> <span class=mi>2</span><span class=p>)])</span>          <span class=c1># {&#34;a&#34;: 1, &#34;b&#34;: 2}</span>
+<span class=n>x</span><span class=o>.</span><span class=n>update</span><span class=p>([(</span><span class=s2>&#34;a&#34;</span><span class=p>,</span> <span class=mi>3</span><span class=p>),</span> <span class=p>(</span><span class=s2>&#34;c&#34;</span><span class=p>,</span> <span class=mi>4</span><span class=p>)])</span>          <span class=c1># {&#34;a&#34;: 3, &#34;b&#34;: 2, &#34;c&#34;: 4}</span>
+</code></pre></div><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>name</span> <span class=ow>in</span> <span class=n>coins</span><span class=p>:</span>
+  <span class=k>print</span><span class=p>(</span><span class=n>name</span><span class=p>,</span> <span class=n>coins</span><span class=p>[</span><span class=n>name</span><span class=p>])</span>	<span class=c1># prints &#34;quarter 25&#34;, &#34;dime 10&#34;, ...</span>
+</code></pre></div><p>Like all mutable values in Starlark, a dictionary can be frozen, and
+once frozen, all subsequent operations that attempt to update it will
+fail.</p><p>A dictionary used in a Boolean context is considered true if it is
+non-empty.</p><p>Dictionaries may be compared for equality using <code>==</code> and <code>!=</code>. Two
+dictionaries compare equal if they contain the same number of items
+and each key/value item (k, v) found in one dictionary is also present
+in the other. Dictionaries are not ordered; it is an error to compare
+two dictionaries with <code>&lt;</code>.</p><p>A dictionary value has these methods:</p><ul><li><a href=#dict%C2%B7clear><code>clear</code></a></li><li><a href=#dict%C2%B7get><code>get</code></a></li><li><a href=#dict%C2%B7items><code>items</code></a></li><li><a href=#dict%C2%B7keys><code>keys</code></a></li><li><a href=#dict%C2%B7pop><code>pop</code></a></li><li><a href=#dict%C2%B7popitem><code>popitem</code></a></li><li><a href=#dict%C2%B7setdefault><code>setdefault</code></a></li><li><a href=#dict%C2%B7update><code>update</code></a></li><li><a href=#dict%C2%B7values><code>values</code></a></li></ul><h2 id=sets>Sets</h2><p>A set is a mutable set of values.
+The <a href=#type>type</a> of a set is <code>"set"</code>.</p><p>Like dictionaries, sets are implemented using hash tables, so the
+elements of a set must be hashable.</p><p>Sets may be compared for equality or inequality using <code>==</code> and <code>!=</code>.
+Two sets compare equal if they contain the same elements.</p><p>Sets are iterable sequences, so they may be used as the operand of a
+<code>for</code>-loop, a list comprehension, or various built-in functions.
+Iteration yields the set&rsquo;s elements in the order in which they were
+inserted.</p><p>The binary <code>|</code> and <code>&</code> operators compute union and intersection when
+applied to sets. The right operand of the <code>|</code> operator may be any
+iterable value. The binary <code>in</code> operator performs a set membership
+test when its right operand is a set.</p><p>The binary <code>^</code> operator performs symmetric difference of two sets.</p><p>Sets are instantiated by calling the built-in <code>set</code> function, which
+returns a set containing all the elements of its optional argument,
+which must be an iterable sequence. Sets have no literal syntax.</p><p>The only method of a set is <code>union</code>, which is equivalent to the <code>|</code> operator.</p><p>A set used in a Boolean context is considered true if it is non-empty.</p><p><b>Implementation note:</b>
+The Go implementation of Starlark requires the <code>-set</code> flag to
+enable support for sets.
+The Java implementation does not support sets.</p><h2 id=functions>Functions</h2><p>A function value represents a function defined in Starlark.
+Its <a href=#type>type</a> is <code>"function"</code>.
+A function value used in a Boolean context is always considered true.</p><p>Functions defined by a <a href=#function-definitions><code>def</code> statement</a> are named;
+functions defined by a <a href=#lambda-expressions><code>lambda</code> expression</a> are anonymous.</p><p>Function definitions may be nested, and an inner function may refer to a local variable of an outer function.</p><p>A function definition defines zero or more named parameters.
+Starlark has a rich mechanism for passing arguments to functions.</p><p>The example below shows a definition and call of a function of two
+required parameters, <code>x</code> and <code>y</code>.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>idiv</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>):</span>
+  <span class=k>return</span> <span class=n>x</span> <span class=o>//</span> <span class=n>y</span>
+
+<span class=n>idiv</span><span class=p>(</span><span class=mi>6</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>		<span class=c1># 2</span>
+</code></pre></div><p>A call may provide arguments to function parameters either by
+position, as in the example above, or by name, as in first two calls
+below, or by a mixture of the two forms, as in the third call below.
+All the positional arguments must precede all the named arguments.
+Named arguments may improve clarity, especially in functions of
+several parameters.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>idiv</span><span class=p>(</span><span class=n>x</span><span class=o>=</span><span class=mi>6</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=mi>3</span><span class=p>)</span>		<span class=c1># 2</span>
+<span class=n>idiv</span><span class=p>(</span><span class=n>y</span><span class=o>=</span><span class=mi>3</span><span class=p>,</span> <span class=n>x</span><span class=o>=</span><span class=mi>6</span><span class=p>)</span>		<span class=c1># 2</span>
+
+<span class=n>idiv</span><span class=p>(</span><span class=mi>6</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=mi>3</span><span class=p>)</span>		<span class=c1># 2</span>
+</code></pre></div><p><b>Optional parameters:</b> A parameter declaration may specify a
+default value using <code>name=value</code> syntax; such a parameter is
+<em>optional</em>. The default value expression is evaluated during
+execution of the <code>def</code> statement or evaluation of the <code>lambda</code>
+expression, and the default value forms part of the function value.
+All optional parameters must follow all non-optional parameters.
+A function call may omit arguments for any suffix of the optional
+parameters; the effective values of those arguments are supplied by
+the function&rsquo;s parameter defaults.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=mi>3</span><span class=p>):</span>
+  <span class=k>return</span> <span class=n>x</span><span class=p>,</span> <span class=n>y</span>
+
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>	<span class=c1># (1, 2)</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>	<span class=c1># (1, 3)</span>
+</code></pre></div><p>If a function parameter&rsquo;s default value is a mutable expression,
+modifications to the value during one call may be observed by
+subsequent calls.
+Beware of this when using lists or dicts as default values.
+If the function becomes frozen, its parameters&rsquo; default values become
+frozen too.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=c1># module a.star</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=nb>list</span><span class=o>=</span><span class=p>[]):</span>
+  <span class=nb>list</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+  <span class=k>return</span> <span class=nb>list</span>
+
+<span class=n>f</span><span class=p>(</span><span class=mi>4</span><span class=p>,</span> <span class=p>[</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>,</span><span class=mi>3</span><span class=p>])</span>           <span class=c1># [1, 2, 3, 4]</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>                    <span class=c1># [1]</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>2</span><span class=p>)</span>                    <span class=c1># [1, 2], not [2]!</span>
+
+<span class=c1># module b.star</span>
+<span class=n>load</span><span class=p>(</span><span class=s2>&#34;a.star&#34;</span><span class=p>,</span> <span class=s2>&#34;f&#34;</span><span class=p>)</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>3</span><span class=p>)</span>                    <span class=c1># error: cannot append to frozen list</span>
+</code></pre></div><p><b>Variadic functions:</b> Some functions allow callers to provide an
+arbitrary number of arguments.
+After all required and optional parameters, a function definition may
+specify a <em>variadic arguments</em> or <em>varargs</em> parameter, indicated by a
+star preceding the parameter name: <code>*args</code>.
+Any surplus positional arguments provided by the caller are formed
+into a tuple and assigned to the <code>args</code> parameter.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>):</span>
+  <span class=k>return</span> <span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>args</span>
+
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>                 <span class=c1># (1, 2, ())</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>)</span>           <span class=c1># (1, 2, (3, 4))</span>
+</code></pre></div><p><b>Keyword-variadic functions:</b> Some functions allow callers to
+provide an arbitrary sequence of <code>name=value</code> keyword arguments.
+A function definition may include a final <em>keyword arguments</em> or
+<em>kwargs</em> parameter, indicated by a double-star preceding the parameter
+name: <code>**kwargs</code>.
+Any surplus named arguments that do not correspond to named parameters
+are collected in a new dictionary and assigned to the <code>kwargs</code> parameter:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span>
+  <span class=k>return</span> <span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>kwargs</span>
+
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>                 <span class=c1># (1, 2, {})</span>
+<span class=n>f</span><span class=p>(</span><span class=n>x</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=mi>1</span><span class=p>)</span>             <span class=c1># (2, 1, {})</span>
+<span class=n>f</span><span class=p>(</span><span class=n>x</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span> <span class=n>z</span><span class=o>=</span><span class=mi>3</span><span class=p>)</span>        <span class=c1># (2, 1, {&#34;z&#34;: 3})</span>
+</code></pre></div><p>It is a static error if any two parameters of a function have the same name.</p><p>Just as a function definition may accept an arbitrary number of
+positional or named arguments, a function call may provide an
+arbitrary number of positional or named arguments supplied by a
+list or dictionary:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>5</span><span class=p>):</span>
+  <span class=k>return</span> <span class=n>a</span> <span class=o>*</span> <span class=n>b</span> <span class=o>+</span> <span class=n>c</span>
+
+<span class=n>f</span><span class=p>(</span><span class=o>*</span><span class=p>[</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>])</span>              <span class=c1># 11</span>
+<span class=n>f</span><span class=p>(</span><span class=o>*</span><span class=p>[</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>7</span><span class=p>])</span>           <span class=c1># 13</span>
+<span class=n>f</span><span class=p>(</span><span class=o>*</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>                 <span class=c1># error: f takes at least 2 arguments (1 given)</span>
+
+<span class=n>f</span><span class=p>(</span><span class=o>**</span><span class=nb>dict</span><span class=p>(</span><span class=n>b</span><span class=o>=</span><span class=mi>3</span><span class=p>,</span> <span class=n>a</span><span class=o>=</span><span class=mi>2</span><span class=p>))</span>             <span class=c1># 11</span>
+<span class=n>f</span><span class=p>(</span><span class=o>**</span><span class=nb>dict</span><span class=p>(</span><span class=n>c</span><span class=o>=</span><span class=mi>7</span><span class=p>,</span> <span class=n>a</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>b</span><span class=o>=</span><span class=mi>3</span><span class=p>))</span>        <span class=c1># 13</span>
+<span class=n>f</span><span class=p>(</span><span class=o>**</span><span class=nb>dict</span><span class=p>(</span><span class=n>a</span><span class=o>=</span><span class=mi>2</span><span class=p>))</span>                  <span class=c1># error: f takes at least 2 arguments (1 given)</span>
+<span class=n>f</span><span class=p>(</span><span class=o>**</span><span class=nb>dict</span><span class=p>(</span><span class=n>d</span><span class=o>=</span><span class=mi>4</span><span class=p>))</span>                  <span class=c1># error: f got unexpected keyword argument &#34;d&#34;</span>
+</code></pre></div><p>Once the parameters have been successfully bound to the arguments
+supplied by the call, the sequence of statements that comprise the
+function body is executed.</p><p>It is a static error if a function call has two named arguments of the
+same name, such as <code>f(x=1, x=2)</code>. A call that provides a <code>**kwargs</code>
+argument may yet have two values for the same name, such as
+<code>f(x=1, **dict(x=2))</code>. This results in a dynamic error.</p><p>Function arguments are evaluated in the order they appear in the call.</p><p>Unlike Python, Starlark does not allow more than one <code>*args</code> argument in a
+call, and if a <code>*args</code> argument is present it must appear after all
+positional and named arguments.</p><p>The final argument to a function call may be followed by a trailing comma.</p><p>A function call completes normally after the execution of either a
+<code>return</code> statement, or of the last statement in the function body.
+The result of the function call is the value of the return statement&rsquo;s
+operand, or <code>None</code> if the return statement had no operand or if the
+function completeted without executing a return statement.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+  <span class=k>if</span> <span class=n>x</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+    <span class=k>return</span>
+  <span class=k>if</span> <span class=n>x</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>:</span>
+    <span class=k>return</span> <span class=o>-</span><span class=n>x</span>
+  <span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>            <span class=c1># returns None after printing &#34;1&#34;</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span>            <span class=c1># returns None without printing</span>
+<span class=n>f</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span>           <span class=c1># returns 1 without printing</span>
+</code></pre></div><p><b>Implementation note:</b>
+The Go implementation of Starlark requires the <code>-recursion</code>
+flag to allow recursive functions.</p><p>If the <code>-recursion</code> flag is not specified it is a dynamic error for a
+function to call itself or another function value with the same
+declaration.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>fib</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+  <span class=k>if</span> <span class=n>x</span> <span class=o>&lt;</span> <span class=mi>2</span><span class=p>:</span>
+    <span class=k>return</span> <span class=n>x</span>
+  <span class=k>return</span> <span class=n>fib</span><span class=p>(</span><span class=n>x</span><span class=o>-</span><span class=mi>2</span><span class=p>)</span> <span class=o>+</span> <span class=n>fib</span><span class=p>(</span><span class=n>x</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span>	<span class=c1># dynamic error: function fib called recursively</span>
+
+<span class=n>fib</span><span class=p>(</span><span class=mi>5</span><span class=p>)</span>
+</code></pre></div><p>This rule, combined with the invariant that all loops are iterations
+over finite sequences, implies that Starlark programs can not be
+Turing complete unless the <code>-recursion</code> flag is specified.</p><h2 id=built-in-functions>Built-in functions</h2><p>A built-in function is a function or method implemented in Go by the interpreter
+or the application into which the interpreter is embedded.</p><p>The <a href=#type>type</a> of a built-in function is <code>"builtin_function_or_method"</code>.
+<b>Implementation note:</b>
+The Java implementation of <code>type(x)</code> returns <code>"function"</code> for all
+functions, whether built in or defined in Starlark,
+even though applications distinguish these two types.</p><p>A built-in function value used in a Boolean context is always considered true.</p><p>Many built-in functions are predeclared in the environment
+(see <a href=#name-resolution>Name Resolution</a>).
+Some built-in functions such as <code>len</code> are <em>universal</em>, that is,
+available to all Starlark programs.
+The host application may predeclare additional built-in functions
+in the environment of a specific module.</p><p>Except where noted, built-in functions accept only positional arguments.
+The parameter names serve merely as documentation.</p><p>Most built-in functions that have a Boolean parameter require its
+argument to be <code>True</code> or <code>False</code>. Unlike <code>if</code> statements, other values
+are not implicitly converted to their truth value and instead cause a
+dynamic error.</p></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/ascode.run/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>

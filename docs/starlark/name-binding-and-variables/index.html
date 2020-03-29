@@ -1,0 +1,119 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Name binding and variables - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=ascode.run/images/favicon.png><link rel=stylesheet href=/ascode.run/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=ascode.run/docs/starlark/name-binding-and-variables/>Language definition</a></h4><ul><li><a href=ascode.run/docs/starlark/lexical-elements/>Lexical elements</a></li><li><a href=ascode.run/docs/starlark/data-types/>Data types</a></li><li><a class=active href=ascode.run/docs/starlark/name-binding-and-variables/>Name binding and variables</a></li><li><a href=ascode.run/docs/starlark/value-concepts/>Value concepts</a></li><li><a href=ascode.run/docs/starlark/expressions/>Expressions</a></li><li><a href=ascode.run/docs/starlark/statements/>Statements</a></li><li><a href=ascode.run/docs/starlark/module-execution/>Module execution</a></li><li><a href=ascode.run/docs/starlark/built-in-constants-and-functions/>Built-in constants and functions</a></li><li><a href=ascode.run/docs/starlark/built-in-methods/>Built-in methods</a></li><li><a href=ascode.run/docs/starlark/dialect-differences/>Dialect differences</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=ascode.run/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>Name binding and variables</h1><div class=content><p>After a Starlark file is parsed, but before its execution begins, the
+Starlark interpreter checks statically that the program is well formed.
+For example, <code>break</code> and <code>continue</code> statements may appear only within
+a loop; a <code>return</code> statement may appear only within a
+function; and <code>load</code> statements may appear only outside any function.</p><p><em>Name resolution</em> is the static checking process that
+resolves names to variable bindings.
+During execution, names refer to variables. Statically, names denote
+places in the code where variables are created; these places are
+called <em>bindings</em>. A name may denote different bindings at different
+places in the program. The region of text in which a particular name
+refers to the same binding is called that binding&rsquo;s <em>scope</em>.</p><p>Four Starlark constructs bind names, as illustrated in the example below:
+<code>load</code> statements (<code>a</code> and <code>b</code>),
+<code>def</code> statements (<code>c</code>),
+function parameters (<code>d</code>),
+and assignments (<code>e</code>, <code>h</code>, including the augmented assignment <code>e += 1</code>).
+Variables may be assigned or re-assigned explicitly (<code>e</code>, <code>h</code>), or implicitly, as
+in a <code>for</code>-loop (<code>f</code>) or comprehension (<code>g</code>, <code>i</code>).</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>load</span><span class=p>(</span><span class=s2>&#34;lib.star&#34;</span><span class=p>,</span> <span class=s2>&#34;a&#34;</span><span class=p>,</span> <span class=n>b</span><span class=o>=</span><span class=s2>&#34;B&#34;</span><span class=p>)</span>
+
+<span class=k>def</span> <span class=nf>c</span><span class=p>(</span><span class=n>d</span><span class=p>):</span>
+  <span class=n>e</span> <span class=o>=</span> <span class=mi>0</span>
+  <span class=k>for</span> <span class=n>f</span> <span class=ow>in</span> <span class=n>d</span><span class=p>:</span>
+     <span class=k>print</span><span class=p>([</span><span class=bp>True</span> <span class=k>for</span> <span class=n>g</span> <span class=ow>in</span> <span class=n>f</span><span class=p>])</span>
+     <span class=n>e</span> <span class=o>+=</span> <span class=mi>1</span>
+
+<span class=n>h</span> <span class=o>=</span> <span class=p>[</span><span class=mi>2</span><span class=o>*</span><span class=n>i</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>a</span><span class=p>]</span>
+</code></pre></div><p>The environment of a Starlark program is structured as a tree of
+<em>lexical blocks</em>, each of which may contain name bindings.
+The tree of blocks is parallel to the syntax tree.
+Blocks are of five kinds.</p><p>At the root of the tree is the <em>predeclared</em> block,
+which binds several names implicitly.
+The set of predeclared names includes the universal
+constant values <code>None</code>, <code>True</code>, and <code>False</code>, and
+various built-in functions such as <code>len</code> and <code>list</code>;
+these functions are immutable and stateless.
+An application may pre-declare additional names
+to provide domain-specific functions to that file, for example.
+These additional functions may have side effects on the application.
+Starlark programs cannot change the set of predeclared bindings
+or assign new values to them.</p><p>Nested beneath the predeclared block is the <em>module</em> block,
+which contains the bindings of the current module.
+Bindings in the module block (such as <code>c</code>, and <code>h</code> in the
+example) are called <em>global</em> and may be visible to other modules.
+The module block is empty at the start of the file
+and is populated by top-level binding statements.</p><p>Nested beneath the module block is the <em>file</em> block,
+which contains bindings local to the current file.
+Names in this block (such as <code>a</code> and <code>b</code> in the example)
+are bound only by <code>load</code> statements.
+The sets of names bound in the file block and in the module block do not overlap:
+it is an error for a load statement to bind the name of a global,
+or for a top-level statement to assign to a name bound by a load statement.</p><p>A file block contains a <em>function</em> block for each top-level
+function, and a <em>comprehension</em> block for each top-level comprehension.
+Bindings in either of these kinds of block,
+and in the file block itself, are called <em>local</em>.
+(In the example, the bindings for <code>e</code>, <code>f</code>, <code>g</code>, and <code>i</code> are all local.)
+Additional functions and comprehensions, and their blocks, may be
+nested in any order, to any depth.</p><p>If name is bound anywhere within a block, all uses of the name within
+the block are treated as references to that binding,
+even if the use appears before the binding.
+This is true even at the top level, unlike Python.
+The binding of <code>y</code> on the last line of the example below makes <code>y</code>
+local to the function <code>hello</code>, so the use of <code>y</code> in the print
+statement also refers to the local <code>y</code>, even though it appears
+earlier.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>y</span> <span class=o>=</span> <span class=s2>&#34;goodbye&#34;</span>
+
+<span class=k>def</span> <span class=nf>hello</span><span class=p>():</span>
+  <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>):</span>
+    <span class=k>if</span> <span class=n>x</span> <span class=o>==</span> <span class=mi>2</span><span class=p>:</span>
+      <span class=k>print</span><span class=p>(</span><span class=n>y</span><span class=p>)</span> <span class=c1># prints &#34;hello&#34;</span>
+    <span class=k>if</span> <span class=n>x</span> <span class=o>==</span> <span class=mi>1</span><span class=p>:</span>
+      <span class=n>y</span> <span class=o>=</span> <span class=s2>&#34;hello&#34;</span>
+</code></pre></div><p>It is a dynamic error to evaluate a reference to a local variable
+before it has been bound:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>():</span>
+  <span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>              <span class=c1># dynamic error: local variable x referenced before assignment</span>
+  <span class=n>x</span> <span class=o>=</span> <span class=s2>&#34;hello&#34;</span>
+</code></pre></div><p>The same is true for global variables:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>                <span class=c1># dynamic error: global variable x referenced before assignment</span>
+<span class=n>x</span> <span class=o>=</span> <span class=s2>&#34;hello&#34;</span>
+</code></pre></div><p>It is a static error to bind a global variable already explicitly bound in the file:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>=</span> <span class=mi>1</span>
+<span class=n>x</span> <span class=o>=</span> <span class=mi>2</span>                   <span class=c1># static error: cannot reassign global x declared on line 1</span>
+</code></pre></div><p>If a name was pre-bound by the application, the Starlark program may
+explicitly bind it, but only once.</p><p>An augmented assignment statement such as <code>x += y</code> is considered both a
+reference to <code>x</code> and a binding use of <code>x</code>, so it may not be used at
+top level.</p><p><b>Implementation note:</b>
+The Go implementation of Starlark permits augmented assignments to appear
+at top level if the <code>-globalreassign</code> flag is enabled.</p><p>A function may refer to variables defined in an enclosing function.
+In this example, the inner function <code>f</code> refers to a variable <code>x</code>
+that is local to the outer function <code>squarer</code>.
+<code>x</code> is a <em>free variable</em> of <code>f</code>.
+The function value (<code>f</code>) created by a <code>def</code> statement holds a
+reference to each of its free variables so it may use
+them even after the enclosing function has returned.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>squarer</span><span class=p>():</span>
+    <span class=n>x</span> <span class=o>=</span> <span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+    <span class=k>def</span> <span class=nf>f</span><span class=p>():</span>
+      <span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>+=</span> <span class=mi>1</span>
+      <span class=k>return</span> <span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>*</span><span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+    <span class=k>return</span> <span class=n>f</span>
+
+<span class=n>sq</span> <span class=o>=</span> <span class=n>squarer</span><span class=p>()</span>
+<span class=k>print</span><span class=p>(</span><span class=n>sq</span><span class=p>(),</span> <span class=n>sq</span><span class=p>(),</span> <span class=n>sq</span><span class=p>(),</span> <span class=n>sq</span><span class=p>())</span> <span class=c1># &#34;1 4 9 16&#34;</span>
+</code></pre></div><p>An inner function cannot assign to a variable bound in an enclosing
+function, because the assignment would bind the variable in the
+inner function.
+In the example below, the <code>x += 1</code> statement binds <code>x</code> within <code>f</code>,
+hiding the outer <code>x</code>.
+Execution fails because the inner <code>x</code> has not been assigned before the
+attempt to increment it.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>squarer</span><span class=p>():</span>
+    <span class=n>x</span> <span class=o>=</span> <span class=mi>0</span>
+    <span class=k>def</span> <span class=nf>f</span><span class=p>():</span>
+      <span class=n>x</span> <span class=o>+=</span> <span class=mi>1</span>            <span class=c1># dynamic error: local variable x referenced before assignment</span>
+      <span class=k>return</span> <span class=n>x</span><span class=o>*</span><span class=n>x</span>
+    <span class=k>return</span> <span class=n>f</span>
+
+<span class=n>sq</span> <span class=o>=</span> <span class=n>squarer</span><span class=p>()</span>
+</code></pre></div><p>(Starlark has no equivalent of Python&rsquo;s <code>nonlocal</code> or <code>global</code>
+declarations, but as the first version of <code>squarer</code> showed, this
+omission can be worked around by using a list of a single element.)</p><p>A name appearing after a dot, such as <code>split</code> in
+<code>get_filename().split('/')</code>, is not resolved statically.
+The <a href=#dot-expressions>dot expression</a> <code>.split</code> is a dynamic operation
+on the value returned by <code>get_filename()</code>.</p></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/ascode.run/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>

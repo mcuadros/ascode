@@ -1,0 +1,123 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Value concepts - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=ascode.run/images/favicon.png><link rel=stylesheet href=/ascode.run/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=ascode.run/docs/starlark/value-concepts/>Language definition</a></h4><ul><li><a href=ascode.run/docs/starlark/lexical-elements/>Lexical elements</a></li><li><a href=ascode.run/docs/starlark/data-types/>Data types</a></li><li><a href=ascode.run/docs/starlark/name-binding-and-variables/>Name binding and variables</a></li><li><a class=active href=ascode.run/docs/starlark/value-concepts/>Value concepts</a></li><li><a href=ascode.run/docs/starlark/expressions/>Expressions</a></li><li><a href=ascode.run/docs/starlark/statements/>Statements</a></li><li><a href=ascode.run/docs/starlark/module-execution/>Module execution</a></li><li><a href=ascode.run/docs/starlark/built-in-constants-and-functions/>Built-in constants and functions</a></li><li><a href=ascode.run/docs/starlark/built-in-methods/>Built-in methods</a></li><li><a href=ascode.run/docs/starlark/dialect-differences/>Dialect differences</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=ascode.run/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>Value concepts</h1><div class=content><h2 id=index>Index</h2><div class=toc><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#identity-and-mutation>Identity and mutation</a></li><li><a href=#freezing-a-value>Freezing a value</a></li><li><a href=#hashing>Hashing</a></li><li><a href=#sequence-types>Sequence types</a></li><li><a href=#indexing>Indexing</a></li></ul></nav></div><h2 id=overview>Overview</h2><p>Starlark has eleven core <a href=#data-types>data types</a>. An application
+that embeds the Starlark intepreter may define additional types that
+behave like Starlark values. All values, whether core or
+application-defined, implement a few basic behaviors:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>str(x)		-- return a string representation of x
+type(x)		-- return a string describing the type of x
+bool(x)		-- convert x to a Boolean truth value
+</code></pre></div><h2 id=identity-and-mutation>Identity and mutation</h2><p>Starlark is an imperative language: programs consist of sequences of
+statements executed for their side effects.
+For example, an assignment statement updates the value held by a
+variable, and calls to some built-in functions such as <code>print</code> change
+the state of the application that embeds the interpreter.</p><p>Values of some data types, such as <code>NoneType</code>, <code>bool</code>, <code>int</code>, <code>float</code>, and
+<code>string</code>, are <em>immutable</em>; they can never change.
+Immutable values have no notion of <em>identity</em>: it is impossible for a
+Starlark program to tell whether two integers, for instance, are
+represented by the same object; it can tell only whether they are
+equal.</p><p>Values of other data types, such as <code>list</code>, <code>dict</code>, and <code>set</code>, are
+<em>mutable</em>: they may be modified by a statement such as <code>a[i] = 0</code> or
+<code>items.clear()</code>. Although <code>tuple</code> and <code>function</code> values are not
+directly mutable, they may refer to mutable values indirectly, so for
+this reason we consider them mutable too. Starlark values of these
+types are actually <em>references</em> to variables.</p><p>Copying a reference to a variable, using an assignment statement for
+instance, creates an <em>alias</em> for the variable, and the effects of
+operations applied to the variable through one alias are visible
+through all others.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>=</span> <span class=p>[]</span>                          <span class=c1># x refers to a new empty list variable</span>
+<span class=n>y</span> <span class=o>=</span> <span class=n>x</span>                           <span class=c1># y becomes an alias for x</span>
+<span class=n>x</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>                     <span class=c1># changes the variable referred to by x</span>
+<span class=k>print</span><span class=p>(</span><span class=n>y</span><span class=p>)</span>                        <span class=c1># &#34;[1]&#34;; y observes the mutation</span>
+</code></pre></div><p>Starlark uses <em>call-by-value</em> parameter passing: in a function call,
+argument values are assigned to function parameters as if by
+assignment statements. If the values are references, the caller and
+callee may refer to the same variables, so if the called function
+changes the variable referred to by a parameter, the effect may also
+be observed by the caller:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>y</span><span class=p>):</span>
+    <span class=n>y</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>                 <span class=c1># changes the variable referred to by x</span>
+
+<span class=n>x</span> <span class=o>=</span> <span class=p>[]</span>                          <span class=c1># x refers to a new empty list variable</span>
+<span class=n>f</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>                            <span class=c1># f&#39;s parameter y becomes an alias for x</span>
+<span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>                        <span class=c1># &#34;[1]&#34;; x observes the mutation</span>
+</code></pre></div><p>As in all imperative languages, understanding <em>aliasing</em>, the
+relationship between reference values and the variables to which they
+refer, is crucial to writing correct programs.</p><h2 id=freezing-a-value>Freezing a value</h2><p>Starlark has a feature unusual among imperative programming languages:
+a mutable value may be <em>frozen</em> so that all subsequent attempts to
+mutate it fail with a dynamic error; the value, and all other values
+reachable from it, become <em>immutable</em>.</p><p>Immediately after execution of a Starlark module, all values in its
+top-level environment are frozen. Because all the global variables of
+an initialized Starlark module are immutable, the module may be published to
+and used by other threads in a parallel program without the need for
+locks. For example, the Bazel build system loads and executes BUILD
+and .bzl files in parallel, and two modules being executed
+concurrently may freely access variables or call functions from a
+third without the possibility of a race condition.</p><h2 id=hashing>Hashing</h2><p>The <code>dict</code> and <code>set</code> data types are implemented using hash tables, so
+only <em>hashable</em> values are suitable as keys of a <code>dict</code> or elements of
+a <code>set</code>. Attempting to use a non-hashable value as the key in a hash
+table results in a dynamic error.</p><p>The hash of a value is an unspecified integer chosen so that two equal
+values have the same hash, in other words, <code>x == y => hash(x) == hash(y)</code>.
+A hashable value has the same hash throughout its lifetime.</p><p>Values of the types <code>NoneType</code>, <code>bool</code>, <code>int</code>, <code>float</code>, and <code>string</code>,
+which are all immutable, are hashable.</p><p>Values of mutable types such as <code>list</code>, <code>dict</code>, and <code>set</code> are not
+hashable. These values remain unhashable even if they have become
+immutable due to <em>freezing</em>.</p><p>A <code>tuple</code> value is hashable only if all its elements are hashable.
+Thus <code>("localhost", 80)</code> is hashable but <code>([127, 0, 0, 1], 80)</code> is not.</p><p>Values of the types <code>function</code> and <code>builtin_function_or_method</code> are also hashable.
+Although functions are not necessarily immutable, as they may be
+closures that refer to mutable variables, instances of these types
+are compared by reference identity (see <a href=#comparisons>Comparisons</a>),
+so their hash values are derived from their identity.</p><h2 id=sequence-types>Sequence types</h2><p>Many Starlark data types represent a <em>sequence</em> of values: lists,
+tuples, and sets are sequences of arbitrary values, and in many
+contexts dictionaries act like a sequence of their keys.</p><p>We can classify different kinds of sequence types based on the
+operations they support.
+Each is listed below using the name of its corresponding interface in
+the interpreter&rsquo;s Go API.</p><ul><li><code>Iterable</code>: an <em>iterable</em> value lets us process each of its elements in a fixed order.
+Examples: <code>dict</code>, <code>set</code>, <code>list</code>, <code>tuple</code>, but not <code>string</code>.</li><li><code>Sequence</code>: a <em>sequence of known length</em> lets us know how many elements it
+contains without processing them.
+Examples: <code>dict</code>, <code>set</code>, <code>list</code>, <code>tuple</code>, but not <code>string</code>.</li><li><code>Indexable</code>: an <em>indexed</em> type has a fixed length and provides efficient
+random access to its elements, which are identified by integer indices.
+Examples: <code>string</code>, <code>tuple</code>, and <code>list</code>.</li><li><code>SetIndexable</code>: a <em>settable indexed type</em> additionally allows us to modify the
+element at a given integer index. Example: <code>list</code>.</li><li><code>Mapping</code>: a mapping is an association of keys to values. Example: <code>dict</code>.</li></ul><p>Although all of Starlark&rsquo;s core data types for sequences implement at
+least the <code>Sequence</code> contract, it&rsquo;s possible for an application
+that embeds the Starlark interpreter to define additional data types
+representing sequences of unknown length that implement only the <code>Iterable</code> contract.</p><p>Strings are not iterable, though they do support the <code>len(s)</code> and
+<code>s[i]</code> operations. Starlark deviates from Python here to avoid a common
+pitfall in which a string is used by mistake where a list containing a
+single string was intended, resulting in its interpretation as a sequence
+of bytes.</p><p>Most Starlark operators and built-in functions that need a sequence
+of values will accept any iterable.</p><p>It is a dynamic error to mutate a sequence such as a list, set, or
+dictionary while iterating over it.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>increment_values</span><span class=p>(</span><span class=nb>dict</span><span class=p>):</span>
+  <span class=k>for</span> <span class=n>k</span> <span class=ow>in</span> <span class=nb>dict</span><span class=p>:</span>
+    <span class=nb>dict</span><span class=p>[</span><span class=n>k</span><span class=p>]</span> <span class=o>+=</span> <span class=mi>1</span>			<span class=c1># error: cannot insert into hash table during iteration</span>
+
+<span class=nb>dict</span> <span class=o>=</span> <span class=p>{</span><span class=s2>&#34;one&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>}</span>
+<span class=n>increment_values</span><span class=p>(</span><span class=nb>dict</span><span class=p>)</span>
+</code></pre></div><h2 id=indexing>Indexing</h2><p>Many Starlark operators and functions require an index operand <code>i</code>,
+such as <code>a[i]</code> or <code>list.insert(i, x)</code>. Others require two indices <code>i</code>
+and <code>j</code> that indicate the start and end of a sub-sequence, such as
+<code>a[i:j]</code>, <code>list.index(x, i, j)</code>, or <code>string.find(x, i, j)</code>.
+All such operations follow similar conventions, described here.</p><p>Indexing in Starlark is <em>zero-based</em>. The first element of a string
+or list has index 0, the next 1, and so on. The last element of a
+sequence of length <code>n</code> has index <code>n-1</code>.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>			<span class=c1># &#34;h&#34;</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span>			<span class=c1># &#34;o&#34;</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>5</span><span class=p>]</span>			<span class=c1># error: index out of range</span>
+</code></pre></div><p>For sub-sequence operations that require two indices, the first is
+<em>inclusive</em> and the second <em>exclusive</em>. Thus <code>a[i:j]</code> indicates the
+sequence starting with element <code>i</code> up to but not including element
+<code>j</code>. The length of this sub-sequence is <code>j-i</code>. This convention is known
+as <em>half-open indexing</em>.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>1</span><span class=p>:</span><span class=mi>4</span><span class=p>]</span>			<span class=c1># &#34;ell&#34;</span>
+</code></pre></div><p>Either or both of the index operands may be omitted. If omitted, the
+first is treated equivalent to 0 and the second is equivalent to the
+length of the sequence:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>1</span><span class=p>:]</span>                     <span class=c1># &#34;ello&#34;</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[:</span><span class=mi>4</span><span class=p>]</span>                     <span class=c1># &#34;hell&#34;</span>
+</code></pre></div><p>It is permissible to supply a negative integer to an indexing
+operation. The effective index is computed from the supplied value by
+the following two-step procedure. First, if the value is negative, the
+length of the sequence is added to it. This provides a convenient way
+to address the final elements of the sequence:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span>                     <span class=c1># &#34;o&#34;,  like &#34;hello&#34;[4]</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=o>-</span><span class=mi>3</span><span class=p>:</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span>                  <span class=c1># &#34;ll&#34;, like &#34;hello&#34;[2:4]</span>
+</code></pre></div><p>Second, for sub-sequence operations, if the value is still negative, it
+is replaced by zero, or if it is greater than the length <code>n</code> of the
+sequence, it is replaced by <code>n</code>. In effect, the index is &ldquo;truncated&rdquo; to
+the nearest value in the range <code>[0:n]</code>.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=o>-</span><span class=mi>1000</span><span class=p>:</span><span class=o>+</span><span class=mi>1000</span><span class=p>]</span>		<span class=c1># &#34;hello&#34;</span>
+</code></pre></div><p>This truncation step does not apply to indices of individual elements:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=o>-</span><span class=mi>6</span><span class=p>]</span>		<span class=c1># error: index out of range</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=o>-</span><span class=mi>5</span><span class=p>]</span>		<span class=c1># &#34;h&#34;</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>4</span><span class=p>]</span>		<span class=c1># &#34;o&#34;</span>
+<span class=s2>&#34;hello&#34;</span><span class=p>[</span><span class=mi>5</span><span class=p>]</span>		<span class=c1># error: index out of range</span>
+</code></pre></div></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/ascode.run/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>

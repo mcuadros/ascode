@@ -1,0 +1,477 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Expressions - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=ascode.run/images/favicon.png><link rel=stylesheet href=/ascode.run/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=ascode.run/docs/starlark/expressions/>Language definition</a></h4><ul><li><a href=ascode.run/docs/starlark/lexical-elements/>Lexical elements</a></li><li><a href=ascode.run/docs/starlark/data-types/>Data types</a></li><li><a href=ascode.run/docs/starlark/name-binding-and-variables/>Name binding and variables</a></li><li><a href=ascode.run/docs/starlark/value-concepts/>Value concepts</a></li><li><a class=active href=ascode.run/docs/starlark/expressions/>Expressions</a></li><li><a href=ascode.run/docs/starlark/statements/>Statements</a></li><li><a href=ascode.run/docs/starlark/module-execution/>Module execution</a></li><li><a href=ascode.run/docs/starlark/built-in-constants-and-functions/>Built-in constants and functions</a></li><li><a href=ascode.run/docs/starlark/built-in-methods/>Built-in methods</a></li><li><a href=ascode.run/docs/starlark/dialect-differences/>Dialect differences</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=ascode.run/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>Expressions</h1><div class=content><h2 id=index>Index</h2><div class=toc><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#identifiers>Identifiers</a></li><li><a href=#literals>Literals</a></li><li><a href=#parenthesized-expressions>Parenthesized expressions</a></li><li><a href=#dictionary-expressions>Dictionary expressions</a></li><li><a href=#list-expressions>List expressions</a></li><li><a href=#unary-operators>Unary operators</a></li><li><a href=#binary-operators>Binary operators</a><ul><li><a href=#or-and-and><code>or</code> and <code>and</code></a></li><li><a href=#comparisons>Comparisons</a></li><li><a href=#arithmetic-operations>Arithmetic operations</a></li><li><a href=#membership-tests>Membership tests</a></li><li><a href=#string-interpolation>String interpolation</a></li></ul></li><li><a href=#conditional-expressions>Conditional expressions</a></li><li><a href=#comprehensions>Comprehensions</a></li><li><a href=#function-and-method-calls>Function and method calls</a></li><li><a href=#dot-expressions>Dot expressions</a></li><li><a href=#index-expressions>Index expressions</a></li><li><a href=#slice-expressions>Slice expressions</a></li><li><a href=#lambda-expressions>Lambda expressions</a></li></ul></nav></div><h2 id=overview>Overview</h2><p>An expression specifies the computation of a value.</p><p>The Starlark grammar defines several categories of expression.
+An <em>operand</em> is an expression consisting of a single token (such as an
+identifier or a literal), or a bracketed expression.
+Operands are self-delimiting.
+An operand may be followed by any number of dot, call, or slice
+suffixes, to form a <em>primary</em> expression.
+In some places in the Starlark grammar where an expression is expected,
+it is legal to provide a comma-separated list of expressions denoting
+a tuple.
+The grammar uses <code>Expression</code> where a multiple-component expression is allowed,
+and <code>Test</code> where it accepts an expression of only a single component.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>Expression = Test {&#39;,&#39; Test} .
+
+Test = LambdaExpr | IfExpr | PrimaryExpr | UnaryExpr | BinaryExpr .
+
+PrimaryExpr = Operand
+            | PrimaryExpr DotSuffix
+            | PrimaryExpr CallSuffix
+            | PrimaryExpr SliceSuffix
+            .
+
+Operand = identifier
+        | int | float | string
+        | ListExpr | ListComp
+        | DictExpr | DictComp
+        | &#39;(&#39; [Expression] [,] &#39;)&#39;
+        | (&#39;-&#39; | &#39;+&#39;) PrimaryExpr
+        .
+
+DotSuffix   = &#39;.&#39; identifier .
+CallSuffix  = &#39;(&#39; [Arguments [&#39;,&#39;]] &#39;)&#39; .
+SliceSuffix = &#39;[&#39; [Expression] [&#39;:&#39; Test [&#39;:&#39; Test]] &#39;]&#39; .
+</code></pre></div><p>TODO: resolve position of +x, -x, and &lsquo;not x&rsquo; in grammar: Operand or UnaryExpr?</p><h2 id=identifiers>Identifiers</h2><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>Primary = identifier
+</code></pre></div><p>An identifier is a name that identifies a value.</p><p>Lookup of locals and globals may fail if not yet defined.</p><h2 id=literals>Literals</h2><p>Starlark supports literals of three different kinds:</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>Primary = int | float | string
+</code></pre></div><p>Evaluation of a literal yields a value of the given type (string, int,
+or float) with the given value.
+See <a href=#lexical-elements>Literals</a> for details.</p><h2 id=parenthesized-expressions>Parenthesized expressions</h2><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>Primary = &#39;(&#39; [Expression] &#39;)&#39;
+</code></pre></div><p>A single expression enclosed in parentheses yields the result of that expression.
+Explicit parentheses may be used for clarity,
+or to override the default association of subexpressions.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=mi>1</span> <span class=o>+</span> <span class=mi>2</span> <span class=o>*</span> <span class=mi>3</span> <span class=o>+</span> <span class=mi>4</span>                   <span class=c1># 11</span>
+<span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=mi>2</span><span class=p>)</span> <span class=o>*</span> <span class=p>(</span><span class=mi>3</span> <span class=o>+</span> <span class=mi>4</span><span class=p>)</span>               <span class=c1># 21</span>
+</code></pre></div><p>If the parentheses are empty, or contain a single expression followed
+by a comma, or contain two or more expressions, the expression yields a tuple.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>()</span>                              <span class=c1># (), the empty tuple</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,)</span>                            <span class=c1># (1,), a tuple of length 1</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>                          <span class=c1># (1, 2), a 2-tuple or pair</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>                       <span class=c1># (1, 2, 3), a 3-tuple or triple</span>
+</code></pre></div><p>In some contexts, such as a <code>return</code> or assignment statement or the
+operand of a <code>for</code> statement, a tuple may be expressed without
+parentheses.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span><span class=p>,</span> <span class=n>y</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span>
+
+<span class=k>return</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span>
+
+<span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>:</span>
+   <span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+</code></pre></div><p>Starlark (like Python 3) does not accept an unparenthesized tuple
+expression as the operand of a list comprehension:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[</span><span class=mi>2</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>]</span>	       	<span class=c1># parse error: unexpected &#39;,&#39;</span>
+</code></pre></div><h2 id=dictionary-expressions>Dictionary expressions</h2><p>A dictionary expression is a comma-separated list of colon-separated
+key/value expression pairs, enclosed in curly brackets, and it yields
+a new dictionary object.
+An optional comma may follow the final pair.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>DictExpr = &#39;{&#39; [Entries [&#39;,&#39;]] &#39;}&#39; .
+Entries  = Entry {&#39;,&#39; Entry} .
+Entry    = Test &#39;:&#39; Test .
+</code></pre></div><p>Examples:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>{}</span>
+<span class=p>{</span><span class=s2>&#34;one&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>}</span>
+<span class=p>{</span><span class=s2>&#34;one&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>,}</span>
+</code></pre></div><p>The key and value expressions are evaluated in left-to-right order.
+Evaluation fails if the same key is used multiple times.</p><p>Only <a href=#hashing>hashable</a> values may be used as the keys of a dictionary.
+This includes all built-in types except dictionaries, sets, and lists;
+a tuple is hashable only if its elements are hashable.</p><h2 id=list-expressions>List expressions</h2><p>A list expression is a comma-separated list of element expressions,
+enclosed in square brackets, and it yields a new list object.
+An optional comma may follow the last element expression.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>ListExpr = &#39;[&#39; [Expression [&#39;,&#39;]] &#39;]&#39; .
+</code></pre></div><p>Element expressions are evaluated in left-to-right order.</p><p>Examples:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[]</span>                      <span class=c1># [], empty list</span>
+<span class=p>[</span><span class=mi>1</span><span class=p>]</span>                     <span class=c1># [1], a 1-element list</span>
+<span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,]</span>              <span class=c1># [1, 2, 3], a 3-element list</span>
+</code></pre></div><h2 id=unary-operators>Unary operators</h2><p>There are three unary operators, all appearing before their operand:
+<code>+</code>, <code>-</code>, <code>~</code>, and <code>not</code>.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>UnaryExpr = &#39;+&#39; PrimaryExpr
+          | &#39;-&#39; PrimaryExpr
+          | &#39;~&#39; PrimaryExpr
+          | &#39;not&#39; Test
+          .
+</code></pre></div><div class=highlight><pre class=chroma><code class=language-text data-lang=text>+ number        unary positive          (int, float)
+- number        unary negation          (int, float)
+~ number        unary bitwise inversion (int)
+not x           logical negation        (any type)
+</code></pre></div><p>The <code>+</code> and <code>-</code> operators may be applied to any number
+(<code>int</code> or <code>float</code>) and return the number unchanged.
+Unary <code>+</code> is never necessary in a correct program,
+but may serve as an assertion that its operand is a number,
+or as documentation.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>if</span> <span class=n>x</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+	<span class=k>return</span> <span class=o>+</span><span class=mi>1</span>
+<span class=k>else</span> <span class=k>if</span> <span class=n>x</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>:</span>
+	<span class=k>return</span> <span class=o>-</span><span class=mi>1</span>
+<span class=k>else</span><span class=p>:</span>
+	<span class=k>return</span> <span class=mi>0</span>
+</code></pre></div><p>The <code>not</code> operator returns the negation of the truth value of its
+operand.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=ow>not</span> <span class=bp>True</span>                        <span class=c1># False</span>
+<span class=ow>not</span> <span class=bp>False</span>                       <span class=c1># True</span>
+<span class=ow>not</span> <span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>]</span>                   <span class=c1># False</span>
+<span class=ow>not</span> <span class=s2>&#34;&#34;</span>                          <span class=c1># True</span>
+<span class=ow>not</span> <span class=mi>0</span>                           <span class=c1># True</span>
+</code></pre></div><p>The <code>~</code> operator yields the bitwise inversion of its integer argument.
+The bitwise inversion of x is defined as -(x+1).</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=o>~</span><span class=mi>1</span>                              <span class=c1># -2</span>
+<span class=o>~-</span><span class=mi>1</span>                             <span class=c1># 0</span>
+<span class=o>~</span><span class=mi>0</span>                              <span class=c1># -1</span>
+</code></pre></div><h2 id=binary-operators>Binary operators</h2><p>Starlark has the following binary operators, arranged in order of increasing precedence:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>or
+and
+==   !=   &lt;    &gt;   &lt;=   &gt;=   in   not in
+|
+^
+&amp;
+&lt;&lt;   &gt;&gt;
+-    +
+*    /    //   %
+</code></pre></div><p>Comparison operators, <code>in</code>, and <code>not in</code> are non-associative,
+so the parser will not accept <code>0 &lt;= i &lt; n</code>.
+All other binary operators of equal precedence associate to the left.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>BinaryExpr = Test {Binop Test} .
+
+Binop = &#39;or&#39;
+      | &#39;and&#39;
+      | &#39;==&#39; | &#39;!=&#39; | &#39;&lt;&#39; | &#39;&gt;&#39; | &#39;&lt;=&#39; | &#39;&gt;=&#39; | &#39;in&#39; | &#39;not&#39; &#39;in&#39;
+      | &#39;|&#39;
+      | &#39;^&#39;
+      | &#39;&amp;&#39;
+      | &#39;-&#39; | &#39;+&#39;
+      | &#39;*&#39; | &#39;%&#39; | &#39;/&#39; | &#39;//&#39;
+      | &#39;&lt;&lt;&#39; | &#39;&gt;&gt;&#39;
+      .
+</code></pre></div><h3 id=or-and-and><code>or</code> and <code>and</code></h3><p>The <code>or</code> and <code>and</code> operators yield, respectively, the logical disjunction and
+conjunction of their arguments, which need not be Booleans.
+The expression <code>x or y</code> yields the value of <code>x</code> if its truth value is <code>True</code>,
+or the value of <code>y</code> otherwise.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>False or False		# False
+False or True		# True
+True  or False		# True
+True  or True		# True
+
+0 or &#34;hello&#34;		# &#34;hello&#34;
+1 or &#34;hello&#34;		# 1
+</code></pre></div><p>Similarly, <code>x and y</code> yields the value of <code>x</code> if its truth value is
+<code>False</code>, or the value of <code>y</code> otherwise.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>False and False		# False
+False and True		# False
+True  and False		# False
+True  and True		# True
+
+0 and &#34;hello&#34;		# 0
+1 and &#34;hello&#34;		# &#34;hello&#34;
+</code></pre></div><p>These operators use &ldquo;short circuit&rdquo; evaluation, so the second
+expression is not evaluated if the value of the first expression has
+already determined the result, allowing constructions like these:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=nb>len</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mi>0</span> <span class=ow>and</span> <span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>==</span> <span class=mi>1</span>		<span class=c1># x[0] is not evaluated if x is empty</span>
+<span class=n>x</span> <span class=ow>and</span> <span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>==</span> <span class=mi>1</span>
+<span class=nb>len</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span> <span class=ow>or</span> <span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span> <span class=o>==</span> <span class=s2>&#34;&#34;</span>
+<span class=ow>not</span> <span class=n>x</span> <span class=ow>or</span> <span class=ow>not</span> <span class=n>x</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+</code></pre></div><h3 id=comparisons>Comparisons</h3><p>The <code>==</code> operator reports whether its operands are equal; the <code>!=</code>
+operator is its negation.</p><p>The operators <code>&lt;</code>, <code>></code>, <code>&lt;=</code>, and <code>>=</code> perform an ordered comparison
+of their operands. It is an error to apply these operators to
+operands of unequal type, unless one of the operands is an <code>int</code> and
+the other is a <code>float</code>. Of the built-in types, only the following
+support ordered comparison, using the ordering relation shown:</p><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>NoneType        <span class=c1># None &lt;= None</span>
+bool            <span class=c1># False &lt; True</span>
+int             <span class=c1># mathematical</span>
+float           <span class=c1># as defined by IEEE 754</span>
+string          <span class=c1># lexicographical</span>
+tuple           <span class=c1># lexicographical</span>
+list            <span class=c1># lexicographical</span>
+</code></pre></div><p>Comparison of floating point values follows the IEEE 754 standard,
+which breaks several mathematical identities. For example, if <code>x</code> is
+a <code>NaN</code> value, the comparisons <code>x &lt; y</code>, <code>x == y</code>, and <code>x > y</code> all
+yield false for all values of <code>y</code>.</p><p>Applications may define additional types that support ordered
+comparison.</p><p>The remaining built-in types support only equality comparisons.
+Values of type <code>dict</code> or <code>set</code> compare equal if their elements compare
+equal, and values of type <code>function</code> or <code>builtin_function_or_method</code> are equal only to
+themselves.</p><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>dict                            <span class=c1># equal contents</span>
+<span class=nb>set</span>                             <span class=c1># equal contents</span>
+<span class=k>function</span>                        <span class=c1># identity</span>
+builtin_function_or_method      <span class=c1># identity</span>
+</code></pre></div><h3 id=arithmetic-operations>Arithmetic operations</h3><p>The following table summarizes the binary arithmetic operations
+available for built-in types:</p><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>Arithmetic <span class=o>(</span>int or float<span class=p>;</span> result has <span class=nb>type</span> float unless both operands have <span class=nb>type</span> int<span class=o>)</span>
+   number + number              <span class=c1># addition</span>
+   number - number              <span class=c1># subtraction</span>
+   number * number              <span class=c1># multiplication</span>
+   number / number              <span class=c1># real division  (result is always a float)</span>
+   number // number             <span class=c1># floored division</span>
+   number % number              <span class=c1># remainder of floored division</span>
+   number ^ number              <span class=c1># bitwise XOR</span>
+   number <span class=s>&lt;&lt; number             # bitwise left shift
+</span><span class=s>   number</span> &gt;&gt; number             <span class=c1># bitwise right shift</span>
+
+Concatenation
+   string + string
+     list + list
+    tuple + tuple
+
+Repetition <span class=o>(</span>string/list/tuple<span class=o>)</span>
+      int * sequence
+ sequence * int
+
+String interpolation
+   string % any                 <span class=c1># see String Interpolation</span>
+
+Sets
+      int <span class=p>|</span> int                 <span class=c1># bitwise union (OR)</span>
+      <span class=nb>set</span> <span class=p>|</span> <span class=nb>set</span>                 <span class=c1># set union</span>
+      int <span class=p>&amp;</span> int                 <span class=c1># bitwise intersection (AND)</span>
+      <span class=nb>set</span> <span class=p>&amp;</span> <span class=nb>set</span>                 <span class=c1># set intersection</span>
+      <span class=nb>set</span> ^ <span class=nb>set</span>                 <span class=c1># set symmetric difference</span>
+</code></pre></div><p>The operands of the arithmetic operators <code>+</code>, <code>-</code>, <code>*</code>, <code>//</code>, and
+<code>%</code> must both be numbers (<code>int</code> or <code>float</code>) but need not have the same type.
+The type of the result has type <code>int</code> only if both operands have that type.
+The result of real division <code>/</code> always has type <code>float</code>.</p><p>The <code>+</code> operator may be applied to non-numeric operands of the same
+type, such as two lists, two tuples, or two strings, in which case it
+computes the concatenation of the two operands and yields a new value of
+the same type.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;Hello, &#34;</span> <span class=o>+</span> <span class=s2>&#34;world&#34;</span>		<span class=c1># &#34;Hello, world&#34;</span>
+<span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span> <span class=o>+</span> <span class=p>(</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>)</span>			<span class=c1># (1, 2, 3, 4)</span>
+<span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>]</span> <span class=o>+</span> <span class=p>[</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>]</span>			<span class=c1># [1, 2, 3, 4]</span>
+</code></pre></div><p>The <code>*</code> operator may be applied to an integer <em>n</em> and a value of type
+<code>string</code>, <code>list</code>, or <code>tuple</code>, in which case it yields a new value
+of the same sequence type consisting of <em>n</em> repetitions of the original sequence.
+The order of the operands is immaterial.
+Negative values of <em>n</em> behave like zero.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s1>&#39;mur&#39;</span> <span class=o>*</span> <span class=mi>2</span>               <span class=c1># &#39;murmur&#39;</span>
+<span class=mi>3</span> <span class=o>*</span> <span class=nb>range</span><span class=p>(</span><span class=mi>3</span><span class=p>)</span>            <span class=c1># [0, 1, 2, 0, 1, 2, 0, 1, 2]</span>
+</code></pre></div><p>Applications may define additional types that support any subset of
+these operators.</p><p>The <code>&</code> operator requires two operands of the same type, either <code>int</code> or <code>set</code>.
+For integers, it yields the bitwise intersection (AND) of its operands.
+For sets, it yields a new set containing the intersection of the
+elements of the operand sets, preserving the element order of the left
+operand.</p><p>The <code>|</code> operator likewise computes bitwise or set unions.
+The result of <code>set | set</code> is a new set whose elements are the
+union of the operands, preserving the order of the elements of the
+operands, left before right.</p><p>The <code>^</code> operator accepts operands of either <code>int</code> or <code>set</code> type.
+For integers, it yields the bitwise XOR (exclusive OR) of its operands.
+For sets, it yields a new set containing elements of either first or second
+operand but not both (symmetric difference).</p><p>The <code>&lt;&lt;</code> and <code>>></code> operators require operands of <code>int</code> type both. They shift
+the first operand to the left or right by the number of bits given by the
+second operand. It is a dynamic error if the second operand is negative.
+Implementations may impose a limit on the second operand of a left shift.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=mh>0x12345678</span> <span class=o>&amp;</span> <span class=mh>0xFF</span>               <span class=c1># 0x00000078</span>
+<span class=mh>0x12345678</span> <span class=o>|</span> <span class=mh>0xFF</span>               <span class=c1># 0x123456FF</span>
+<span class=mb>0b01011101</span> <span class=o>^</span> <span class=mb>0b110101101</span>        <span class=c1># 0b111110000</span>
+<span class=mb>0b01011101</span> <span class=o>&gt;&gt;</span> <span class=mi>2</span>                 <span class=c1># 0b010111</span>
+<span class=mb>0b01011101</span> <span class=o>&lt;&lt;</span> <span class=mi>2</span>                 <span class=c1># 0b0101110100</span>
+
+<span class=nb>set</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>])</span> <span class=o>&amp;</span> <span class=nb>set</span><span class=p>([</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>])</span>       <span class=c1># set([2])</span>
+<span class=nb>set</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>])</span> <span class=o>|</span> <span class=nb>set</span><span class=p>([</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>])</span>       <span class=c1># set([1, 2, 3])</span>
+<span class=nb>set</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>])</span> <span class=o>^</span> <span class=nb>set</span><span class=p>([</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>])</span>       <span class=c1># set([1, 3])</span>
+</code></pre></div><p><b>Implementation note:</b>
+The Go implementation of Starlark requires the <code>-set</code> flag to
+enable support for sets.
+The Java implementation does not support sets.</p><h3 id=membership-tests>Membership tests</h3><div class=highlight><pre class=chroma><code class=language-text data-lang=text>      any in     sequence		(list, tuple, dict, set, string)
+      any not in sequence
+</code></pre></div><p>The <code>in</code> operator reports whether its first operand is a member of its
+second operand, which must be a list, tuple, dict, set, or string.
+The <code>not in</code> operator is its negation.
+Both return a Boolean.</p><p>The meaning of membership varies by the type of the second operand:
+the members of a list, tuple, or set are its elements;
+the members of a dict are its keys;
+the members of a string are all its substrings.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=mi>1</span> <span class=ow>in</span> <span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>]</span>                  <span class=c1># True</span>
+<span class=mi>4</span> <span class=ow>in</span> <span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>                  <span class=c1># False</span>
+<span class=mi>4</span> <span class=ow>not</span> <span class=ow>in</span> <span class=nb>set</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>])</span>         <span class=c1># True</span>
+
+<span class=n>d</span> <span class=o>=</span> <span class=p>{</span><span class=s2>&#34;one&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>}</span>
+<span class=s2>&#34;one&#34;</span> <span class=ow>in</span> <span class=n>d</span>                      <span class=c1># True</span>
+<span class=s2>&#34;three&#34;</span> <span class=ow>in</span> <span class=n>d</span>                    <span class=c1># False</span>
+<span class=mi>1</span> <span class=ow>in</span> <span class=n>d</span>                          <span class=c1># False</span>
+<span class=p>[]</span> <span class=ow>in</span> <span class=n>d</span>				<span class=c1># False</span>
+
+<span class=s2>&#34;nasty&#34;</span> <span class=ow>in</span> <span class=s2>&#34;dynasty&#34;</span>            <span class=c1># True</span>
+<span class=s2>&#34;a&#34;</span> <span class=ow>in</span> <span class=s2>&#34;banana&#34;</span>                 <span class=c1># True</span>
+<span class=s2>&#34;f&#34;</span> <span class=ow>not</span> <span class=ow>in</span> <span class=s2>&#34;way&#34;</span>                <span class=c1># True</span>
+</code></pre></div><h3 id=string-interpolation>String interpolation</h3><p>The expression <code>format % args</code> performs <em>string interpolation</em>, a
+simple form of template expansion.
+The <code>format</code> string is interpreted as a sequence of literal portions
+and <em>conversions</em>.
+Each conversion, which starts with a <code>%</code> character, is replaced by its
+corresponding value from <code>args</code>.
+The characters following <code>%</code> in each conversion determine which
+argument it uses and how to convert it to a string.</p><p>Each <code>%</code> character marks the start of a conversion specifier, unless
+it is immediately followed by another <code>%</code>, in which case both
+characters together denote a literal percent sign.</p><p>If the <code>"%"</code> is immediately followed by <code>"(key)"</code>, the parenthesized
+substring specifies the key of the <code>args</code> dictionary whose
+corresponding value is the operand to convert.
+Otherwise, the conversion&rsquo;s operand is the next element of <code>args</code>,
+which must be a tuple with exactly one component per conversion,
+unless the format string contains only a single conversion, in which
+case <code>args</code> itself is its operand.</p><p>Starlark does not support the flag, width, and padding specifiers
+supported by Python&rsquo;s <code>%</code> and other variants of C&rsquo;s <code>printf</code>.</p><p>After the optional <code>(key)</code> comes a single letter indicating what
+operand types are valid and how to convert the operand <code>x</code> to a string:</p><div class=highlight><pre class=chroma><code class=language-text data-lang=text>%       none            literal percent sign
+s       any             as if by str(x)
+r       any             as if by repr(x)
+d       number          signed integer decimal
+i       number          signed integer decimal
+o       number          signed octal
+x       number          signed hexadecimal, lowercase
+X       number          signed hexadecimal, uppercase
+e       number          float exponential format, lowercase
+E       number          float exponential format, uppercase
+f       number          float decimal format, lowercase
+F       number          float decimal format, uppercase
+g       number          like %e for large exponents, %f otherwise
+G       number          like %E for large exponents, %F otherwise
+c       string          x (string must encode a single Unicode code point)
+        int             as if by chr(x)
+</code></pre></div><p>It is an error if the argument does not have the type required by the
+conversion specifier. A Boolean argument is not considered a number.</p><p>Examples:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;Hello </span><span class=si>%s</span><span class=s2>, your score is </span><span class=si>%d</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=s2>&#34;Bob&#34;</span><span class=p>,</span> <span class=mi>75</span><span class=p>)</span>      <span class=c1># &#34;Hello Bob, your score is 75&#34;</span>
+
+<span class=s2>&#34;</span><span class=si>%d</span><span class=s2> </span><span class=si>%o</span><span class=s2> </span><span class=si>%x</span><span class=s2> </span><span class=si>%c</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=mi>65</span><span class=p>,</span> <span class=mi>65</span><span class=p>,</span> <span class=mi>65</span><span class=p>,</span> <span class=mi>65</span><span class=p>)</span>                <span class=c1># &#34;65 101 41 A&#34; (decimal, octal, hexadecimal, Unicode)</span>
+
+<span class=s2>&#34;</span><span class=si>%(greeting)s</span><span class=s2>, </span><span class=si>%(audience)s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=nb>dict</span><span class=p>(</span>            <span class=c1># &#34;Hello, world&#34;</span>
+  <span class=n>greeting</span><span class=o>=</span><span class=s2>&#34;Hello&#34;</span><span class=p>,</span>
+  <span class=n>audience</span><span class=o>=</span><span class=s2>&#34;world&#34;</span><span class=p>,</span>
+<span class=p>)</span>
+
+<span class=s2>&#34;rate = </span><span class=si>%g%%</span><span class=s2> APR&#34;</span> <span class=o>%</span> <span class=mf>3.5</span>                         <span class=c1># &#34;rate = 3.5% APR&#34;</span>
+</code></pre></div><p>One subtlety: to use a tuple as the operand of a conversion in format
+string containing only a single conversion, you must wrap the tuple in
+a singleton tuple:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;coordinates=</span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=p>(</span><span class=mf>40.741491</span><span class=p>,</span> <span class=o>-</span><span class=mf>74.003680</span><span class=p>)</span>	<span class=c1># error: too many arguments for format string</span>
+<span class=s2>&#34;coordinates=</span><span class=si>%s</span><span class=s2>&#34;</span> <span class=o>%</span> <span class=p>((</span><span class=mf>40.741491</span><span class=p>,</span> <span class=o>-</span><span class=mf>74.003680</span><span class=p>),)</span>	<span class=c1># &#34;coordinates=(40.741491, -74.003680)&#34;</span>
+</code></pre></div><p>TODO: specify <code>%e</code> and <code>%f</code> more precisely.</p><h2 id=conditional-expressions>Conditional expressions</h2><p>A conditional expression has the form <code>a if cond else b</code>.
+It first evaluates the condition <code>cond</code>.
+If it&rsquo;s true, it evaluates <code>a</code> and yields its value;
+otherwise it yields the value of <code>b</code>.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>IfExpr = Test &#39;if&#39; Test &#39;else&#39; Test .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;yes&#34;</span> <span class=k>if</span> <span class=n>enabled</span> <span class=k>else</span> <span class=s2>&#34;no&#34;</span>
+</code></pre></div><h2 id=comprehensions>Comprehensions</h2><p>A comprehension constructs new list or dictionary value by looping
+over one or more iterables and evaluating a <em>body</em> expression that produces
+successive elements of the result.</p><p>A list comprehension consists of a single expression followed by one
+or more <em>clauses</em>, the first of which must be a <code>for</code> clause.
+Each <code>for</code> clause resembles a <code>for</code> statement, and specifies an
+iterable operand and a set of variables to be assigned by successive
+values of the iterable.
+An <code>if</code> cause resembles an <code>if</code> statement, and specifies a condition
+that must be met for the body expression to be evaluated.
+A sequence of <code>for</code> and <code>if</code> clauses acts like a nested sequence of
+<code>for</code> and <code>if</code> statements.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>ListComp = &#39;[&#39; Test {CompClause} &#39;]&#39;.
+DictComp = &#39;{&#39; Entry {CompClause} &#39;}&#39; .
+
+CompClause = &#39;for&#39; LoopVariables &#39;in&#39; Test
+           | &#39;if&#39; Test .
+
+LoopVariables = PrimaryExpr {&#39;,&#39; PrimaryExpr} .
+</code></pre></div><p>Examples:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>5</span><span class=p>)]</span>                 <span class=c1># [0, 1, 4, 9, 16]</span>
+<span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>5</span><span class=p>)</span> <span class=k>if</span> <span class=n>x</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>0</span><span class=p>]</span>     <span class=c1># [0, 4, 16]</span>
+<span class=p>[(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>5</span><span class=p>)</span>
+        <span class=k>if</span> <span class=n>x</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>0</span>
+        <span class=k>for</span> <span class=n>y</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>5</span><span class=p>)</span>
+        <span class=k>if</span> <span class=n>y</span> <span class=o>&gt;</span> <span class=n>x</span><span class=p>]</span>                       <span class=c1># [(0, 1), (0, 2), (0, 3), (0, 4), (2, 3), (2, 4)]</span>
+</code></pre></div><p>A dict comprehension resembles a list comprehension, but its body is a
+pair of expressions, <code>key: value</code>, separated by a colon,
+and its result is a dictionary containing the key/value pairs
+for which the body expression was evaluated.
+Evaluation fails if the value of any key is unhashable.</p><p>As with a <code>for</code> loop, the loop variables may exploit compound
+assignment:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>y</span><span class=o>+</span><span class=n>z</span> <span class=k>for</span> <span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>),</span> <span class=n>z</span> <span class=ow>in</span> <span class=p>[((</span><span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>),</span> <span class=mi>5</span><span class=p>),</span> <span class=p>((</span><span class=s2>&#34;o&#34;</span><span class=p>,</span> <span class=mi>2</span><span class=p>),</span> <span class=s2>&#34;!&#34;</span><span class=p>)]]</span>         <span class=c1># [11, &#39;oo!&#39;]</span>
+</code></pre></div><p>Starlark, following Python 3, does not accept an unparenthesized
+tuple or lambda expression as the operand of a <code>for</code> clause:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>]</span>		<span class=c1># parse error: unexpected comma</span>
+<span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=k>lambda</span><span class=p>:</span> <span class=mi>0</span><span class=p>]</span>	<span class=c1># parse error: unexpected lambda</span>
+</code></pre></div><p>Comprehensions in Starlark, again following Python 3, define a new lexical
+block, so assignments to loop variables have no effect on variables of
+the same name in an enclosing block:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>=</span> <span class=mi>1</span>
+<span class=n>_</span> <span class=o>=</span> <span class=p>[</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=p>[</span><span class=mi>2</span><span class=p>]]</span>            <span class=c1># new variable x is local to the comprehension</span>
+<span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>                        <span class=c1># 1</span>
+</code></pre></div><p>The operand of a comprehension&rsquo;s first clause (always a <code>for</code>) is
+resolved in the lexical block enclosing the comprehension.
+In the examples below, identifiers referring to the outer variable
+named <code>x</code> have been distinguished by subscript.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span><span class=err>₀</span> <span class=o>=</span> <span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>
+<span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=n>x</span><span class=err>₀</span><span class=p>]</span>               <span class=c1># [1, 4, 9]</span>
+<span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=n>x</span><span class=err>₀</span> <span class=k>if</span> <span class=n>x</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>0</span><span class=p>]</span>   <span class=c1># [4]</span>
+</code></pre></div><p>All subsequent <code>for</code> and <code>if</code> expressions are resolved within the
+comprehension&rsquo;s lexical block, as in this rather obscure example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span><span class=err>₀</span> <span class=o>=</span> <span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>],</span> <span class=p>[</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=p>[</span><span class=mi>5</span><span class=p>,</span> <span class=mi>6</span><span class=p>])</span>
+<span class=p>[</span><span class=n>x</span><span class=o>*</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=n>x</span><span class=err>₀</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=n>x</span> <span class=k>if</span> <span class=n>x</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>0</span><span class=p>]</span>     <span class=c1># [4, 16, 36]</span>
+</code></pre></div><p>which would be more clearly rewritten as:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>=</span> <span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>],</span> <span class=p>[</span><span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=p>[</span><span class=mi>5</span><span class=p>,</span> <span class=mi>6</span><span class=p>])</span>
+<span class=p>[</span><span class=n>z</span><span class=o>*</span><span class=n>z</span> <span class=k>for</span> <span class=n>y</span> <span class=ow>in</span> <span class=n>x</span> <span class=k>for</span> <span class=n>z</span> <span class=ow>in</span> <span class=n>y</span> <span class=k>if</span> <span class=n>z</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>0</span><span class=p>]</span>     <span class=c1># [4, 16, 36]</span>
+</code></pre></div><h2 id=function-and-method-calls>Function and method calls</h2><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>CallSuffix = &#39;(&#39; [Arguments [&#39;,&#39;]] &#39;)&#39; .
+
+Arguments = Argument {&#39;,&#39; Argument} .
+Argument  = Test | identifier &#39;=&#39; Test | &#39;*&#39; Test | &#39;**&#39; Test .
+</code></pre></div><p>A value <code>f</code> of type <code>function</code> or <code>builtin_function_or_method</code> may be called using the expression <code>f(...)</code>.
+Applications may define additional types whose values may be called in the same way.</p><p>A method call such as <code>filename.endswith(".star")</code> is the composition
+of two operations, <code>m = filename.endswith</code> and <code>m(".star")</code>.
+The first, a dot operation, yields a <em>bound method</em>, a function value
+that pairs a receiver value (the <code>filename</code> string) with a choice of
+method (<a href=#string%C2%B7endswith>string·endswith</a>).</p><p>Only built-in or application-defined types may have methods.</p><p>See <a href=#functions>Functions</a> for an explanation of function parameter passing.</p><h2 id=dot-expressions>Dot expressions</h2><p>A dot expression <code>x.f</code> selects the attribute <code>f</code> (a field or method)
+of the value <code>x</code>.</p><p>Fields are possessed by none of the main Starlark <a href=#data-types>data types</a>,
+but some application-defined types have them.
+Methods belong to the built-in types <code>string</code>, <code>list</code>, <code>dict</code>, and
+<code>set</code>, and to many application-defined types.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>DotSuffix = &#39;.&#39; identifier .
+</code></pre></div><p>A dot expression fails if the value does not have an attribute of the
+specified name.</p><p>Use the built-in function <code>hasattr(x, "f")</code> to ascertain whether a
+value has a specific attribute, or <code>dir(x)</code> to enumerate all its
+attributes. The <code>getattr(x, "f")</code> function can be used to select an
+attribute when the name <code>"f"</code> is not known statically.</p><p>A dot expression that selects a method typically appears within a call
+expression, as in these examples:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=p>[</span><span class=s2>&#34;able&#34;</span><span class=p>,</span> <span class=s2>&#34;baker&#34;</span><span class=p>,</span> <span class=s2>&#34;charlie&#34;</span><span class=p>]</span><span class=o>.</span><span class=n>index</span><span class=p>(</span><span class=s2>&#34;baker&#34;</span><span class=p>)</span>     <span class=c1># 1</span>
+<span class=s2>&#34;banana&#34;</span><span class=o>.</span><span class=n>count</span><span class=p>(</span><span class=s2>&#34;a&#34;</span><span class=p>)</span>                             <span class=c1># 3</span>
+<span class=s2>&#34;banana&#34;</span><span class=o>.</span><span class=n>reverse</span><span class=p>()</span>                              <span class=c1># error: string has no .reverse field or method</span>
+</code></pre></div><p>But when not called immediately, the dot expression evaluates to a
+<em>bound method</em>, that is, a method coupled to a specific receiver
+value. A bound method can be called like an ordinary function,
+without a receiver argument:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>f</span> <span class=o>=</span> <span class=s2>&#34;banana&#34;</span><span class=o>.</span><span class=n>count</span>
+<span class=n>f</span>                                               <span class=c1># &lt;built-in method count of string value&gt;</span>
+<span class=n>f</span><span class=p>(</span><span class=s2>&#34;a&#34;</span><span class=p>)</span>                                          <span class=c1># 3</span>
+<span class=n>f</span><span class=p>(</span><span class=s2>&#34;n&#34;</span><span class=p>)</span>                                          <span class=c1># 2</span>
+</code></pre></div><h2 id=index-expressions>Index expressions</h2><p>An index expression <code>a[i]</code> yields the <code>i</code>th element of an <em>indexable</em>
+type such as a string, tuple, or list. The index <code>i</code> must be an <code>int</code>
+value in the range -<code>n</code> ≤ <code>i</code> &lt; <code>n</code>, where <code>n</code> is <code>len(a)</code>; any other
+index results in an error.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>SliceSuffix = &#39;[&#39; [Expression] [&#39;:&#39; Test [&#39;:&#39; Test]] &#39;]&#39; .
+</code></pre></div><p>A valid negative index <code>i</code> behaves like the non-negative index <code>n+i</code>,
+allowing for convenient indexing relative to the end of the
+sequence.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;abc&#34;</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span>                        <span class=c1># &#34;a&#34;</span>
+<span class=s2>&#34;abc&#34;</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span>                        <span class=c1># &#34;b&#34;</span>
+<span class=s2>&#34;abc&#34;</span><span class=p>[</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span>                       <span class=c1># &#34;c&#34;</span>
+
+<span class=p>(</span><span class=s2>&#34;zero&#34;</span><span class=p>,</span> <span class=s2>&#34;one&#34;</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>)[</span><span class=mi>0</span><span class=p>]</span>       <span class=c1># &#34;zero&#34;</span>
+<span class=p>(</span><span class=s2>&#34;zero&#34;</span><span class=p>,</span> <span class=s2>&#34;one&#34;</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>)[</span><span class=mi>1</span><span class=p>]</span>       <span class=c1># &#34;one&#34;</span>
+<span class=p>(</span><span class=s2>&#34;zero&#34;</span><span class=p>,</span> <span class=s2>&#34;one&#34;</span><span class=p>,</span> <span class=s2>&#34;two&#34;</span><span class=p>)[</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span>      <span class=c1># &#34;two&#34;</span>
+</code></pre></div><p>An index expression <code>d[key]</code> may also be applied to a dictionary <code>d</code>,
+to obtain the value associated with the specified key. It is an error
+if the dictionary contains no such key.</p><p>An index expression appearing on the left side of an assignment causes
+the specified list or dictionary element to be updated:</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>a = range(3)            # a == [0, 1, 2]
+a[2] = 7                # a == [0, 1, 7]
+
+coins[&#34;suzie b&#34;] = 100
+</code></pre></div><p>It is a dynamic error to attempt to update an element of an immutable
+type, such as a tuple or string, or a frozen value of a mutable type.</p><h2 id=slice-expressions>Slice expressions</h2><p>A slice expression <code>a[start:stop:stride]</code> yields a new value containing a
+sub-sequence of <code>a</code>, which must be a string, tuple, or list.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>SliceSuffix = &#39;[&#39; [Expression] [&#39;:&#39; Test [&#39;:&#39; Test]] &#39;]&#39; .
+</code></pre></div><p>Each of the <code>start</code>, <code>stop</code>, and <code>stride</code> operands is optional;
+if present, and not <code>None</code>, each must be an integer.
+The <code>stride</code> value defaults to 1.
+If the stride is not specified, the colon preceding it may be omitted too.
+It is an error to specify a stride of zero.</p><p>Conceptually, these operands specify a sequence of values <code>i</code> starting
+at <code>start</code> and successively adding <code>stride</code> until <code>i</code> reaches or
+passes <code>stop</code>. The result consists of the concatenation of values of
+<code>a[i]</code> for which <code>i</code> is valid.`</p><p>The effective start and stop indices are computed from the three
+operands as follows. Let <code>n</code> be the length of the sequence.</p><p><b>If the stride is positive:</b>
+If the <code>start</code> operand was omitted, it defaults to -infinity.
+If the <code>end</code> operand was omitted, it defaults to +infinity.
+For either operand, if a negative value was supplied, <code>n</code> is added to it.
+The <code>start</code> and <code>end</code> values are then &ldquo;clamped&rdquo; to the
+nearest value in the range 0 to <code>n</code>, inclusive.</p><p><b>If the stride is negative:</b>
+If the <code>start</code> operand was omitted, it defaults to +infinity.
+If the <code>end</code> operand was omitted, it defaults to -infinity.
+For either operand, if a negative value was supplied, <code>n</code> is added to it.
+The <code>start</code> and <code>end</code> values are then &ldquo;clamped&rdquo; to the
+nearest value in the range -1 to <code>n</code>-1, inclusive.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=s2>&#34;abc&#34;</span><span class=p>[</span><span class=mi>1</span><span class=p>:]</span>               <span class=c1># &#34;bc&#34;  (remove first element)</span>
+<span class=s2>&#34;abc&#34;</span><span class=p>[:</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span>              <span class=c1># &#34;ab&#34;  (remove last element)</span>
+<span class=s2>&#34;abc&#34;</span><span class=p>[</span><span class=mi>1</span><span class=p>:</span><span class=o>-</span><span class=mi>1</span><span class=p>]</span>             <span class=c1># &#34;b&#34;   (remove first and last element)</span>
+<span class=s2>&#34;banana&#34;</span><span class=p>[</span><span class=mi>1</span><span class=p>::</span><span class=mi>2</span><span class=p>]</span>          <span class=c1># &#34;aaa&#34; (select alternate elements starting at index 1)</span>
+<span class=s2>&#34;banana&#34;</span><span class=p>[</span><span class=mi>4</span><span class=p>::</span><span class=o>-</span><span class=mi>2</span><span class=p>]</span>         <span class=c1># &#34;nnb&#34; (select alternate elements in reverse, starting at index 4)</span>
+</code></pre></div><p>Unlike Python, Starlark does not allow a slice expression on the left
+side of an assignment.</p><p>Slicing a tuple or string may be more efficient than slicing a list
+because tuples and strings are immutable, so the result of the
+operation can share the underlying representation of the original
+operand (when the stride is 1). By contrast, slicing a list requires
+the creation of a new list and copying of the necessary elements.</p><h2 id=lambda-expressions>Lambda expressions</h2><p>A <code>lambda</code> expression yields a new function value.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>LambdaExpr = &#39;lambda&#39; [Parameters] &#39;:&#39; Test .
+
+Parameters = Parameter {&#39;,&#39; Parameter} .
+Parameter  = identifier
+           | identifier &#39;=&#39; Test
+           | &#39;*&#39;
+           | &#39;*&#39; identifier
+           | &#39;**&#39; identifier
+           .
+</code></pre></div><p>Syntactically, a lambda expression consists of the keyword <code>lambda</code>,
+followed by a parameter list like that of a <code>def</code> statement but
+unparenthesized, then a colon <code>:</code>, and a single expression, the
+<em>function body</em>.</p><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>map</span><span class=p>(</span><span class=n>f</span><span class=p>,</span> <span class=nb>list</span><span class=p>):</span>
+    <span class=k>return</span> <span class=p>[</span><span class=n>f</span><span class=p>(</span><span class=n>x</span><span class=p>)</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>list</span><span class=p>]</span>
+
+<span class=nb>map</span><span class=p>(</span><span class=k>lambda</span> <span class=n>x</span><span class=p>:</span> <span class=mi>2</span><span class=o>*</span><span class=n>x</span><span class=p>,</span> <span class=nb>range</span><span class=p>(</span><span class=mi>3</span><span class=p>))</span>    <span class=c1># [2, 4, 6]</span>
+</code></pre></div><p>As with functions created by a <code>def</code> statement, a lambda function
+captures the syntax of its body, the default values of any optional
+parameters, the value of each free variable appearing in its body, and
+the global dictionary of the current module.</p><p>The name of a function created by a lambda expression is <code>"lambda"</code>.</p><p>The two statements below are essentially equivalent, but the
+function created by the <code>def</code> statement is named <code>twice</code> and the
+function created by the lambda expression is named <code>lambda</code>.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>twice</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+   <span class=k>return</span> <span class=n>x</span> <span class=o>*</span> <span class=mi>2</span>
+
+<span class=n>twice</span> <span class=o>=</span> <span class=k>lambda</span> <span class=n>x</span><span class=p>:</span> <span class=n>x</span> <span class=o>*</span> <span class=mi>2</span>
+</code></pre></div><p><b>Implementation note:</b>
+The Go implementation of Starlark requires the <code>-lambda</code> flag
+to enable support for lambda expressions.
+The Java implementation does not support them.
+See Google Issue b/36358844.</p></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/ascode.run/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>

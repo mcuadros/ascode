@@ -1,0 +1,47 @@
+baseURL = "ascode.run"
+languageCode = "en-us"
+title = "AsCode - Terraform Alternative Syntax"
+theme = "hugo-ascode-theme"
+
+pygmentsCodeFences = true
+pygmentsCodefencesGuessSyntax = true
+pygmentsUseClasses = true
+
+[[menu.main]]
+    name = "Home"
+    url = "/"
+    weight = 1
+
+[[menu.main]]
+    name = "Docs"
+    url = "/docs/"
+    weight = 2
+
+[[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/mcuadros/ascode"
+    weight = 3
+
+[markup.goldmark.renderer]
+unsafe = true
+autoHeadingIDType = "github"
+
+[params]
+  version=""
+  google_analytics_id=""
+  homepage_button_link = '/docs'
+  homepage_button_text = 'Read The Docs'
+  homepage_intro = 'AsCode allows you to describe your infrastructure using an expressive language in Terraform without writing a single line of HCL.'
+  homepage_image = '/images/terminal.gif'
+
+  [params.homepage_meta_tags]
+    meta_description = "AsCode allows you to describe your infrastructure using an expressive language in Terraform without writing a single line of HCL."
+    meta_og_title = "AsCode - Terraform Alternative Syntax"
+    meta_og_type = "website"
+    meta_og_url = "https://ascode.run"
+    meta_og_image = "https://ascode.run/images/og.png"
+    meta_og_description = "AsCode - Terraform Alternative Syntax."
+
+  [params.logo]
+      mobile = "/images/logo-mobile.svg"
+      standard  = "/images/logo.svg"

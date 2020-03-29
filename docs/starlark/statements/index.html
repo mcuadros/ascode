@@ -1,0 +1,213 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Statements - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=ascode.run/images/favicon.png><link rel=stylesheet href=/ascode.run/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-single"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=ascode.run/docs/starlark/statements/>Language definition</a></h4><ul><li><a href=ascode.run/docs/starlark/lexical-elements/>Lexical elements</a></li><li><a href=ascode.run/docs/starlark/data-types/>Data types</a></li><li><a href=ascode.run/docs/starlark/name-binding-and-variables/>Name binding and variables</a></li><li><a href=ascode.run/docs/starlark/value-concepts/>Value concepts</a></li><li><a href=ascode.run/docs/starlark/expressions/>Expressions</a></li><li><a class=active href=ascode.run/docs/starlark/statements/>Statements</a></li><li><a href=ascode.run/docs/starlark/module-execution/>Module execution</a></li><li><a href=ascode.run/docs/starlark/built-in-constants-and-functions/>Built-in constants and functions</a></li><li><a href=ascode.run/docs/starlark/built-in-methods/>Built-in methods</a></li><li><a href=ascode.run/docs/starlark/dialect-differences/>Dialect differences</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=ascode.run/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><h1 class=title>Statements</h1><div class=content><h2 id=index>Index</h2><div class=toc><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#pass-statements>Pass statements</a></li><li><a href=#assignments>Assignments</a></li><li><a href=#augmented-assignments>Augmented assignments</a></li><li><a href=#function-definitions>Function definitions</a></li><li><a href=#return-statements>Return statements</a></li><li><a href=#expression-statements>Expression statements</a></li><li><a href=#if-statements>If statements</a></li><li><a href=#while-loops>While loops</a></li><li><a href=#for-loops>For loops</a></li><li><a href=#break-and-continue>Break and Continue</a></li><li><a href=#load-statements>Load statements</a></li></ul></nav></div><h2 id=overview>Overview</h2><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>Statement  = DefStmt | IfStmt | ForStmt | SimpleStmt .
+SimpleStmt = SmallStmt {&#39;;&#39; SmallStmt} [&#39;;&#39;] &#39;\n&#39; .
+SmallStmt  = ReturnStmt
+           | BreakStmt | ContinueStmt | PassStmt
+           | AssignStmt
+           | ExprStmt
+           | LoadStmt
+           .
+</code></pre></div><h2 id=pass-statements>Pass statements</h2><p>A <code>pass</code> statement does nothing. Use a <code>pass</code> statement when the
+syntax requires a statement but no behavior is required, such as the
+body of a function that does nothing.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>PassStmt = &#39;pass&#39; .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>noop</span><span class=p>():</span>
+   <span class=k>pass</span>
+
+<span class=k>def</span> <span class=nf>list_to_dict</span><span class=p>(</span><span class=n>items</span><span class=p>):</span>
+  <span class=c1># Convert list of tuples to dict</span>
+  <span class=n>m</span> <span class=o>=</span> <span class=p>{}</span>
+  <span class=k>for</span> <span class=n>k</span><span class=p>,</span> <span class=n>m</span><span class=p>[</span><span class=n>k</span><span class=p>]</span> <span class=ow>in</span> <span class=n>items</span><span class=p>:</span>
+    <span class=k>pass</span>
+  <span class=k>return</span> <span class=n>m</span>
+</code></pre></div><h2 id=assignments>Assignments</h2><p>An assignment statement has the form <code>lhs = rhs</code>. It evaluates the
+expression on the right-hand side then assigns its value (or values) to
+the variable (or variables) on the left-hand side.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>AssignStmt = Expression &#39;=&#39; Expression .
+</code></pre></div><p>The expression on the left-hand side is called a <em>target</em>. The
+simplest target is the name of a variable, but a target may also have
+the form of an index expression, to update the element of a list or
+dictionary, or a dot expression, to update the field of an object:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>k</span> <span class=o>=</span> <span class=mi>1</span>
+<span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>v</span>
+<span class=n>m</span><span class=o>.</span><span class=n>f</span> <span class=o>=</span> <span class=s2>&#34;&#34;</span>
+</code></pre></div><p>Compound targets may consist of a comma-separated list of
+subtargets, optionally surrounded by parentheses or square brackets,
+and targets may be nested arbitarily in this way.
+An assignment to a compound target checks that the right-hand value is a
+sequence with the same number of elements as the target.
+Each element of the sequence is then assigned to the corresponding
+element of the target, recursively applying the same logic.
+It is a static error if the sequence is empty.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>pi</span><span class=p>,</span> <span class=n>e</span> <span class=o>=</span> <span class=mf>3.141</span><span class=p>,</span> <span class=mf>2.718</span>
+<span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span> <span class=o>=</span> <span class=n>f</span><span class=p>()</span>
+<span class=p>[</span><span class=n>zero</span><span class=p>,</span> <span class=n>one</span><span class=p>,</span> <span class=n>two</span><span class=p>]</span> <span class=o>=</span> <span class=nb>range</span><span class=p>(</span><span class=mi>3</span><span class=p>)</span>
+
+<span class=p>[(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>),</span> <span class=p>(</span><span class=n>c</span><span class=p>,</span> <span class=n>d</span><span class=p>)]</span> <span class=o>=</span> <span class=p>{</span><span class=s2>&#34;a&#34;</span><span class=p>:</span> <span class=s2>&#34;b&#34;</span><span class=p>,</span> <span class=s2>&#34;c&#34;</span><span class=p>:</span> <span class=s2>&#34;d&#34;</span><span class=p>}</span><span class=o>.</span><span class=n>items</span><span class=p>()</span>
+<span class=n>a</span><span class=p>,</span> <span class=n>b</span> <span class=o>=</span> <span class=p>{</span><span class=s2>&#34;a&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span> <span class=s2>&#34;b&#34;</span><span class=p>:</span> <span class=mi>2</span><span class=p>}</span>
+</code></pre></div><p>The same process for assigning a value to a target expression is used
+in <code>for</code> loops and in comprehensions.</p><p><b>Implementation note:</b>
+In the Java implementation, targets cannot be dot expressions.</p><h2 id=augmented-assignments>Augmented assignments</h2><p>An augmented assignment, which has the form <code>lhs op= rhs</code> updates the
+variable <code>lhs</code> by applying a binary arithmetic operator <code>op</code> (one of
+<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>//</code>, <code>%</code>, <code>&</code>, <code>|</code>, <code>^</code>, <code>&lt;&lt;</code>, <code>>></code>) to the previous
+value of <code>lhs</code> and the value of <code>rhs</code>.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>AssignStmt = Expression (&#39;+=&#39; | &#39;-=&#39; | &#39;*=&#39; | &#39;/=&#39; | &#39;//=&#39; | &#39;%=&#39; | &#39;&amp;=&#39; | &#39;|=&#39; | &#39;^=&#39; | &#39;&lt;&lt;=&#39; | &#39;&gt;&gt;=&#39;) Expression .
+</code></pre></div><p>The left-hand side must be a simple target:
+a name, an index expression, or a dot expression.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>-=</span> <span class=mi>1</span>
+<span class=n>x</span><span class=o>.</span><span class=n>filename</span> <span class=o>+=</span> <span class=s2>&#34;.star&#34;</span>
+<span class=n>a</span><span class=p>[</span><span class=n>index</span><span class=p>()]</span> <span class=o>*=</span> <span class=mi>2</span>
+</code></pre></div><p>Any subexpressions in the target on the left-hand side are evaluated
+exactly once, before the evaluation of <code>rhs</code>.
+The first two assignments above are thus equivalent to:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>x</span> <span class=o>=</span> <span class=n>x</span> <span class=o>-</span> <span class=mi>1</span>
+<span class=n>x</span><span class=o>.</span><span class=n>filename</span> <span class=o>=</span> <span class=n>x</span><span class=o>.</span><span class=n>filename</span> <span class=o>+</span> <span class=s2>&#34;.star&#34;</span>
+</code></pre></div><p>and the third assignment is similar in effect to the following two
+statements but does not declare a new temporary variable <code>i</code>:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>i</span> <span class=o>=</span> <span class=n>index</span><span class=p>()</span>
+<span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=mi>2</span>
+</code></pre></div><h2 id=function-definitions>Function definitions</h2><p>A <code>def</code> statement creates a named function and assigns it to a variable.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>DefStmt = &#39;def&#39; identifier &#39;(&#39; [Parameters [&#39;,&#39;]] &#39;)&#39; &#39;:&#39; Suite .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>twice</span><span class=p>(</span><span class=n>x</span><span class=p>):</span>
+    <span class=k>return</span> <span class=n>x</span> <span class=o>*</span> <span class=mi>2</span>
+
+<span class=nb>str</span><span class=p>(</span><span class=n>twice</span><span class=p>)</span>              <span class=c1># &#34;&lt;function twice&gt;&#34;</span>
+<span class=n>twice</span><span class=p>(</span><span class=mi>2</span><span class=p>)</span>                <span class=c1># 4</span>
+<span class=n>twice</span><span class=p>(</span><span class=s2>&#34;two&#34;</span><span class=p>)</span>            <span class=c1># &#34;twotwo&#34;</span>
+</code></pre></div><p>The function&rsquo;s name is preceded by the <code>def</code> keyword and followed by
+the parameter list (which is enclosed in parentheses), a colon, and
+then an indented block of statements which form the body of the function.</p><p>The parameter list is a comma-separated list whose elements are of
+several kinds. First come zero or more required parameters, which are
+simple identifiers; all calls must provide an argument value for these parameters.</p><p>The required parameters are followed by zero or more optional
+parameters, of the form <code>name=expression</code>. The expression specifies
+the default value for the parameter for use in calls that do not
+provide an argument value for it.</p><p>The required parameters are optionally followed by a single parameter
+name preceded by a <code>*</code>. This is the called the <em>varargs</em> parameter,
+and it accumulates surplus positional arguments specified by a call.
+It is conventionally named <code>*args</code>.</p><p>The varargs parameter may be followed by zero or more
+parameters, again of the forms <code>name</code> or <code>name=expression</code>,
+but these parameters differ from earlier ones in that they are
+<em>keyword-only</em>: if a call provides their values, it must do so as
+keyword arguments, not positional ones.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=o>*</span><span class=p>,</span> <span class=n>b</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>c</span><span class=p>):</span>
+  <span class=k>print</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>)</span>
+
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>                    <span class=c1># error: function f missing 1 argument (c)</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>                 <span class=c1># error: function f accepts 1 positional argument (2 given)</span>
+<span class=n>f</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>3</span><span class=p>)</span>               <span class=c1># &#34;1 2 3&#34;</span>
+
+<span class=k>def</span> <span class=nf>g</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=n>b</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>c</span><span class=p>):</span>
+  <span class=k>print</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>args</span><span class=p>)</span>
+
+<span class=n>g</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>3</span><span class=p>)</span>                 <span class=c1># error: function g missing 1 argument (c)</span>
+<span class=n>g</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=mi>4</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>3</span><span class=p>)</span>            <span class=c1># &#34;1 2 3 (4,)&#34;</span>
+
+</code></pre></div><p>A non-variadic function may also declare keyword-only parameters,
+by using a bare <code>*</code> in place of the <code>*args</code> parameter.
+This form does not declare a parameter but marks the boundary
+between the earlier parameters and the keyword-only parameters.
+This form must be followed by at least one optional parameter.</p><p>Finally, there may be an optional parameter name preceded by <code>**</code>.
+This is called the <em>keyword arguments</em> parameter, and accumulates in a
+dictionary any surplus <code>name=value</code> arguments that do not match a
+prior parameter. It is conventionally named <code>**kwargs</code>.</p><p>The final parameter may be followed by a trailing comma.</p><p>Here are some example parameter lists:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>def</span> <span class=nf>f</span><span class=p>():</span> <span class=k>pass</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>):</span> <span class=k>pass</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>1</span><span class=p>):</span> <span class=k>pass</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>):</span> <span class=k>pass</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span> <span class=o>*</span><span class=n>args</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>):</span> <span class=k>pass</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=o>**</span><span class=n>kwargs</span><span class=p>):</span> <span class=k>pass</span>
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span> <span class=o>*</span><span class=p>,</span> <span class=n>d</span><span class=o>=</span><span class=mi>1</span><span class=p>):</span> <span class=k>pass</span>
+
+<span class=k>def</span> <span class=nf>f</span><span class=p>(</span>
+  <span class=n>a</span><span class=p>,</span>
+  <span class=o>*</span><span class=n>args</span><span class=p>,</span>
+  <span class=o>**</span><span class=n>kwargs</span><span class=p>,</span>
+<span class=p>)</span>
+</code></pre></div><p>Execution of a <code>def</code> statement creates a new function object. The
+function object contains: the syntax of the function body; the default
+value for each optional parameter; the value of each free variable
+referenced within the function body; and the global dictionary of the
+current module.</p><p><b>Implementation note:</b>
+The Go implementation of Starlark requires the <code>-nesteddef</code>
+flag to enable support for nested <code>def</code> statements.
+The Java implementation does not permit a <code>def</code> expression to be
+nested within the body of another function.</p><h2 id=return-statements>Return statements</h2><p>A <code>return</code> statement ends the execution of a function and returns a
+value to the caller of the function.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>ReturnStmt = &#39;return&#39; [Expression] .
+</code></pre></div><p>A return statement may have zero, one, or more
+result expressions separated by commas.
+With no expressions, the function has the result <code>None</code>.
+With a single expression, the function&rsquo;s result is the value of that expression.
+With multiple expressions, the function&rsquo;s result is a tuple.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>return</span>                  <span class=c1># returns None</span>
+<span class=k>return</span> <span class=mi>1</span>                <span class=c1># returns 1</span>
+<span class=k>return</span> <span class=mi>1</span><span class=p>,</span> <span class=mi>2</span>             <span class=c1># returns (1, 2)</span>
+</code></pre></div><h2 id=expression-statements>Expression statements</h2><p>An expression statement evaluates an expression and discards its result.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>ExprStmt = Expression .
+</code></pre></div><p>Any expression may be used as a statement, but an expression statement is
+most often used to call a function for its side effects.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=nb>list</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+</code></pre></div><h2 id=if-statements>If statements</h2><p>An <code>if</code> statement evaluates an expression (the <em>condition</em>), then, if
+the truth value of the condition is <code>True</code>, executes a list of
+statements.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>IfStmt = &#39;if&#39; Test &#39;:&#39; Suite {&#39;elif&#39; Test &#39;:&#39; Suite} [&#39;else&#39; &#39;:&#39; Suite] .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>if</span> <span class=n>score</span> <span class=o>&gt;=</span> <span class=mi>100</span><span class=p>:</span>
+    <span class=k>print</span><span class=p>(</span><span class=s2>&#34;You win!&#34;</span><span class=p>)</span>
+    <span class=k>return</span>
+</code></pre></div><p>An <code>if</code> statement may have an <code>else</code> block defining a second list of
+statements to be executed if the condition is false.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>if</span> <span class=n>score</span> <span class=o>&gt;=</span> <span class=mi>100</span><span class=p>:</span>
+        <span class=k>print</span><span class=p>(</span><span class=s2>&#34;You win!&#34;</span><span class=p>)</span>
+        <span class=k>return</span>
+<span class=k>else</span><span class=p>:</span>
+        <span class=k>print</span><span class=p>(</span><span class=s2>&#34;Keep trying...&#34;</span><span class=p>)</span>
+        <span class=k>continue</span>
+</code></pre></div><p>It is common for the <code>else</code> block to contain another <code>if</code> statement.
+To avoid increasing the nesting depth unnecessarily, the <code>else</code> and
+following <code>if</code> may be combined as <code>elif</code>:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>if</span> <span class=n>x</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+        <span class=n>result</span> <span class=o>=</span> <span class=o>+</span><span class=mi>1</span>
+<span class=k>elif</span> <span class=n>x</span> <span class=o>&lt;</span> <span class=mi>0</span><span class=p>:</span>
+        <span class=n>result</span> <span class=o>=</span> <span class=o>-</span><span class=mi>1</span>
+<span class=k>else</span><span class=p>:</span>
+        <span class=n>result</span> <span class=o>=</span> <span class=mi>0</span>
+</code></pre></div><p>An <code>if</code> statement is permitted only within a function definition.
+An <code>if</code> statement at top level results in a static error.</p><p><b>Implementation note:</b>
+The Go implementation of Starlark permits <code>if</code>-statements to appear at top level
+if the <code>-globalreassign</code> flag is enabled.</p><h2 id=while-loops>While loops</h2><p>A <code>while</code> loop evaluates an expression (the <em>condition</em>) and if the truth
+value of the condition is <code>True</code>, it executes a list of statement and repeats
+the process until the truth value of the condition becomes <code>False</code>.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>WhileStmt = &#39;while&#39; Test &#39;:&#39; Suite .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>while</span> <span class=n>n</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+    <span class=n>r</span> <span class=o>=</span> <span class=n>r</span> <span class=o>+</span> <span class=n>n</span>
+    <span class=n>n</span> <span class=o>=</span> <span class=n>n</span> <span class=o>-</span> <span class=mi>1</span>
+</code></pre></div><p>A <code>while</code> statement is permitted only within a function definition.
+A <code>while</code> statement at top level results in a static error.</p><p><b>Implementation note:</b>
+The Go implementation of Starlark permits <code>while</code> loops only if the <code>-recursion</code> flag is enabled.
+A <code>while</code> statement is permitted at top level if the <code>-globalreassign</code> flag is enabled.</p><h2 id=for-loops>For loops</h2><p>A <code>for</code> loop evaluates its operand, which must be an iterable value.
+Then, for each element of the iterable&rsquo;s sequence, the loop assigns
+the successive element values to one or more variables and executes a
+list of statements, the <em>loop body</em>.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>ForStmt = &#39;for&#39; LoopVariables &#39;in&#39; Expression &#39;:&#39; Suite .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>10</span><span class=p>):</span>
+   <span class=k>print</span><span class=p>(</span><span class=mi>10</span><span class=p>)</span>
+</code></pre></div><p>The assignment of each value to the loop variables follows the same
+rules as an ordinary assignment. In this example, two-element lists
+are repeatedly assigned to the pair of variables (a, i):</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>a</span><span class=p>,</span> <span class=n>i</span> <span class=ow>in</span> <span class=p>[[</span><span class=s2>&#34;a&#34;</span><span class=p>,</span> <span class=mi>1</span><span class=p>],</span> <span class=p>[</span><span class=s2>&#34;b&#34;</span><span class=p>,</span> <span class=mi>2</span><span class=p>],</span> <span class=p>[</span><span class=s2>&#34;c&#34;</span><span class=p>,</span> <span class=mi>3</span><span class=p>]]:</span>
+  <span class=k>print</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>i</span><span class=p>)</span>                          <span class=c1># prints &#34;a 1&#34;, &#34;b 2&#34;, &#34;c 3&#34;</span>
+</code></pre></div><p>Because Starlark loops always iterate over a finite sequence, they are
+guaranteed to terminate, unlike loops in most languages which can
+execute an arbitrary and perhaps unbounded number of iterations.</p><p>Within the body of a <code>for</code> loop, <code>break</code> and <code>continue</code> statements may
+be used to stop the execution of the loop or advance to the next
+iteration.</p><p>In Starlark, a <code>for</code> loop is permitted only within a function definition.
+A <code>for</code> loop at top level results in a static error.</p><p><b>Implementation note:</b>
+The Go implementation of Starlark permits loops to appear at top level
+if the <code>-globalreassign</code> flag is enabled.</p><h2 id=break-and-continue>Break and Continue</h2><p>The <code>break</code> and <code>continue</code> statements terminate the current iteration
+of a <code>for</code> loop. Whereas the <code>continue</code> statement resumes the loop at
+the next iteration, a <code>break</code> statement terminates the entire loop.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>BreakStmt    = &#39;break&#39; .
+ContinueStmt = &#39;continue&#39; .
+</code></pre></div><p>Example:</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>10</span><span class=p>):</span>
+    <span class=k>if</span> <span class=n>x</span><span class=o>%</span><span class=mi>2</span> <span class=o>==</span> <span class=mi>1</span><span class=p>:</span>
+        <span class=k>continue</span>        <span class=c1># skip odd numbers</span>
+    <span class=k>if</span> <span class=n>x</span> <span class=o>&gt;</span> <span class=mi>7</span><span class=p>:</span>
+        <span class=k>break</span>           <span class=c1># stop at 8</span>
+    <span class=k>print</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>            <span class=c1># prints &#34;0&#34;, &#34;2&#34;, &#34;4&#34;, &#34;6&#34;</span>
+</code></pre></div><p>Both statements affect only the innermost lexically enclosing loop.
+It is a static error to use a <code>break</code> or <code>continue</code> statement outside a
+loop.</p><h2 id=load-statements>Load statements</h2><p>The <code>load</code> statement loads another Starlark module, extracts one or
+more values from it, and binds them to names in the current module.</p><p>Syntactically, a load statement looks like a function call <code>load(...)</code>.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>LoadStmt = &#39;load&#39; &#39;(&#39; string {&#39;,&#39; [identifier &#39;=&#39;] string} [&#39;,&#39;] &#39;)&#39; .
+</code></pre></div><p>A load statement requires at least two &ldquo;arguments&rdquo;.
+The first must be a literal string; it identifies the module to load.
+Its interpretation is determined by the application into which the
+Starlark interpreter is embedded, and is not specified here.</p><p>During execution, the application determines what action to take for a
+load statement.
+A typical implementation locates and executes a Starlark file,
+populating a cache of files executed so far to avoid duplicate work,
+to obtain a module, which is a mapping from global names to values.</p><p>The remaining arguments are a mixture of literal strings, such as
+<code>"x"</code>, or named literal strings, such as <code>y="x"</code>.</p><p>The literal string (<code>"x"</code>), which must denote a valid identifier not
+starting with <code>_</code>, specifies the name to extract from the loaded
+module. In effect, names starting with <code>_</code> are not exported.
+The name (<code>y</code>) specifies the local name;
+if no name is given, the local name matches the quoted name.</p><div class=highlight><pre class=chroma><code class=language-python data-lang=python><span class=n>load</span><span class=p>(</span><span class=s2>&#34;module.star&#34;</span><span class=p>,</span> <span class=s2>&#34;x&#34;</span><span class=p>,</span> <span class=s2>&#34;y&#34;</span><span class=p>,</span> <span class=s2>&#34;z&#34;</span><span class=p>)</span>       <span class=c1># assigns x, y, and z</span>
+<span class=n>load</span><span class=p>(</span><span class=s2>&#34;module.star&#34;</span><span class=p>,</span> <span class=s2>&#34;x&#34;</span><span class=p>,</span> <span class=n>y2</span><span class=o>=</span><span class=s2>&#34;y&#34;</span><span class=p>,</span> <span class=s2>&#34;z&#34;</span><span class=p>)</span>    <span class=c1># assigns x, y2, and z</span>
+</code></pre></div><p>A load statement within a function is a static error.</p></div></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/ascode.run/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>

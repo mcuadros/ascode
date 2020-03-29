@@ -1,0 +1,38 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Language definition - AsCode - Terraform Alternative Syntax</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=ascode.run/images/favicon.png><link rel=stylesheet href=/ascode.run/css/style.min.37751f14958ad1a61021e1497352232a22ff4360dc56a748231224ac9948a0b3.css></head><body class="page page-default-list"><div id=main-menu-mobile class=main-menu-mobile><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><div class=wrapper><div class=header><div class=container><div class=logo><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div class=logo-mobile><a href=ascode.run><img alt=Logo src=/images/logo-header.svg></a></div><div id=main-menu class=main-menu><ul><li class=menu-item-home><a href=ascode.run/><span>Home</span></a></li><li class=menu-item-docs><a href=ascode.run/docs/><span>Docs</span></a></li><li class=menu-item-github><a href=https://github.com/mcuadros/ascode><span>GitHub</span></a></li></ul></div><button id=toggle-main-menu-mobile class="hamburger hamburger--slider" type=button>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button></div></div><div class="main container pt-2 pt-md-6 pb-3 pb-md-6"><div class=row><div class="col-12 col-md-3 mb-3"><div class=sidebar><div class=docs-menu><h4><a href=ascode.run/docs/starlark/>Language definition</a></h4><ul><li><a href=ascode.run/docs/starlark/lexical-elements/>Lexical elements</a></li><li><a href=ascode.run/docs/starlark/data-types/>Data types</a></li><li><a href=ascode.run/docs/starlark/name-binding-and-variables/>Name binding and variables</a></li><li><a href=ascode.run/docs/starlark/value-concepts/>Value concepts</a></li><li><a href=ascode.run/docs/starlark/expressions/>Expressions</a></li><li><a href=ascode.run/docs/starlark/statements/>Statements</a></li><li><a href=ascode.run/docs/starlark/module-execution/>Module execution</a></li><li><a href=ascode.run/docs/starlark/built-in-constants-and-functions/>Built-in constants and functions</a></li><li><a href=ascode.run/docs/starlark/built-in-methods/>Built-in methods</a></li><li><a href=ascode.run/docs/starlark/dialect-differences/>Dialect differences</a></li></ul></div><div style=font-size:90%;margin-top:40px><a href=ascode.run/docs/>« Documentation</a></div></div></div><div class="col-12 col-md-9"><span class=overview>Overview</span><h1 class=title>Language definition</h1><div class=content><p>Starlark is a dialect of Python intended for use as a configuration
+language. A Starlark interpreter is typically embedded within a larger
+application, and this application may define additional
+domain-specific functions and data types beyond those provided by the
+core language. For example, Starlark is embedded within (and was
+originally developed for) the <a href=https://bazel.build>Bazel build tool</a>,
+and <a href=https://docs.bazel.build/versions/master/starlark/language.html>Bazel&rsquo;s build language</a> is based on Starlark.</p><p>This document describes the Go implementation of Starlark
+at go.starlark.net/starlark.
+The language it defines is similar but not identical to
+<a href=https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/starlark/Starlark.java>the Java-based implementation</a>
+used by Bazel.
+We identify places where their behaviors differ, and an
+<a href=#dialect-differences>appendix</a> provides a summary of those
+differences.
+We plan to converge both implementations on a single specification.</p><p>This document is maintained by Alan Donovan <a href=mailto:adonovan@google.com>adonovan@google.com</a>.
+It was influenced by the Python specification,
+Copyright 1990–2017, Python Software Foundation,
+and the Go specification, Copyright 2009–2017, The Go Authors.</p><p>Starlark was designed and implemented in Java by Laurent Le Brun,
+Dmitry Lomov, Jon Brandvin, and Damien Martin-Guillerez, standing on
+the shoulders of the Python community.
+The Go implementation was written by Alan Donovan and Jay Conrod;
+its scanner was derived from one written by Russ Cox.</p><h2 id=overview>Overview</h2><p>Starlark is an untyped dynamic language with high-level data types,
+first-class functions with lexical scope, and automatic memory
+management or <em>garbage collection</em>.</p><p>Starlark is strongly influenced by Python, and is almost a subset of
+that language. In particular, its data types and syntax for
+statements and expressions will be very familiar to any Python
+programmer.
+However, Starlark is intended not for writing applications but for
+expressing configuration: its programs are short-lived and have no
+external side effects and their main result is structured data or side
+effects on the host application.
+As a result, Starlark has no need for classes, exceptions, reflection,
+concurrency, and other such features of Python.</p><p>Starlark execution is <em>deterministic</em>: all functions and operators
+in the core language produce the same execution each time the program
+is run; there are no sources of random numbers, clocks, or unspecified
+iterators. This makes Starlark suitable for use in applications where
+reproducibility is paramount, such as build tools.</p></div></div></div></div></div><div class=sub-footer><div class=container><div class=row><div class=col-12><div class=sub-footer-inner><ul><li><a href=https://github.com/mcuadros/ascod>Documentation version dev</a></li><li>Template by <a href=https://www.zerostatic.io>Robert Austin</a></li></ul></div></div></div></div><script type=text/javascript src=/ascode.run/js/scripts.min.be6fe1294698d6acd837c5182149cd1a24daae9fa1903ce810c264539d254d62.js></script></body></html>
