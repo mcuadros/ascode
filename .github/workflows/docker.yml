@@ -1,5 +1,11 @@
 name: Docker Push
-on: [push, create]
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
 jobs:
   docker:
     runs-on: ubuntu-latest

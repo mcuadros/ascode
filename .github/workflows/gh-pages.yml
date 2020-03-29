@@ -1,0 +1,29 @@
+name: Documentation
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
+jobs:
+  gh-pages:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Hugo
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: '0.68.2'
+        extended: true
+
+    - name: Hugo Build
+      run: make hugo-build
+
+    - name: Push to gh-pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./_site/public
