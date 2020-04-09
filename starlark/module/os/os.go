@@ -345,7 +345,7 @@ func TempDir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, 
 //
 //   outline: os
 //     functions:
-//       command(command, shell?, dir?, combined?, env?)
+//       command(command, shell=False, dir="", combined=False, env=[])
 //         runs the command and returns its standard output. If the exit code
 //         it different to zero, an error is triggered.
 //         params:
