@@ -20,7 +20,7 @@ var NameGenerator = func() string {
 	return fmt.Sprintf("id_%s", ulid.MustNew(ulid.Timestamp(t), entropy))
 }
 
-// Kind describes what kind of resource is represented by a Resource isntance.
+// Kind describes what kind of resource is represented by a Resource instance.
 type Kind string
 
 // IsNamed returns true if this kind of resources contains a name.
@@ -65,7 +65,7 @@ func MakeResource(
 		name = NameGenerator()
 	}
 
-	r := NewResource(name, c.typ, c.kind, c.block, c.provider, c.parent)
+	r := NewResource(name, c.typ, c.kind, c.block, c.provider, c.parent, t.CallStack())
 	if dict != nil && dict.Len() != 0 {
 		if err := r.loadDict(dict); err != nil {
 			return nil, err
@@ -208,6 +208,8 @@ type Resource struct {
 	parent       *Resource
 	dependencies []*Resource
 	provisioners []*Provisioner
+
+	cs starlark.CallStack
 }
 
 var _ starlark.Value = &Resource{}
@@ -217,7 +219,11 @@ var _ starlark.Comparable = &Resource{}
 
 // NewResource returns a new resource of the given kind, type based on the
 // given configschema.Block.
-func NewResource(name, typ string, k Kind, b *configschema.Block, provider *Provider, parent *Resource) *Resource {
+func NewResource(
+	name, typ string, k Kind,
+	b *configschema.Block, provider *Provider, parent *Resource,
+	cs starlark.CallStack,
+) *Resource {
 	return &Resource{
 		name:     name,
 		typ:      typ,
@@ -226,6 +232,7 @@ func NewResource(name, typ string, k Kind, b *configschema.Block, provider *Prov
 		values:   NewValues(),
 		provider: provider,
 		parent:   parent,
+		cs:       cs,
 	}
 }
 
@@ -337,11 +344,14 @@ func (r *Resource) attrBlock(name string, b *configschema.NestedBlock) (starlark
 		return v.Starlark(), nil
 	}
 
+	var output starlark.Value
 	if b.MaxItems != 1 {
-		return r.values.Set(name, MustValue(NewResourceCollection(name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
+		output = NewNestedResourceCollection(name, b, r.provider, r)
+	} else {
+		output = NewResource("", name, NestedKind, &b.Block, r.provider, r, nil)
 	}
 
-	return r.values.Set(name, MustValue(NewResource("", name, NestedKind, &b.Block, r.provider, r))).Starlark(), nil
+	return r.values.Set(name, MustValue(output)).Starlark(), nil
 }
 
 func (r *Resource) attrValue(name string, attr *configschema.Attribute) (starlark.Value, error) {
@@ -558,4 +568,16 @@ func (r *Resource) doCompareSameType(y *Resource, depth int) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (r *Resource) CallStack() starlark.CallStack {
+	if r.cs != nil {
+		return r.cs
+	}
+
+	if r.parent != nil {
+		return r.parent.CallStack()
+	}
+
+	return nil
 }

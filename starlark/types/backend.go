@@ -53,7 +53,7 @@ func MakeBackend(
 	}
 
 	pm := t.Local(PluginManagerLocal).(*terraform.PluginManager)
-	p, err := NewBackend(pm, name.GoString())
+	p, err := NewBackend(pm, name.GoString(), t.CallStack())
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ var _ starlark.HasAttrs = &Backend{}
 var _ starlark.Comparable = &Backend{}
 
 // NewBackend returns a new Backend instance based on given arguments,
-func NewBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
+func NewBackend(pm *terraform.PluginManager, typ string, cs starlark.CallStack) (*Backend, error) {
 	fn := binit.Backend(typ)
 	if fn == nil {
 		return nil, fmt.Errorf("unable to find backend %q", typ)
@@ -112,7 +112,7 @@ func NewBackend(pm *terraform.PluginManager, typ string) (*Backend, error) {
 	return &Backend{
 		pm:       pm,
 		b:        b,
-		Resource: NewResource("", typ, BackendKind, b.ConfigSchema(), nil, nil),
+		Resource: NewResource("", typ, BackendKind, b.ConfigSchema(), nil, nil, cs),
 	}, nil
 }
 
@@ -261,7 +261,7 @@ func (s *State) initialize(state *states.State, mod *states.Module) error {
 	addrs := state.ProviderAddrs()
 	for _, addr := range addrs {
 		typ := addr.ProviderConfig.Type.Type
-		p, err := NewProvider(s.pm, typ, "", addr.ProviderConfig.Alias)
+		p, err := NewProvider(s.pm, typ, "", addr.ProviderConfig.Alias, nil)
 		if err != nil {
 			return err
 		}
@@ -297,7 +297,7 @@ func (s *State) initializeResource(p *Provider, r *states.Resource) error {
 
 	multi := r.EachMode != states.NoEach
 	for _, instance := range r.Instances {
-		r := NewResource(name, typ, ResourceKind, schema.Block, p, p.Resource)
+		r := NewResource(name, typ, ResourceKind, schema.Block, p, p.Resource, nil)
 
 		var val interface{}
 		if err := json.Unmarshal(instance.Current.AttrsJSON, &val); err != nil {

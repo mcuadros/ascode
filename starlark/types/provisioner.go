@@ -44,7 +44,7 @@ func MakeProvisioner(
 		return nil, fmt.Errorf("unexpected positional arguments count")
 	}
 
-	p, err := NewProvisioner(pm, name.GoString())
+	p, err := NewProvisioner(pm, name.GoString(), t.CallStack())
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ type Provisioner struct {
 }
 
 // NewProvisioner returns a new Provisioner for the given type.
-func NewProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, error) {
+func NewProvisioner(pm *terraform.PluginManager, typ string, cs starlark.CallStack) (*Provisioner, error) {
 	cli, meta, err := pm.Provisioner(typ)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func NewProvisioner(pm *terraform.PluginManager, typ string) (*Provisioner, erro
 		provisioner: provisioner,
 		meta:        meta,
 
-		Resource: NewResource(NameGenerator(), typ, ProvisionerKind, response.Provisioner, nil, nil),
+		Resource: NewResource(NameGenerator(), typ, ProvisionerKind, response.Provisioner, nil, nil, cs),
 	}, nil
 }
 

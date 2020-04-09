@@ -50,7 +50,7 @@ func MakeProvider(
 	}
 
 	pm := t.Local(PluginManagerLocal).(*terraform.PluginManager)
-	p, err := NewProvider(pm, name.GoString(), version.GoString(), alias.GoString())
+	p, err := NewProvider(pm, name.GoString(), version.GoString(), alias.GoString(), t.CallStack())
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ var _ starlark.HasAttrs = &Provider{}
 var _ starlark.Comparable = &Provider{}
 
 // NewProvider returns a new Provider instance from a given type, version and name.
-func NewProvider(pm *terraform.PluginManager, typ, version, name string) (*Provider, error) {
+func NewProvider(pm *terraform.PluginManager, typ, version, name string, cs starlark.CallStack) (*Provider, error) {
 	cli, meta, err := pm.Provider(typ, version, false)
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func NewProvider(pm *terraform.PluginManager, typ, version, name string) (*Provi
 		meta:     meta,
 	}
 
-	p.Resource = NewResource(name, typ, ProviderKind, response.Provider.Block, p, nil)
+	p.Resource = NewResource(name, typ, ProviderKind, response.Provider.Block, p, nil, cs)
 	p.dataSources = NewResourceCollectionGroup(p, DataSourceKind, response.DataSources)
 	p.resources = NewResourceCollectionGroup(p, ResourceKind, response.ResourceTypes)
 

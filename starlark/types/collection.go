@@ -55,11 +55,13 @@ import (
 //                 Value to match in the given key.
 //
 type ResourceCollection struct {
-	typ      string
-	kind     Kind
-	block    *configschema.Block
-	provider *Provider
-	parent   *Resource
+	typ         string
+	kind        Kind
+	block       *configschema.Block
+	nestedblock *configschema.NestedBlock
+	provider    *Provider
+	parent      *Resource
+
 	*starlark.List
 }
 
@@ -82,6 +84,21 @@ func NewResourceCollection(
 	}
 }
 
+// NewNestedResourceCollection returns
+func NewNestedResourceCollection(
+	typ string, block *configschema.NestedBlock, provider *Provider, parent *Resource,
+) *ResourceCollection {
+	return &ResourceCollection{
+		typ:         typ,
+		kind:        NestedKind,
+		block:       &block.Block,
+		nestedblock: block,
+		provider:    provider,
+		parent:      parent,
+		List:        starlark.NewList(nil),
+	}
+}
+
 // LoadList loads a list of dicts on the collection. It clears the collection.
 func (c *ResourceCollection) LoadList(l *starlark.List) error {
 	if err := c.List.Clear(); err != nil {
@@ -94,7 +111,7 @@ func (c *ResourceCollection) LoadList(l *starlark.List) error {
 			return fmt.Errorf("%d: expected dict, got %s", i, l.Index(i).Type())
 		}
 
-		r := NewResource("", c.typ, c.kind, c.block, c.provider, c.parent)
+		r := NewResource("", c.typ, c.kind, c.block, c.provider, c.parent, nil)
 		if dict != nil && dict.Len() != 0 {
 			if err := r.loadDict(dict); err != nil {
 				return err

@@ -81,6 +81,7 @@ func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, str
 		"hcl":         BuiltinHCL(),
 		"fn":          BuiltinFunctionAttribute(),
 		"evaluate":    BuiltinEvaluate(),
+		"validate":    BuiltinValidate(),
 		"tf":          NewTerraform(pm),
 	}
 
