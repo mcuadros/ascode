@@ -27,7 +27,8 @@ type RunCmd struct {
 	commonCmd
 
 	ToHCL          string `long:"to-hcl" description:"dumps resources to a hcl file"`
-	PrintHCL       bool   `long:"print-hcl" description:"print resources to a hcl file"`
+	PrintHCL       bool   `long:"print-hcl" description:"prints resources to a hcl file"`
+	NoValidate     bool   `long:"no-validate" description:"skips the validation of the resources"`
 	PositionalArgs struct {
 		File string `positional-arg-name:"file" description:"starlark source file"`
 	} `positional-args:"true" required:"1"`
@@ -37,7 +38,7 @@ type RunCmd struct {
 func (c *RunCmd) Execute(args []string) error {
 	c.init()
 
-	out, err := c.runtime.ExecFile(c.PositionalArgs.File)
+	_, err := c.runtime.ExecFile(c.PositionalArgs.File)
 	if err != nil {
 		if err, ok := err.(*starlark.EvalError); ok {
 			fmt.Println(err.Backtrace())
@@ -48,10 +49,26 @@ func (c *RunCmd) Execute(args []string) error {
 		return err
 	}
 
-	return c.dumpToHCL(out)
+	c.validate()
+	return c.dumpToHCL()
 }
 
-func (c *RunCmd) dumpToHCL(ctx starlark.StringDict) error {
+func (c *RunCmd) validate() {
+	if c.NoValidate {
+		return
+	}
+
+	errs := c.runtime.Terraform.Validate()
+	for _, err := range errs {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	if len(errs) != 0 {
+		os.Exit(1)
+	}
+}
+
+func (c *RunCmd) dumpToHCL() error {
 	if c.ToHCL == "" && !c.PrintHCL {
 		return nil
 	}

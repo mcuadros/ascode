@@ -85,17 +85,17 @@ func BuiltinValidate() starlark.Value {
 	})
 }
 
-// Validate honors the Vadiabler interface.
+// Validate honors the Validabler interface.
 func (t *Terraform) Validate() (errs ValidationErrors) {
 	if t.b != nil {
 		errs = append(errs, t.b.Validate()...)
 	}
 
-	errs = append(errs, t.b.Validate()...)
+	errs = append(errs, t.p.Validate()...)
 	return
 }
 
-// Validate honors the Vadiabler interface.
+// Validate honors the Validabler interface.
 func (d *Dict) Validate() (errs ValidationErrors) {
 	for _, v := range d.Keys() {
 		p, _, _ := d.Get(v)
@@ -110,7 +110,7 @@ func (d *Dict) Validate() (errs ValidationErrors) {
 	return
 }
 
-// Validate honors the Vadiabler interface.
+// Validate honors the Validabler interface.
 func (p *Provider) Validate() (errs ValidationErrors) {
 	errs = append(errs, p.Resource.Validate()...)
 	errs = append(errs, p.dataSources.Validate()...)
@@ -119,7 +119,7 @@ func (p *Provider) Validate() (errs ValidationErrors) {
 	return
 }
 
-// Validate honors the Vadiabler interface.
+// Validate honors the Validabler interface.
 func (g *ResourceCollectionGroup) Validate() (errs ValidationErrors) {
 	names := make(sort.StringSlice, len(g.collections))
 	var i int
@@ -136,7 +136,7 @@ func (g *ResourceCollectionGroup) Validate() (errs ValidationErrors) {
 	return
 }
 
-// Validate honors the Vadiabler interface.
+// Validate honors the Validabler interface.
 func (c *ResourceCollection) Validate() (errs ValidationErrors) {
 	if c.nestedblock != nil {
 		l := c.Len()
@@ -161,7 +161,7 @@ func (c *ResourceCollection) Validate() (errs ValidationErrors) {
 	return
 }
 
-// Validate honors the Vadiabler interface.
+// Validate honors the Validabler interface.
 func (r *Resource) Validate() ValidationErrors {
 	return append(
 		r.doValidateAttributes(),

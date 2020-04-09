@@ -85,8 +85,8 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 
 // ExecFile parses, resolves, and executes a Starlark file.
 func (r *Runtime) ExecFile(filename string) (starlark.StringDict, error) {
-	filename, _ = osfilepath.Abs(filename)
-	r.path, _ = osfilepath.Split(filename)
+	fullpath, _ := osfilepath.Abs(filename)
+	r.path, _ = osfilepath.Split(fullpath)
 
 	thread := &starlark.Thread{Name: "thread", Load: r.load}
 	r.setLocals(thread)
