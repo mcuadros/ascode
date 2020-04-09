@@ -1,10 +1,13 @@
 package os
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"sync"
 
+	gobs "github.com/gobs/args"
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarkstruct"
 )
@@ -26,6 +29,7 @@ const (
 	removeAllFuncName = "remove_all"
 	renameFuncName    = "rename"
 	tempDirFuncName   = "temp_dir"
+	commandFuncName   = "command"
 )
 
 var (
@@ -57,6 +61,7 @@ func LoadModule() (starlark.StringDict, error) {
 					removeAllFuncName: starlark.NewBuiltin(mkdirFuncName, RemoveAll),
 					renameFuncName:    starlark.NewBuiltin(renameFuncName, Rename),
 					tempDirFuncName:   starlark.NewBuiltin(tempDirFuncName, TempDir),
+					commandFuncName:   starlark.NewBuiltin(commandFuncName, Command),
 				},
 			},
 		}
@@ -334,4 +339,98 @@ func Rename(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, k
 //         returns the default directory to use for temporary files.
 func TempDir(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 	return starlark.String(os.TempDir()), nil
+}
+
+// Command runs the command and returns its standard output.
+//
+//   outline: os
+//     functions:
+//       command(command, shell?, dir?, combined?, env?)
+//         runs the command and returns its standard output. If the exit code
+//         it different to zero, an error is triggered.
+//         params:
+//           shell bool
+//             if True execute the command inside of a shell.
+//           dir string
+//             working directory of the command.
+//           combined bool
+//             if True returns combined standard output and standard error.
+//           env list
+//             specifies the environment of the process, each value of the list
+//             should follow the pattern "key=value".
+func Command(thread *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+	var (
+		command  string
+		env      *starlark.List
+		dir      string
+		combined bool
+		shell    bool
+	)
+
+	err := starlark.UnpackArgs(renameFuncName, args, kwargs,
+		"command", &command,
+		"env?", &env,
+		"dir?", &dir,
+		"combined?", &combined,
+		"shell?", &shell,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if shell {
+		command = fmt.Sprintf("sh -c %q", command)
+	}
+
+	cmdArgs := gobs.GetArgs(command)
+	bin, err := exec.LookPath(cmdArgs[0])
+	if err != nil {
+		return nil, err
+	}
+
+	environment, err := unpackListArg(renameFuncName, "env", env)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := &exec.Cmd{
+		Path: bin,
+		Args: cmdArgs,
+		Env:  append(os.Environ(), environment...),
+		Dir:  dir,
+	}
+
+	var output []byte
+	if combined {
+		output, err = cmd.CombinedOutput()
+	} else {
+		output, err = cmd.Output()
+	}
+
+	if len(output) >= 1 && output[len(output)-1] == '\n' {
+		output = output[:len(output)-1]
+	}
+
+	return starlark.String(output), err
+}
+
+func unpackListArg(fnName, argName string, l *starlark.List) ([]string, error) {
+	if l == nil {
+		return []string{}, nil
+	}
+
+	output := make([]string, l.Len())
+	for i := 0; i < l.Len(); i++ {
+		s, ok := l.Index(i).(starlark.String)
+		if ok {
+			output[i] = s.GoString()
+			continue
+		}
+
+		return nil, fmt.Errorf("%s: parameter %q expected string at index %d", fnName, argName, i)
+
+	}
+
+	return output, nil
 }

@@ -34,3 +34,24 @@ os.remove_all("bar")
 
 def deleteNotExistant(): os.remove("foo")
 assert.fails(deleteNotExistant, "remove foo: no such file or directory")
+
+# test command
+temp = os.temp_dir() + "/example-dir"
+os.mkdir_all(temp + "/foo/bar", 0o755)
+os.chdir(temp)
+
+assert.eq(os.command("ls -1"), "foo")
+
+# test command dir
+assert.eq(os.command("ls -1", dir="foo"), "bar")
+
+# test command shell and env
+assert.eq(os.command("echo $FOO", shell=True, env=["FOO=foo"]), "foo")
+
+# test command combined
+assert.ne(os.command("not-exists || true", shell=True, combined=True), "")
+
+# test command error
+assert.fails(lambda: os.command("not-exists"), "executable file not found")
+
+os.remove_all(temp)

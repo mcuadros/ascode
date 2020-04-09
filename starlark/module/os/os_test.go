@@ -17,6 +17,9 @@ func TestFile(t *testing.T) {
 	}
 
 	resolve.AllowFloat = true
+	resolve.AllowGlobalReassign = true
+	resolve.AllowLambda = true
+
 	thread := &starlark.Thread{Load: testdata.NewLoader(LoadModule, ModuleName)}
 	starlarktest.SetReporter(thread, t)
 
