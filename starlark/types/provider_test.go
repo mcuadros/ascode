@@ -13,6 +13,7 @@ import (
 	"github.com/mcuadros/ascode/terraform"
 	"go.starlark.net/resolve"
 	"go.starlark.net/starlark"
+	"go.starlark.net/starlarkstruct"
 )
 
 var id int
@@ -75,15 +76,16 @@ func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, str
 
 	test.SetReporter(thread, t)
 
-	predeclared := starlark.StringDict{
-		"provisioner": BuiltinProvisioner(),
-		"backend":     BuiltinBackend(),
-		"hcl":         BuiltinHCL(),
-		"fn":          BuiltinFunctionAttribute(),
-		"evaluate":    BuiltinEvaluate(),
-		"validate":    BuiltinValidate(),
-		"tf":          NewTerraform(pm),
-	}
+	predeclared := starlark.StringDict{}
+	predeclared["tf"] = NewTerraform(pm)
+	predeclared["provisioner"] = BuiltinProvisioner()
+	predeclared["backend"] = BuiltinBackend()
+	predeclared["hcl"] = BuiltinHCL()
+	predeclared["validate"] = BuiltinValidate()
+	predeclared["fn"] = BuiltinFunctionAttribute()
+	predeclared["evaluate"] = BuiltinEvaluate(predeclared)
+	predeclared["struct"] = starlark.NewBuiltin("struct", starlarkstruct.Make)
+	predeclared["module"] = starlark.NewBuiltin("module", starlarkstruct.MakeModule)
 
 	_, err := starlark.ExecFile(thread, filename, nil, predeclared)
 	if err != nil {

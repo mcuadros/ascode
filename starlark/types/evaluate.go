@@ -25,10 +25,9 @@ import (
 //             Defines the predeclared context for the execution. Execution does
 //             not modify this dictionary
 //
-func BuiltinEvaluate() starlark.Value {
+func BuiltinEvaluate(predeclared starlark.StringDict) starlark.Value {
 	return starlark.NewBuiltin("evaluate", func(t *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var raw starlark.String
-		predeclared := starlark.StringDict{}
 
 		switch len(args) {
 		case 2:

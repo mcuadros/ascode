@@ -51,6 +51,16 @@ type Runtime struct {
 // NewRuntime returns a new Runtime for the given terraform.PluginManager.
 func NewRuntime(pm *terraform.PluginManager) *Runtime {
 	tf := types.NewTerraform(pm)
+	predeclared := starlark.StringDict{}
+	predeclared["tf"] = tf
+	predeclared["provisioner"] = types.BuiltinProvisioner()
+	predeclared["backend"] = types.BuiltinBackend()
+	predeclared["validate"] = types.BuiltinValidate()
+	predeclared["hcl"] = types.BuiltinHCL()
+	predeclared["fn"] = types.BuiltinFunctionAttribute()
+	predeclared["evaluate"] = types.BuiltinEvaluate(predeclared)
+	predeclared["struct"] = starlark.NewBuiltin("struct", starlarkstruct.Make)
+	predeclared["module"] = starlark.NewBuiltin("module", starlarkstruct.MakeModule)
 
 	return &Runtime{
 		Terraform:   tf,
@@ -70,16 +80,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"time":            time.LoadModule,
 			"http":            http.LoadModule,
 		},
-		predeclared: starlark.StringDict{
-			"tf":          tf,
-			"provisioner": types.BuiltinProvisioner(),
-			"backend":     types.BuiltinBackend(),
-			"hcl":         types.BuiltinHCL(),
-			"fn":          types.BuiltinFunctionAttribute(),
-			"evaluate":    types.BuiltinEvaluate(),
-			"struct":      starlark.NewBuiltin("struct", starlarkstruct.Make),
-			"module":      starlark.NewBuiltin("module", starlarkstruct.MakeModule),
-		},
+		predeclared: predeclared,
 	}
 }
 
