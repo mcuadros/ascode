@@ -125,6 +125,10 @@ func (c *Attribute) Attr(name string) (starlark.Value, error) {
 	return NewAttributeWithPath(c.r, c.t.AttributeType(name), name, path), nil
 }
 
+func (c *Attribute) String() string {
+	return c.sString.GoString()
+}
+
 // AttrNames honors the starlark.HasAttrs interface.
 func (c *Attribute) AttrNames() []string {
 	return []string{"__resource__", "__type__"}

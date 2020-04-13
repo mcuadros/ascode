@@ -7,12 +7,12 @@ require (
 	github.com/containers/image/v5 v5.2.1
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
-	github.com/go-git/go-git/v5 v5.0.0
 	github.com/gobs/args v0.0.0-20180315064131-86002b4df18c
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/hashicorp/go-hclog v0.11.0
 	github.com/hashicorp/go-plugin v1.0.1-0.20190610192547-a1bc61569a26
-	github.com/hashicorp/hcl2 v0.0.0-20190618163856-0b64543c968c
+	github.com/hashicorp/hcl/v2 v2.3.0
+	github.com/hashicorp/hcl2 v0.0.0-00010101000000-000000000000
 	github.com/hashicorp/terraform v0.12.23
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kr/text v0.2.0 // indirect
@@ -20,7 +20,6 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/qri-io/starlib v0.4.2-0.20200326221746-d3997998591b
-	github.com/rogpeppe/go-internal v1.5.2
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect

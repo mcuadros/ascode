@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/hashicorp/hcl2/hclwrite"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/jessevdk/go-flags"
 	"go.starlark.net/starlark"
 )

@@ -32,7 +32,7 @@ assert.fails(lambda: qux.foo, "Resource<data> has no .foo field or method")
 
 # attr id
 assert.eq(type(qux.id), "Attribute<string>")
-assert.eq(str(qux.id), '"${data.ignition_user.id_2.id}"')
+assert.eq(str(qux.id), "${data.ignition_user.id_2.id}")
 aws = tf.provider("aws", "2.13.0")
 
 # attr output assignation
@@ -58,7 +58,7 @@ assert.eq("__kind__" in dir(web), True)
 assert.eq("__dict__" in dir(web), True)
 
 # attr optional computed
-assert.eq(str(group.name), '"${aws_autoscaling_group.id_6.name}"')
+assert.eq(str(group.name), "${aws_autoscaling_group.id_6.name}")
 
 group.name = "foo"
 assert.eq(group.name, "foo")
@@ -124,7 +124,7 @@ assert.eq(ignition.data.user(groups=["foo"]), ignition.data.user(groups=["foo"])
 
 # constructor with name
 quux = ignition.data.user("quux")
-assert.eq(str(quux.id), '"${data.ignition_user.quux.id}"')
+assert.eq(str(quux.id), "${data.ignition_user.quux.id}")
 
 # constructor from kwargs
 bar = ignition.data.user(uid=42, system=True)
@@ -135,7 +135,7 @@ assert.eq(bar.system, True)
 fred = ignition.data.user("fred", uid=42, system=True)
 assert.eq(fred.uid, 42)
 assert.eq(fred.system, True)
-assert.eq(str(fred.id), '"${data.ignition_user.fred.id}"')
+assert.eq(str(fred.id), "${data.ignition_user.fred.id}")
 
 # constructor from dict
 foo = ignition.data.user({"uid": 42, "system": True})
@@ -146,13 +146,13 @@ assert.eq(foo.system, True)
 baz = ignition.data.user("baz", {"uid": 42, "system": True})
 assert.eq(baz.uid, 42)
 assert.eq(baz.system, True)
-assert.eq(str(baz.id), '"${data.ignition_user.baz.id}"')
+assert.eq(str(baz.id), "${data.ignition_user.baz.id}")
 
 # constructor from dict with name and kwargs
 baz = ignition.data.user("baz", {"uid": 42, "system": True}, uid=84)
 assert.eq(baz.uid, 84)
 assert.eq(baz.system, True)
-assert.eq(str(baz.id), '"${data.ignition_user.baz.id}"')
+assert.eq(str(baz.id), "${data.ignition_user.baz.id}")
 
 
 assert.eq(bar, foo)

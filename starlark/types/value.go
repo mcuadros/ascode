@@ -81,7 +81,7 @@ func (v *Value) Cty() cty.Value {
 	case "Attribute":
 		return cty.StringVal(v.v.(*Attribute).GoString())
 	default:
-		return cty.StringVal(fmt.Sprintf("unhandled: %s", v.t.typ))
+		panic(fmt.Sprintf("unhandled: %s", v.t.Starlark()))
 	}
 }
 

@@ -11,4 +11,4 @@ instance.ami = ami.id
 
 print(instance.ami)
 # Output:
-# "${aws_ami.ubuntu.id}"
+# ${aws_ami.ubuntu.id}

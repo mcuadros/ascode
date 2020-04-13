@@ -27,13 +27,13 @@ func MustTypeFromStarlark(typ string) *Type {
 
 // NewTypeFromStarlark returns a Type from a given starlark type string.
 func NewTypeFromStarlark(typ string) (*Type, error) {
-	t := &Type{}
-	t.typ = typ
-
 	complex := strings.SplitN(typ, "<", 2)
 	if len(complex) == 2 {
 		typ = complex[0]
 	}
+
+	t := &Type{}
+	t.typ = typ
 
 	switch typ {
 	case "bool":
