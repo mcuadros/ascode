@@ -47,6 +47,12 @@ assert.eq(str(cluster.master_auth.client_certificate), "${google_container_clust
 # attr non-object
 assert.fails(lambda: web.ami.foo, "Attribute<string> it's not a object")
 
-
 # fn wrapping
 assert.eq(str(fn("base64encode", web.ami)), "${base64encode(data.aws_ami.id_2.id)}")
+
+# attribute of dict
+k8s = tf.provider("kubernetes")
+
+secret = k8s.data.secret("foo")
+assert.eq(str(secret.data["qux"]), "${data.kubernetes_secret.foo.data.qux}")
+assert.eq(str(secret.data["qux"][0]), "${data.kubernetes_secret.foo.data.qux.0}")

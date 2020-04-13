@@ -155,7 +155,33 @@ func (c *Attribute) Index(i int) starlark.Value {
 		return NewAttributeWithPath(c.r, *c.t.ListElementType(), c.name, path)
 	}
 
+	if c.t.IsMapType() {
+		return NewAttributeWithPath(c.r, c.t, c.name, path)
+	}
+
 	return starlark.None
+}
+
+// Get honors the starlark.Mapping interface.
+func (c *Attribute) Get(key starlark.Value) (v starlark.Value, found bool, err error) {
+	switch vKey := key.(type) {
+	case starlark.Int:
+		if !c.t.IsSetType() && !c.t.IsListType() && !c.t.IsMapType() {
+			return nil, false, fmt.Errorf("%s does not support index", c.name)
+		}
+
+		index, _ := vKey.Int64()
+		return c.Index(int(index)), true, nil
+	case starlark.String:
+		if !c.t.IsMapType() {
+			return nil, false, fmt.Errorf("%s it's not a dict", c.name)
+		}
+
+		path := fmt.Sprintf("%s.%s", c.path, vKey.GoString())
+		return NewAttributeWithPath(c.r, c.t, c.name, path), true, nil
+	default:
+		return nil, false, fmt.Errorf("%s: unexpected key type %s", c.name, key.Type())
+	}
 }
 
 // Len honors the starlark.Indexable interface.
