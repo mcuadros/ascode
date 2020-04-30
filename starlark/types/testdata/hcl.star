@@ -22,11 +22,23 @@ m.bucket = "main-storage"
 m.role = "roles/storage.objectAdmin"
 m.member = "serviceAccount:%s" % sa.email
 
+addr = google.resource.compute_global_address("test")
+addr.purpose = "VPC_PEERING"
+addr.address_type = "INTERNAL"
+addr.prefix_length = 16
+
 # hcl with interpoaltion
 assert.eq(hcl(google), "" + 
 'provider "google" {\n' + \
 '  alias   = "default"\n' + \
 '  version = "3.16.0"\n' + \
+'}\n' + \
+'\n' + \
+'resource "google_compute_global_address" "test" {\n' + \
+'  provider      = google.default\n' + \
+'  address_type  = "INTERNAL"\n' + \
+'  prefix_length = 16\n' + \
+'  purpose       = "VPC_PEERING"\n' + \
 '}\n' + \
 '\n' + \
 'resource "google_service_account" "sa" {\n' + \

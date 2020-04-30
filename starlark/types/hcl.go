@@ -256,8 +256,7 @@ func appendTokensForValue(val starlark.Value, toks hclwrite.Tokens) hclwrite.Tok
 			Bytes: []byte(srcStr),
 		})
 	case starlark.Int:
-		bf := v.BigInt()
-		srcStr := bf.Text('2')
+		srcStr := fmt.Sprintf("%d", v)
 		toks = append(toks, &hclwrite.Token{
 			Type:  hclsyntax.TokenNumberLit,
 			Bytes: []byte(srcStr),
