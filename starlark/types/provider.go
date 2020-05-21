@@ -97,9 +97,20 @@ func MakeProvider(
 //             Blocks defined by the provider schema, thus are nested resources,
 //             containing other arguments and/or blocks.
 //
+//         methods:
+//           set_prefix(enable, prefix="")
+//             If enabled, all the resource names belonging to this provider
+//             are prefixed, with the given prefix or by default the alias name.
+//             params:
+//               enable bool
+//                 if True enables the the prefix of resources.
+//               prefix string
+//                 string to be used as prefix of the resources, if None, the
+//                 provider name it's used as prefix.
 type Provider struct {
 	provider *plugin.GRPCProvider
 	meta     discovery.PluginMeta
+	prefix   string
 
 	dataSources *ResourceCollectionGroup
 	resources   *ResourceCollectionGroup
@@ -190,6 +201,8 @@ func (p *Provider) Type() string {
 // Attr honors the starlark.Attr interface.
 func (p *Provider) Attr(name string) (starlark.Value, error) {
 	switch name {
+	case "set_prefix":
+		return starlark.NewBuiltin("set_prefix", p.setPrefix), nil
 	case "__version__":
 		return starlark.String(p.meta.Version), nil
 	case "data":
@@ -199,6 +212,28 @@ func (p *Provider) Attr(name string) (starlark.Value, error) {
 	}
 
 	return p.Resource.Attr(name)
+}
+
+func (p *Provider) setPrefix(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+
+	var enable bool
+	var prefix string
+	err := starlark.UnpackArgs("set_prefix", args, kwargs, "enable", &enable, "prefix?", &prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	if enable == false {
+		p.prefix = ""
+		return starlark.Bool(enable), nil
+	}
+
+	p.prefix = p.name
+	if prefix != "" {
+		p.prefix = prefix
+	}
+
+	return starlark.Bool(enable), nil
 }
 
 // AttrNames honors the starlark.HasAttrs interface.

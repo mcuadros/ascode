@@ -52,3 +52,20 @@ assert.eq(hcl(google), "" +
 '  member   = "serviceAccount:${google_service_account.sa.email}"\n' + \
 '  role     = "roles/storage.objectAdmin"\n' + \
 '}\n\n')
+
+# hcl with prefixed provider
+google = tf.provider("google", "3.16.0", "alias")
+google.set_prefix(True)
+
+sa = google.resource.service_account("sa")
+sa.account_id = "service-account"
+assert.eq(hcl(google), "" +
+'provider "google" {\n' + \
+'  alias   = "alias"\n' + \
+'  version = "3.16.0"\n' + \
+'}\n' + \
+'\n' + \
+'resource "google_service_account" "alias-sa" {\n' + \
+'  provider   = google.alias\n' + \
+'  account_id = "service-account"\n' + \
+'}\n\n')

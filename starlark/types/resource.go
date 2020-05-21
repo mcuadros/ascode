@@ -286,8 +286,12 @@ func (r *Resource) Truth() starlark.Bool {
 // Freeze honors the starlark.Value interface.
 func (r *Resource) Freeze() {}
 
-// Name returns the resource name based on the hash.
+// Name returns the resource name based.
 func (r *Resource) Name() string {
+	if r.kind == ResourceKind && r.provider.prefix != "" {
+		return fmt.Sprintf("%s-%s", r.provider.prefix, r.name)
+	}
+
 	return r.name
 }
 
