@@ -58,6 +58,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 	predeclared["validate"] = types.BuiltinValidate()
 	predeclared["hcl"] = types.BuiltinHCL()
 	predeclared["fn"] = types.BuiltinFunctionAttribute()
+	predeclared["ref"] = types.BuiltinRef()
 	predeclared["evaluate"] = types.BuiltinEvaluate(predeclared)
 	predeclared["struct"] = starlark.NewBuiltin("struct", starlarkstruct.Make)
 	predeclared["module"] = starlark.NewBuiltin("module", starlarkstruct.MakeModule)

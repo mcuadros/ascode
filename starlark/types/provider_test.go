@@ -83,6 +83,7 @@ func doTestPrint(t *testing.T, filename string, print func(*starlark.Thread, str
 	predeclared["hcl"] = BuiltinHCL()
 	predeclared["validate"] = BuiltinValidate()
 	predeclared["fn"] = BuiltinFunctionAttribute()
+	predeclared["ref"] = BuiltinRef()
 	predeclared["evaluate"] = BuiltinEvaluate(predeclared)
 	predeclared["struct"] = starlark.NewBuiltin("struct", starlarkstruct.Make)
 	predeclared["module"] = starlark.NewBuiltin("module", starlarkstruct.MakeModule)

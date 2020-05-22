@@ -10,6 +10,40 @@ import (
 // sTring alias required to avoid name collision with the method String.
 type sString = starlark.String
 
+// BuiltinRef returns a starlak.Builtin function to generate a reference to a
+// resource argument.
+//
+//   outline: types
+//     functions:
+//       ref(resource, argument) string
+//         Returns a reference to a resource argument.
+//         params:
+//           resource <resource>
+//             resource to be referenced.
+//           field string
+//             field to be referenced.
+//
+//         examples:
+//           ref.star
+//
+func BuiltinRef() starlark.Value {
+	return starlark.NewBuiltin("ref", func(_ *starlark.Thread, _ *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
+		var resource *Resource
+		var argument string
+		err := starlark.UnpackArgs("ref", args, kwargs, "resource", &resource, "argument", &argument)
+		if err != nil {
+			return nil, err
+		}
+
+		attr, ok := resource.block.Attributes[argument]
+		if !ok {
+			return nil, fmt.Errorf("%s has no .%s field", resource, argument)
+		}
+
+		return NewAttribute(resource, attr.Type, argument), nil
+	})
+}
+
 // Attribute is a reference to an argument of a Resource. Used mainly
 // for Computed arguments of Resources.
 //

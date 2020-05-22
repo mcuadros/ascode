@@ -56,3 +56,13 @@ k8s = tf.provider("kubernetes")
 secret = k8s.data.secret("foo")
 assert.eq(str(secret.data["qux"]), "${data.kubernetes_secret.foo.data.qux}")
 assert.eq(str(secret.data["qux"][0]), "${data.kubernetes_secret.foo.data.qux.0}")
+
+# ref
+secret = k8s.resource.secret("foo")
+secret.metadata.name = "foo"
+secret.type = "kubernetes.io/dockerconfigjson"
+assert.eq(str(ref(secret, "type")), "${kubernetes_secret.foo.type}")
+assert.eq(str(ref(secret.metadata, "name")), "${kubernetes_secret.foo.metadata.0.name}")
+
+# ref to non-exits
+assert.fails(lambda: ref(secret, "foo"), "Resource<kubernetes.resource.kubernetes_secret> has no .foo field")
