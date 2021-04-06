@@ -100,7 +100,7 @@ func TestValuesHash(t *testing.T) {
 
 	hashA, err := a.Hash()
 	assert.NoError(t, err)
-	assert.Equal(t, hashA, uint32(0xfede4ab3))
+	assert.Equal(t, hashA, uint32(0x98f6840f))
 
 	b := NewValues()
 	b.Set("bar", MustValue(starlark.MakeInt(42*32)))
