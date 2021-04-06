@@ -12,6 +12,7 @@ RUNTIME_MODULES = \
 	github.com/mcuadros/ascode/starlark/module/os \
 	github.com/mcuadros/ascode/starlark/types \
 	github.com/mcuadros/ascode/starlark/module/filepath \
+	github.com/mcuadros/ascode/starlark/module/url \
 	github.com/qri-io/starlib/encoding/base64 \
 	github.com/qri-io/starlib/encoding/csv \
 	github.com/qri-io/starlib/encoding/json \

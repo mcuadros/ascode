@@ -7,6 +7,7 @@ import (
 	"github.com/mcuadros/ascode/starlark/module/docker"
 	"github.com/mcuadros/ascode/starlark/module/filepath"
 	"github.com/mcuadros/ascode/starlark/module/os"
+	"github.com/mcuadros/ascode/starlark/module/url"
 	"github.com/mcuadros/ascode/starlark/types"
 	"github.com/mcuadros/ascode/terraform"
 	"github.com/qri-io/starlib/encoding/base64"
@@ -80,6 +81,7 @@ func NewRuntime(pm *terraform.PluginManager) *Runtime {
 			"re":              re.LoadModule,
 			"time":            time.LoadModule,
 			"http":            http.LoadModule,
+			"url":             url.LoadModule,
 		},
 		predeclared: predeclared,
 	}
