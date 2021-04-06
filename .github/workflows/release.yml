@@ -17,7 +17,7 @@ jobs:
 
     - name: Set GO_LDFLAGS
       run: |
-        echo ::set-env name=GO_LDFLAGS::$(make goldflags)
+        echo "GO_LDFLAGS=$(make goldflags)" >> $GITHUB_ENV
 
     - name: Release binaries
       uses: mcuadros/go-release-action@master
