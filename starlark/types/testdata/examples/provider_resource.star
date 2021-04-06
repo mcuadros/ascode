@@ -1,4 +1,4 @@
-helm = tf.provider("helm")
+helm = tf.provider("helm", "1.0.0")
 
 podinfo = helm.resource.release("podinfo")
 podinfo.chart = "podinfo"

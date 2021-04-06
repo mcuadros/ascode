@@ -286,11 +286,18 @@ func (s *State) initializeResource(p *Provider, r *states.Resource) error {
 	mode := addrsResourceModeString(r.Addr.Mode)
 
 	var schema providers.Schema
+	var ok bool
 	switch r.Addr.Mode {
 	case addrs.DataResourceMode:
-		schema = p.dataSources.schemas[typ]
+		schema, ok = p.dataSources.schemas[typ]
+		if !ok {
+			return fmt.Errorf("unknown data resource %s", typ)
+		}
 	case addrs.ManagedResourceMode:
-		schema = p.resources.schemas[typ]
+		schema, ok = p.resources.schemas[typ]
+		if !ok {
+			return fmt.Errorf("unknown  resource %s", typ)
+		}
 	default:
 		return fmt.Errorf("invalid resource type")
 	}

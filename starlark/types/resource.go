@@ -224,6 +224,10 @@ func NewResource(
 	b *configschema.Block, provider *Provider, parent *Resource,
 	cs starlark.CallStack,
 ) *Resource {
+
+	if b == nil {
+		b.Attributes["fpoo"] = nil
+	}
 	return &Resource{
 		name:     name,
 		typ:      typ,
