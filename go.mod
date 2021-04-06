@@ -14,9 +14,9 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-hclog v0.11.0
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-plugin v1.0.1-0.20190610192547-a1bc61569a26
-	github.com/hashicorp/hcl/v2 v2.3.0
-	github.com/hashicorp/terraform v0.12.23
+	github.com/hashicorp/go-plugin v1.3.0
+	github.com/hashicorp/hcl/v2 v2.9.1
+	github.com/hashicorp/terraform v0.14.8
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kr/text v0.2.0 // indirect
@@ -39,4 +39,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-replace github.com/hashicorp/hcl2 => github.com/mcuadros/hcl2 v0.0.0-20190711172820-dd3dbf62a554
+replace google.golang.org/grpc v1.31.1 => google.golang.org/grpc v1.27.1
+
+replace k8s.io/client-go => k8s.io/client-go v0.0.0-20190620085101-78d2af792bab
