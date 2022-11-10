@@ -36,7 +36,7 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProvisioner(t *testing.T) {
-	if stdos.Getenv("ALLOW_PROVISIONER_SKIP") != "" && !terraform.IsTerraformBinaryAvailable() {
+	if stdos.Getenv("ALLOW_PROVISIONER_SKIP") != "" {
 		t.Skip("terraform binary now available in $PATH")
 	}
 

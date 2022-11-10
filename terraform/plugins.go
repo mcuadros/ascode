@@ -1,9 +1,15 @@
 package terraform
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/go-hclog"
@@ -28,6 +34,11 @@ type PluginManager struct {
 func (m *PluginManager) Provider(provider, version string, forceLocal bool) (*plugin.Client, discovery.PluginMeta, error) {
 	meta, ok := m.getLocal("provider", provider, version)
 	if !ok && !forceLocal {
+		meta, ok, _ = m.getProviderRemoteDirectDownload(provider, version)
+		if ok {
+			return client(meta), meta, nil
+		}
+
 		var err error
 		meta, _, err = m.getProviderRemote(provider, version)
 		if err != nil {
@@ -87,6 +98,77 @@ func client(m discovery.PluginMeta) *plugin.Client {
 	})
 }
 
+const releaseTemplateURL = "https://releases.hashicorp.com/terraform-provider-%s/%s/terraform-provider-%[1]s_%[2]s_%s_%s.zip"
+
+func (m *PluginManager) getProviderRemoteDirectDownload(provider, v string) (discovery.PluginMeta, bool, error) {
+	url := fmt.Sprintf(releaseTemplateURL, provider, v, runtime.GOOS, runtime.GOARCH)
+	if err := m.downloadURL(url); err != nil {
+		return discovery.PluginMeta{}, false, err
+	}
+
+	meta, ok := m.getLocal("provider", provider, v)
+	return meta, ok, nil
+}
+
+func (m *PluginManager) downloadURL(url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return fmt.Errorf("error downloading %s file: %w", url, err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("invalid URL: %s", url)
+	}
+
+	defer resp.Body.Close()
+	file, err := ioutil.TempFile("", "ascode")
+	if err != nil {
+		return err
+
+	}
+
+	if _, err := io.Copy(file, resp.Body); err != nil {
+		return fmt.Errorf("error downloading %s file: %w", url, err)
+	}
+
+	file.Close()
+	defer os.Remove(file.Name())
+
+	archive, err := zip.OpenReader(file.Name())
+	if err != nil {
+		panic(err)
+	}
+
+	defer archive.Close()
+
+	for _, f := range archive.File {
+		file := filepath.Join(m.Path, f.Name)
+
+		if !strings.HasPrefix(file, filepath.Clean(m.Path)+string(os.PathSeparator)) {
+			return fmt.Errorf("invalid path")
+		}
+
+		output, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return err
+		}
+
+		r, err := f.Open()
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(output, r); err != nil {
+			return err
+		}
+
+		output.Close()
+		r.Close()
+	}
+
+	return nil
+}
+
 const defaultVersionContraint = "> 0"
 
 func (m *PluginManager) getProviderRemote(provider, v string) (discovery.PluginMeta, bool, error) {
@@ -94,6 +176,7 @@ func (m *PluginManager) getProviderRemote(provider, v string) (discovery.PluginM
 		v = defaultVersionContraint
 	}
 
+	m.getProviderRemoteDirectDownload(provider, v)
 	installer := &discovery.ProviderInstaller{
 		Dir:                   m.Path,
 		PluginProtocolVersion: discovery.PluginInstallProtocolVersion,

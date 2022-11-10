@@ -26,7 +26,6 @@ jobs:
 
     - name: Allow skip provisioner tests
       uses: allenevans/set-env@v2.0.0
-      if: matrix.os != 'ubuntu-latest'
       with:
         ALLOW_PROVISIONER_SKIP: 1
         
